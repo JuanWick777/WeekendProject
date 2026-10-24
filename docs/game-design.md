@@ -9,10 +9,10 @@ Arena cenital para **2 a 4 jugadores, todos contra todos**, con disparos de ener
 | Tiempo desde el inicio | Nodo activo |
 | --- | --- |
 | 0–30 s | `center`: centro |
-| 30–60 s | `north-west`: superior izquierdo |
-| 60–90 s | `north-east`: superior derecho |
-| 90–120 s | `south-east`: inferior derecho |
-| 120–150 s | `south-west`: inferior izquierdo |
+| 30–60 s | `north`: norte / sector A |
+| 60–90 s | `east`: este / sector B |
+| 90–120 s | `south`: sur / sector C |
+| 120–150 s | `west`: oeste / sector D |
 
 Durante los últimos **5 segundos** de cada intervalo se señala el siguiente nodo. En el último intervalo no hay siguiente nodo. Las posiciones y el orden permanecen fijos; se activa otra zona, sin regenerar el terreno. El reloj sigue avanzando con la zona vacía o disputada. No hay prórroga.
 

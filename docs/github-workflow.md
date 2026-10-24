@@ -18,7 +18,7 @@ Se crea una rama por tarea, no una rama permanente por persona:
 
 Tras integrar una tarea, crear otra rama desde main actualizado. Ejemplos siguientes: feat/lobbies, feat/telemetry y feat/client-network. No necesitamos una rama develop durante este fin de semana.
 
-La documentación v2 se prepara en docs/rotating-control. B migra después las reglas compartidas en una tarea separada B0.1 y retoma feat/auth desde main actualizado. Leer las reglas nuevas antes de integrar gameplay: el bootstrap aún conserva constantes de la modalidad anterior.
+La documentación v2 está en el PR de docs/rotating-control. La rama feat/auth-v2 parte de ese contrato e incorpora B0.1 y auth HTTP. Revisar/integrar primero la documentación y después la implementación; main sigue siendo la base para las siguientes tareas. Leer las reglas nuevas antes de integrar gameplay.
 
 ## A y C: primera preparación
 

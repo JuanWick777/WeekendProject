@@ -7,7 +7,8 @@
     ".": "./src/index.js",
     "./constants": "./src/constants.js",
     "./protocol": "./src/protocol.js",
-    "./schemas": "./src/schemas.js"
+    "./schemas": "./src/schemas.js",
+    "./fixtures/rotating-control": "./fixtures/rotating-control.json"
   },
   "dependencies": {
     "zod": "^4.0.0"

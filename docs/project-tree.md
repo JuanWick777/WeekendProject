@@ -23,19 +23,22 @@ GameWeekend/
     package.json
     src/app.js, index.js, config.js      B: HTTP/arranque
     src/net/socket-server.js            B: rechaza upgrades hasta tener sesión
-    src/auth/, rooms/, game/             B: vacías
+    src/auth/                           B: servicio, rutas, sesiones, middleware y límite
+    src/rooms/, game/                    B: vacías
     src/storage/, telemetry/            C: vacías
-    test/app.test.js                    Frontera HTTP inicial
+    test/app.test.js, auth.test.js      HTTP real; auth con repositorios de prueba
+    test/helpers/auth-repositories.js   Solo tests, no persistencia de producción
   shared/                              B mantiene
     package.json
-    src/constants.js                   Aún v1; B0.1 migra reglas
-    src/protocol.js                    Rutas/mensajes; protocolVersion aún 1
+    src/constants.js                   Reglas v2 de nodos y escudo
+    src/protocol.js                    Rutas/mensajes; protocolVersion 2
     src/schemas.js, index.js            Zod de entradas/exportaciones
     test/schemas.test.js                Contratos iniciales
+    fixtures/                          Ejemplo JSON v2 de partida y resultado
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/
-    game-design.md, maps.md, contracts.md
+    game-design.md, maps.md, contracts.md, auth-integration.md
     brief-persona-a.md, brief-persona-b.md, brief-persona-c.md
     tasks.md, project-tree.md, github-workflow.md, evaluation.md
     visual-references/                  A: referencias, boceto y paleta

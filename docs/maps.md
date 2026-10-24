@@ -4,6 +4,16 @@
 
 Esta guía complementa [game-design.md](game-design.md) y [contracts.md](contracts.md). La geometría definitiva se aprobará con el boceto de A; las reglas de generación quedan fijadas aquí.
 
+## Boceto de referencia recibido
+
+![Boceto original de la arena](visual-references/arena-sketch-v1.png)
+
+El boceto aportado por el equipo ubica el centro y cuatro nodos cardinales: **sector A al norte, B al este, C al sur y D al oeste**, con apariciones en las cuatro esquinas. Sus IDs son center, north, east, south y west; este trazado sustituye la propuesta inicial de nodos diagonales. El orden es centro -> A -> B -> C -> D.
+
+Se conserva como referencia de distribución, no como geometría final. A/B aún deben fijar posiciones, escudos y grupos variables. Para la cuadrícula de trabajo se simplificarán las coberturas; curvas/diagonales dibujadas no implican un nuevo sistema de colisiones. A debe coordinar esa adaptación antes de producir arte que prometa huecos o paredes distintos de los tiles sólidos.
+
+El círculo central aparece mayor en el dibujo, pero todos mantienen radio inicial 64 en las reglas; cualquier ajuste de tamaño se acuerda y comprueba durante playtesting. Hay un [fixture de formato](../shared/fixtures/README.md) con coordenadas ilustrativas, sin sustituir la plantilla definitiva.
+
 ## Entregable completo de A
 
 Una vista cenital sobre cuadrícula de **24 × 16 casillas**, cada una de 32 unidades. Origen arriba a la izquierda; x crece a la derecha e y hacia abajo. Se acepta dibujo anotado con coordenadas: B ayuda a traducirlo a datos, sin exigir que A programe el generador.
@@ -11,7 +21,7 @@ Una vista cenital sobre cuadrícula de **24 × 16 casillas**, cada una de 32 uni
 El diseño debe señalar:
 
 1. Paredes permanentes y suelo transitable, separados de la decoración.
-2. Centros de los cinco nodos: `center`, `north-west`, `north-east`, `south-east`, `south-west`. Mostrar sus círculos de radio 64.
+2. Centros de los cinco nodos: `center`, `north`, `east`, `south`, `west`. Mostrar sus círculos de radio 64.
 3. Al menos cuatro candidatos de aparición/reaparición, repartidos fuera de las zonas de control.
 4. Posiciones propuestas de recogidas de escudo, fuera de las zonas de control.
 5. Rutas principales y laterales que conectan nodos, apariciones y recogidas.

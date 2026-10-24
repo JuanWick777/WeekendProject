@@ -8,13 +8,13 @@ Cinco nodos se activan de uno en uno cada 30 segundos. Un único ocupante vivo a
 
 Hay workspaces npm, un cliente Vite con Canvas provisional, un servidor Express con GET /api/health, reglas compartidas, esquemas Zod, pruebas de contrato y configuración inicial de CI.
 
-**La documentación ya define el diseño y contrato v2. El código compartido todavía contiene constantes y protocolVersion v1:** la siguiente tarea B0.1 los migrará antes de integrar la partida. Esta actualización documental no implementa nodos, mapas ni escudos.
+**B0.1 implementado en la rama de trabajo:** constantes y protocolVersion ya son v2. B1 incorpora servicio, rutas y middleware de autenticación con repositorios inyectados. El arranque normal responde AUTH_NOT_READY hasta conectar users/sessions PostgreSQL de C; ver [integración de autenticación](docs/auth-integration.md).
 
-**Todavía no hay autenticación, salas, conexiones WebSocket aceptadas, simulación, persistencia ni una partida jugable.** Los upgrades WebSocket se rechazan explícitamente hasta que B implemente la validación de sesión. Los endpoints de evaluación siguen pendientes.
+**Todavía no hay autenticación conectada a PostgreSQL, salas, conexiones WebSocket aceptadas ni partida jugable.** Las pruebas de auth usan HTTP real y repositorios de prueba aislados. Los upgrades WebSocket siguen rechazados hasta B2; endpoints de evaluación pendientes.
 
 Repositorio privado del equipo: https://github.com/JuanWick777/WeekendProject. Todavía no se ha desplegado el juego. Un CI de bootstrap en verde no sustituye los tres E2E y la cobertura funcional de la entrega.
 
-Verificación local inicial con Node 24.22.1: lint aprobado, 7 pruebas aprobadas y build aprobado. Servidor construido comprobado por HTTP: health 200, página 200 y asset JavaScript 200. Lockfile comprobado con npm ci --dry-run --offline. Estas comprobaciones no incluyen una partida ni las mediciones públicas.
+Verificación de B0.1/B1 con Node 24.22.1: lint aprobado, 20 pruebas aprobadas y build aprobado. Las pruebas de auth usan HTTP real con repositorios de prueba; todavía no acreditan PostgreSQL, una partida online ni las mediciones públicas. Las áreas funcionales de mapas, daño e interpolación siguen pendientes aunque el total de casos supere diez.
 
 ## Empezar
 
@@ -34,6 +34,7 @@ El bootstrap arranca sin base de datos. La aplicación completa necesitará Post
 - [Reglas del juego](docs/game-design.md)
 - [Mapas: una arena base, variantes y entregable de A](docs/maps.md)
 - [Contrato técnico y funciones de persistencia](docs/contracts.md)
+- [Autenticación implementada y conexión con C](docs/auth-integration.md)
 - [Tareas y dependencias](docs/tasks.md)
 - [Árbol y propiedad de archivos](docs/project-tree.md)
 - [GitHub: ramas, pull requests e integración](docs/github-workflow.md)
@@ -65,7 +66,7 @@ El comando db:init se agregará en C1, junto con el esquema PostgreSQL. No exist
 - Los archivos .gitkeep conservan las carpetas todavía vacías al clonar. Se pueden quitar al implementar cada carpeta.
 - Diseños y datos de prueba son fixtures identificados; el multijugador final siempre usa el servidor real.
 
-Siguiente trabajo de B: migrar shared a v2 y después autenticación con repositorios inyectados, coordinando users/sessions con C. A puede avanzar su arena y cliente; C puede implementar persistencia usando docs/contracts.md.
+Siguiente integración: conectar users/sessions de C con createAuthService y createApp, comprobar dos cuentas con PostgreSQL y continuar con salas/WebSocket (B2). A puede consumir el [fixture v2](shared/fixtures/README.md) mientras implementa su cliente.
 
 ## Entrega
 
