@@ -1,6 +1,6 @@
 # B1 — Autenticación implementada y conexión con C
 
-Estado: servicio, rutas HTTP, cookies, middleware, validación y pruebas implementados en feat/auth-v2. **Falta conectar los repositorios PostgreSQL de C al arranque y probar esa integración.** El servidor normal conserva health y responde 503 AUTH_NOT_READY en auth hasta recibirlos; no crea un almacenamiento en memoria de producción.
+Estado: servicio, rutas HTTP, cookies, middleware, validación y pruebas implementados en feat/auth-v2. B2 añade [salas y WebSockets](lobbies-network.md) en feat/lobbies-ws. **Falta conectar los repositorios PostgreSQL de C al arranque y probar esa integración.** El servidor normal conserva health y responde 503 AUTH_NOT_READY en auth hasta recibirlos; no crea un almacenamiento en memoria de producción.
 
 ## Archivos disponibles
 
@@ -27,20 +27,21 @@ Cuando estén listos, B/C conectan en server/src/index.js antes de crear el serv
 
 ~~~js
 import { createAuthService } from './auth/auth-service.js';
+import { createServerRuntime } from './runtime.js';
 
 // users y sessions son los repositorios PostgreSQL inicializados por C.
 const authService = createAuthService({ users, sessions });
-const app = createApp({
+const runtime = createServerRuntime({
   authService,
   appOrigin: config.appOrigin,
   nodeEnv: config.nodeEnv,
 });
-const server = createServer(app);
+const { server } = runtime;
 ~~~
 
-El fragmento muestra el punto de unión, no un módulo de almacenamiento ya existente. Coordinar la edición de index.js con B y cerrar el pool al apagar. La conexión/configuración inicial debe fallar claramente si es incorrecta; no sustituirla con repositorios de prueba. Ajustar el estado database de health cuando se implemente su comprobación real.
+El fragmento muestra el punto de unión, no un módulo de almacenamiento ya existente. Coordinar la edición de index.js con B. Al apagar, ejecutar runtime.close y cerrar el pool. La conexión/configuración inicial debe fallar claramente si es incorrecta; no sustituirla con repositorios de prueba. Ajustar el estado database de health cuando se implemente su comprobación real.
 
-B2 conectará `getRoomCode(userId)` en createApp y reutilizará requireSession para las salas. GET me devuelve roomCode null mientras no haya salas. El upgrade WS sigue rechazado en esta etapa.
+B2 ya conecta el roomCode real del usuario y protege las salas con requireSession. El runtime acepta /ws cuando recibe authService; sin repositorios sigue rechazando el upgrade. Se conservan createApp y los middleware para las pruebas aisladas de auth.
 
 ## Contrato HTTP disponible
 
@@ -60,6 +61,6 @@ Hay 20 intentos combinados de registro/login por minuto e IP por defecto y como 
 
 ## Verificación y cierre de B1
 
-Con Node 24: npm run verify. Resultado de este bloque: lint aprobado, 20 pruebas aprobadas y build aprobado. Los tests cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
+Con Node 24: npm run verify. B1 aprobó 20 pruebas; junto con B2, el total es 41 pruebas, lint y build aprobados. Los tests de auth cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
 
 Para cerrar B1 faltan dos cuentas reales con PostgreSQL, reinicio del servidor conservando usuarios/sesiones y rechazo de sesión después de logout/expiración. C añade esa integración a su base de pruebas; el recorrido de navegador con auth, lobby y Canvas sigue pendiente de C3/A/B2.

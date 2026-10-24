@@ -22,12 +22,16 @@ GameWeekend/
   server/
     package.json
     src/app.js, index.js, config.js      B: HTTP/arranque
-    src/net/socket-server.js            B: rechaza upgrades hasta tener sesión
+    src/runtime.js                      B: une auth, salas, HTTP y WebSocket
+    src/net/socket-server.js            B: upgrade autenticado, lobby, ping/pong y límites
     src/auth/                           B: servicio, rutas, sesiones, middleware y límite
-    src/rooms/, game/                    B: vacías
+    src/rooms/                          B: room-manager, rutas y errores
+    src/game/                           B: vacía, simulación pendiente
     src/storage/, telemetry/            C: vacías
     test/app.test.js, auth.test.js      HTTP real; auth con repositorios de prueba
     test/helpers/auth-repositories.js   Solo tests, no persistencia de producción
+    test/rooms.test.js, network.test.js  Salas y HTTP/WebSocket reales
+    test/helpers/socket-client.js       Cliente ws para las pruebas
   shared/                              B mantiene
     package.json
     src/constants.js                   Reglas v2 de nodos y escudo
@@ -38,7 +42,7 @@ GameWeekend/
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/
-    game-design.md, maps.md, contracts.md, auth-integration.md
+    game-design.md, maps.md, contracts.md, auth-integration.md, lobbies-network.md
     brief-persona-a.md, brief-persona-b.md, brief-persona-c.md
     tasks.md, project-tree.md, github-workflow.md, evaluation.md
     visual-references/                  A: referencias, boceto y paleta

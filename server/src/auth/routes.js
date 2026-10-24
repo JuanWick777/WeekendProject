@@ -5,6 +5,7 @@ import { readSessionToken, SESSION_COOKIE, sessionCookieOptions } from './sessio
 
 export function createAuthRouter({
   authService, appOrigin, nodeEnv, getRoomCode = () => null, rateLimit,
+  onSessionInvalidated = () => {},
 }) {
   const router = Router();
   const cookieOptions = sessionCookieOptions(nodeEnv);
@@ -19,7 +20,9 @@ export function createAuthRouter({
 
   for (const action of ['register', 'login']) {
     router.post('/' + action, allowedOrigin, limitAttempts, async (request, response) => {
-      const result = await authService[action](request.body, readSessionToken(request.headers.cookie));
+      const previousToken = readSessionToken(request.headers.cookie);
+      const result = await authService[action](request.body, previousToken);
+      if (previousToken) onSessionInvalidated(previousToken);
       response.cookie(SESSION_COOKIE, result.sessionToken, {
         ...cookieOptions, expires: new Date(result.expiresAtMs),
       });
@@ -32,7 +35,9 @@ export function createAuthRouter({
   });
 
   router.post('/logout', allowedOrigin, async (request, response) => {
-    await authService.logout(readSessionToken(request.headers.cookie));
+    const token = readSessionToken(request.headers.cookie);
+    await authService.logout(token);
+    if (token) onSessionInvalidated(token);
     response.clearCookie(SESSION_COOKIE, cookieOptions);
     response.json({ ok: true, data: { loggedOut: true } });
   });

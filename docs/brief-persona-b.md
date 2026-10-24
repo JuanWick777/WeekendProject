@@ -1,6 +1,6 @@
 # B — Servidor, salas y simulación
 
-Este rol lo toma el coordinador de este chat. B0 está publicado en main. La rama de implementación incorpora B0.1 y la lógica HTTP de B1; falta conectar PostgreSQL de C y comprobar persistencia real. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, index.js y config.js. C mantiene storage/telemetry y A client.
+Este rol lo toma el coordinador de este chat. B0 está publicado en main; B0.1/B1 y B2 están preparados en feat/auth-v2 y feat/lobbies-ws. Falta conectar PostgreSQL de C y construir la simulación B3. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, runtime.js, index.js y config.js. C mantiene storage/telemetry y A client. La integración B2 está en [lobbies-network.md](lobbies-network.md).
 
 Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). Este documento es un plan, no una lista de funciones ya disponibles.
 
@@ -20,7 +20,7 @@ Elevar PROTOCOL_VERSION a 2, mantener nombres de mensajes/rutas e inputs compati
 
 Terminado: registro/login crean sesión; me reconoce sesión válida, rechaza ausente/expirada; logout la invalida. Probar rutas con cookies reales y repositorios aislados, sin esperar al Canvas.
 
-## B2 — Salas y conexión autenticada
+## B2 — Salas/red implementadas; integración con PostgreSQL pendiente
 
 - Código de seis caracteres; crear, entrar, salir, Listo, transferir host y permisos de inicio/revancha.
 - Estados lobby/countdown/playing/finished; iniciar solo con 2–4 conectados y listos. Cancelar countdown si dejan de cumplirse las condiciones; no admitir nuevos participantes en playing.

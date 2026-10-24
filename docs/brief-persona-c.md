@@ -2,7 +2,7 @@
 
 Tu responsabilidad es storage, telemetry, scripts, E2E, CI y despliegue. B mantiene autenticación, salas, red, simulación y shared; A cliente y arte. Usa JavaScript ESM, PostgreSQL y pg. No necesitas esperar a que la partida esté terminada.
 
-Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2 y auth HTTP con inyección de repositorios. Conecta users/sessions siguiendo [auth-integration.md](auth-integration.md); todavía no hay partida online. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
+Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2, auth HTTP y salas/WebSocket con inyección de autenticación. Entrega users/sessions a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [lobbies-network.md](lobbies-network.md); todavía no hay partida online. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
 ## Qué cambió y qué guardar
 

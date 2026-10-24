@@ -36,6 +36,13 @@ export function createAuthService({ users, sessions, now = Date.now }) {
     return { user: publicUser(user), sessionToken, expiresAtMs };
   }
 
+  async function getSession(sessionToken) {
+    if (!isSessionToken(sessionToken)) return null;
+    const session = await sessions.findSessionByTokenHash(tokenHash(sessionToken));
+    if (!session || !Number.isFinite(session.expiresAtMs) || session.expiresAtMs <= now()) return null;
+    return { user: publicUser(session.user), expiresAtMs: session.expiresAtMs };
+  }
+
   return Object.freeze({
     async register(payload, previousToken) {
       const { username, displayName, password } = registerSchema.parse(payload);
@@ -66,13 +73,10 @@ export function createAuthService({ users, sessions, now = Date.now }) {
     },
 
     async authenticateSession(sessionToken) {
-      if (!isSessionToken(sessionToken)) return null;
-      const session = await sessions.findSessionByTokenHash(tokenHash(sessionToken));
-      if (!session || !Number.isFinite(session.expiresAtMs) || session.expiresAtMs <= now()) {
-        return null;
-      }
-      return publicUser(session.user);
+      return (await getSession(sessionToken))?.user ?? null;
     },
+
+    getSession,
 
     async logout(sessionToken) {
       if (isSessionToken(sessionToken)) await sessions.deleteSessionByTokenHash(tokenHash(sessionToken));

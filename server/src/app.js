@@ -6,6 +6,8 @@ import { ZodError } from 'zod';
 import { API_ROUTES, PROTOCOL_VERSION } from '@cybergrid/shared/protocol';
 import { AuthError } from './auth/auth-error.js';
 import { createAuthRouter } from './auth/routes.js';
+import { RoomError } from './rooms/room-error.js';
+import { createRoomRouter } from './rooms/routes.js';
 
 const defaultClientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
 
@@ -16,6 +18,9 @@ export function createApp({
   nodeEnv = 'development',
   getRoomCode,
   authRateLimit,
+  roomManager = null,
+  websocketReady = false,
+  onSessionInvalidated,
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -29,15 +34,20 @@ export function createApp({
         stage: 'bootstrap',
         protocolVersion: PROTOCOL_VERSION,
         authentication: authService ? 'ready' : 'pending',
-        websocket: 'pending',
+        websocket: websocketReady ? 'ready' : 'pending',
+        rooms: roomManager ? 'ready' : 'pending',
         database: 'pending',
       },
     });
   });
 
   app.use('/api/auth', createAuthRouter({
-    authService, appOrigin, nodeEnv, getRoomCode, rateLimit: authRateLimit,
+    authService, appOrigin, nodeEnv,
+    getRoomCode: getRoomCode ?? ((id) => roomManager?.getUserRoomCode(id) ?? null),
+    rateLimit: authRateLimit, onSessionInvalidated,
   }));
+
+  if (roomManager) app.use(API_ROUTES.ROOMS, createRoomRouter({ authService, roomManager, appOrigin }));
 
   app.use('/api', (_request, response) => {
     response.status(404).json({
@@ -56,12 +66,13 @@ export function createApp({
   }
 
   app.use((error, _request, response, _next) => {
-    if (error instanceof AuthError || error instanceof ZodError) {
-      return response.status(error instanceof AuthError ? error.status : 400).json({
+    const knownError = error instanceof AuthError || error instanceof RoomError;
+    if (knownError || error instanceof ZodError) {
+      return response.status(knownError ? error.status : 400).json({
         ok: false,
         error: {
-          code: error instanceof AuthError ? error.code : 'VALIDATION_ERROR',
-          message: error instanceof AuthError ? error.message : 'Revisa los campos de la solicitud.',
+          code: knownError ? error.code : 'VALIDATION_ERROR',
+          message: knownError ? error.message : 'Revisa los campos de la solicitud.',
         },
       });
     }
