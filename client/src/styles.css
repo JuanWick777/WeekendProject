@@ -1,0 +1,23 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #e5eaf3;
+  background: #0b1018;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(100% - 2rem, 960px); margin: 2rem auto; }
+h1 { margin: 0.25rem 0 1rem; }
+p { line-height: 1.5; }
+.eyebrow { margin-bottom: 0; letter-spacing: 0.15em; text-transform: uppercase; }
+.muted { color: #9aa7bc; font-size: 0.875rem; }
+canvas { display: block; width: 100%; height: auto; border: 1px solid #344157; }
+footer { margin-top: 1rem; }
+
+@media (max-height: 500px) and (orientation: landscape) {
+  main { margin: 0.5rem auto; }
+  header p, footer .muted { display: none; }
+  h1 { font-size: 1.1rem; }
+  canvas { width: auto; max-width: 100%; max-height: 65vh; margin: auto; }
+}

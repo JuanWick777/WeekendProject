@@ -1,0 +1,13 @@
+{
+  "name": "@cybergrid/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@cybergrid/shared": "*",
+    "express": "^5.0.0",
+    "pg": "^8.16.0",
+    "ws": "^8.18.0",
+    "zod": "^4.0.0"
+  }
+}

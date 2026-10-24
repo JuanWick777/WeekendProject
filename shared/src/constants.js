@@ -1,0 +1,45 @@
+export const GAME_CONFIG = Object.freeze({
+  world: Object.freeze({
+    columns: 24,
+    rows: 16,
+    tileSize: 32,
+    width: 768,
+    height: 512,
+  }),
+  room: Object.freeze({
+    minPlayers: 2,
+    maxPlayers: 4,
+    countdownMs: 3_000,
+    reconnectGraceMs: 15_000,
+  }),
+  match: Object.freeze({
+    durationMs: 150_000,
+    respawnMs: 3_000,
+    syncDurationMs: 2_000,
+    syncRadius: 48,
+    pickupRespawnMs: 8_000,
+    droppedPickupLifetimeMs: 15_000,
+  }),
+  player: Object.freeze({
+    maxHealth: 100,
+    maxCarry: 5,
+    speed: 160,
+    radius: 10,
+  }),
+  weapon: Object.freeze({
+    cooldownMs: 350,
+    projectileSpeed: 480,
+    projectileRange: 320,
+    projectileRadius: 3,
+    damageNear: 30,
+    damageFar: 20,
+  }),
+  network: Object.freeze({
+    tickRate: 30,
+    inputRate: 20,
+    snapshotRate: 15,
+    inputTimeoutMs: 250,
+    pingIntervalMs: 2_000,
+    maxSocketPayloadBytes: 4_096,
+  }),
+});
