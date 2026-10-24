@@ -1,64 +1,61 @@
 # B — Servidor, salas y simulación
 
-Este rol lo toma el coordinador de este chat. La base B0 está preparada localmente; falta publicarla en GitHub. Lee primero game-design.md y contracts.md.
+Este rol lo toma el coordinador de este chat. B0 está publicado en main; la implementación de autenticación no ha comenzado. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, index.js y config.js. C mantiene storage/telemetry y A client.
 
-## Tu primer bloque: B1, autenticación
+Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). Este documento es un plan, no una lista de funciones ya disponibles.
 
-Mientras A diseña y C prepara almacenamiento, implementa auth-service.js con repositorios inyectados. Así puedes comprobar su lógica con un repositorio de prueba sin esperar a que PostgreSQL esté listo.
+## B0.1 — Migración compartida antes de integrar el juego
 
-1. Acordar con C las firmas de users.js y sessions.js que aparecen en contracts.md.
-2. Implementar registro con username normalizado, displayName y hash de contraseña. Usar scrypt asíncrono de node:crypto o una librería acordada; nunca guardar la contraseña.
-3. Implementar login que compruebe hash, logout y GET /api/auth/me.
-4. Usar token aleatorio de sesión en cookie HttpOnly, SameSite=Lax, Path=/ y Secure en producción. Guardar su hash en la base. Duración inicial: 24 horas.
-5. Agregar middleware de sesión para salas; ningún cliente elige su userId.
-6. Integrar repositorios reales de C y probar dos usuarios distintos.
+Actualizar constants.js al modo rotating_control: duración 150000, cinco intervalos de 30000, preaviso 5000, radio 64, escudo máximo 1, reaparición 3000 y recogidas cada 8000 ms. Retirar syncDurationMs, syncRadius, maxCarry y droppedPickupLifetimeMs. Mantener reglas de movimiento, bláster y red.
 
-Terminado: login correcto devuelve 200 y cookie; credenciales incorrectas devuelven 401; me sin sesión devuelve 401; logout invalida la sesión; respuestas públicas no incluyen hashes ni tokens.
+Elevar PROTOCOL_VERSION a 2, mantener nombres de mensajes/rutas e inputs compatibles y dar a A/C fixtures documentados de mapa, snapshot y MatchResult v2. Comprobar que health publica la versión correcta. Este cambio es la primera tarea de código después de la documentación.
 
-## Segundo bloque: B2, salas y conexión
+## B1 — Autenticación
 
-- Crear código de sala de seis caracteres, entrar/salir, marcar Listo y transferir anfitrión si sale.
-- Estados: lobby, countdown, playing, finished.
-- Solo iniciar con 2-4 participantes y todos listos; solo el anfitrión inicia o pide revancha.
-- Aceptar upgrade /ws únicamente con sesión válida y Origin permitido. Vincular el socket al usuario del servidor.
-- Enviar welcome/lobby y propagar cambios a los participantes de la sala.
-- Implementar ping/pong de aplicación para medir RTT. Añadir heartbeat del transporte para detectar conexiones muertas.
-- Rechazar conexiones adicionales o reemplazar de forma controlada la conexión anterior del mismo usuario; no crear jugadores duplicados.
+1. Consumir las interfaces users/sessions de C mediante inyección; no crear otra persistencia de producción. Se puede avanzar con repositorios de prueba mientras C entrega PostgreSQL.
+2. Registro con username normalizado, displayName y hash scrypt asíncrono de node:crypto; no guardar contraseña. Duplicado -> 409, credenciales incorrectas -> 401.
+3. Login, logout y me; sesiones aleatorias con hash persistido, cookie HttpOnly/SameSite/Secure según contrato y duración 24 h.
+4. Middleware para salas y validación de Origin en operaciones mutables/upgrade. Ningún cliente escoge su identidad.
+5. Integrar repositorios reales y probar dos cuentas. Las respuestas públicas no incluyen hashes ni tokens.
 
-Terminado: dos navegadores con dos cuentas se ven en la misma sala, reciben sus cambios y empiezan una cuenta regresiva. La sesión y la pertenencia a la sala también se comprueban en backend.
+Terminado: registro/login crean sesión; me reconoce sesión válida, rechaza ausente/expirada; logout la invalida. Probar rutas con cookies reales y repositorios aislados, sin esperar al Canvas.
 
-## Tercer bloque: B3, partida completa
+## B2 — Salas y conexión autenticada
 
-1. Generador por semilla con conectividad comprobada y fallback válido.
-2. Tick fijo de 30 Hz. Usar reloj del servidor, no dt ni posiciones enviados por el cliente.
-3. Movimiento de 160 unidades/s, normalización diagonal y colisiones con paredes/límites.
-4. Proyectiles: 480 unidades/s, alcance 320, intervalo 350 ms, daño de 30 a 20. Detectar el primer impacto a lo largo del segmento recorrido; no comprobar únicamente su punto final.
-5. Recogidas e inventario hasta 5 fragmentos; sincronización automática de 2 segundos que se cancela por movimiento, disparo o daño.
-6. Muerte, pérdida de carga, respawn a los 3 segundos y condición de fin a los 150 segundos.
-7. Snapshots de 15 Hz con lastProcessedSeq por jugador, proyectiles y estado de sincronización.
-8. Persistir un resultado por matchId mediante C, en una transacción, sin bloquear cada tick con consultas.
+- Código de seis caracteres; crear, entrar, salir, Listo, transferir host y permisos de inicio/revancha.
+- Estados lobby/countdown/playing/finished; iniciar solo con 2–4 conectados y listos. Cancelar countdown si dejan de cumplirse las condiciones; no admitir nuevos participantes en playing.
+- Upgrade /ws con sesión y Origin válido; un socket vigente por usuario y pertenencia verificada.
+- welcome/lobby, ping/pong RTT y heartbeat; no duplicar jugadores al reconectar.
+- Validar Zod, tamaño, frecuencia y fase desde el principio; no posponer la autoridad hasta el cierre.
 
-Terminado: dos usuarios pueden jugar una ronda completa y los resultados corresponden a las decisiones del servidor.
+Terminado: dos cuentas en navegadores distintos comparten sala, Listo y cuenta regresiva reales. Usuario sin sesión no accede a HTTP protegido ni a WebSocket.
 
-## Cuarto bloque: B4, límites y desconexión
+## B3a — Primera partida integrada
 
-- Validar mensajes con Zod, limitar tamaño/frecuencia y rechazar inputs fuera de fase.
-- Inputs sin actualizar durante 250 ms vuelven a movimiento cero y sin disparo.
-- Ignorar secuencias repetidas/antiguas. En reconexión, establecer la secuencia inicial con el cliente.
-- Permitir recuperar al mismo jugador durante 15 segundos, sin duplicarlo.
-- Después del plazo, registrar abandono y limpiar la participación. Resolver final por abandono cuando corresponda.
-- Limpiar salas inactivas y recursos de partidas terminadas.
+1. Convertir el boceto de A en plantilla y generar/validar variantes por semilla con fallback según maps.md.
+2. Tick fijo 30 Hz y movimiento normalizado con colisiones; reloj del servidor.
+3. Objetivo rotatorio, puntuación fraccionaria y estados empty/controlled/contested.
+4. Snapshots 15 Hz con lastProcessedSeq, objective y campos v2.
+5. Fin a 150 s y resultado coherente con puntos/desempates.
 
-## Tus pruebas requeridas
+Primer encuentro con A: dos jugadores llegan al nodo, uno puntúa, con dos se detiene, al salir uno continúa y al rotar deja de puntuar la zona anterior. Este es el primer recorrido a integrar, antes del acabado visual.
 
-- Dos de mapas: reproducibilidad y transitabilidad/apariciones.
-- Dos de daño/escalado: fórmula y límites.
-- Una de autoridad: input malicioso no permite atravesar paredes ni superar velocidad.
+## B3b — Combate, inventario y resultados
 
-Estas cinco son casos funcionales pendientes; las pruebas ya incluidas en el bootstrap no las reemplazan.
+- Bláster: intervalo 350 ms, velocidad 480, alcance 320, radio 3 y daño 30→20. Detectar primer impacto por segmento completo.
+- Una carga de escudo, recogida automática, absorción de un impacto, reaparición de recogida a 8 s.
+- Muerte, bajas, pérdida del escudo y respawn a 3 s sin perder puntos/control.
+- Resolver ticks en orden documentado; conservar invariantes de control, vida y duración.
+- Construir MatchResult una sola vez; llamar saveMatch de C fuera del tick. Mostrar y registrar fallos de guardado, sin fingir persistencia.
 
-## Archivos tuyos
+Terminado: ronda completa online entre dos o más cuentas, con resultado guardado de manera idempotente y repetible en una revancha.
 
-server/src/auth/, rooms/, net/, game/, app.js, index.js y config.js. Mantienes shared/src/. C edita storage/ y telemetry/; conecta sus routers desde app.js en un cambio pequeño coordinado.
+## B4 — Desconexión y cierre
 
-Primer entregable para A: un login y lobby reales. Primer entregable para C: el formato definitivo de MatchResult y la llamada saveMatch.
+Input caducado a 250 ms, secuencias antiguas ignoradas y socket sustituido inactivo. Reconexión del mismo jugador por 15 s, detenido/vulnerable y sin reiniciar puntaje. Plazo vencido o salida voluntaria -> abandono; resolver ganador restante o abortada. Cancelar timers, limpiar sockets/salas y no duplicar resultados. Estas reglas se incorporan con B2/B3; B4 comprueba el recorrido completo.
+
+## Pruebas y entregables
+
+Cinco casos funcionales base: dos de mapas (determinismo y transitabilidad/validez), dos de daño (fórmula y límites) y uno de autoridad (input no atraviesa paredes ni excede velocidad). Añadir casos de nodo vacío/único/disputado, fracciones, rotación y fin sin exceso de tiempo; escudo/respawn y sesiones deben tener verificaciones útiles. Las siete pruebas iniciales no sustituyen esta cobertura.
+
+Entregar a A login/lobby reales y ejemplos v2; a C interfaces estables y resultado definitivo; a ambos fallos de protocolo explícitos. Trabajar por ramas pequeñas con PR y revisión, comenzando por B0.1 y después retomando feat/auth desde main actualizado. No mezclar cambios ajenos ni otro motor/transporte.

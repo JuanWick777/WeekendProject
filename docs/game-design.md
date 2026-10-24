@@ -1,51 +1,69 @@
-# CyberGrid — Diseño acordado v1
+# CyberGrid — Diseño acordado v2
 
-## Identidad
+Este documento sustituye la modalidad de extracción del diseño v1. Es una especificación: la base publicada todavía no contiene una partida jugable. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`.
 
-Arena cenital de 2 a 4 jugadores, todos contra todos, sobre una red informática. El objetivo es recoger datos, transportarlos y sincronizarlos en un nodo central. Gana la puntuación asegurada, no la carga ni las bajas por sí solas.
+## Objetivo y puntuación
 
-Duración: 150 segundos. Capacidad: 5 fragmentos. Sincronización: 2 segundos quieto dentro del nodo. Moverse, disparar o recibir daño reinicia el progreso. Sincronizar asegura toda la carga y la deja en cero.
+Arena cenital para **2 a 4 jugadores, todos contra todos**, con disparos de energía. Cada ronda dura **150 segundos**. Hay cinco nodos en una misma arena y solo uno está activo a la vez.
 
-Desempate: puntuación descendente, bajas descendentes, muertes ascendentes; si siguen iguales, empate. Un empate se registra como tal y no como victoria individual.
+| Tiempo desde el inicio | Nodo activo |
+| --- | --- |
+| 0–30 s | `center`: centro |
+| 30–60 s | `north-west`: superior izquierdo |
+| 60–90 s | `north-east`: superior derecho |
+| 90–120 s | `south-east`: inferior derecho |
+| 120–150 s | `south-west`: inferior izquierdo |
 
-## Combate aprobado
+Durante los últimos **5 segundos** de cada intervalo se señala el siguiente nodo. En el último intervalo no hay siguiente nodo. Las posiciones y el orden permanecen fijos; se activa otra zona, sin regenerar el terreno. El reloj sigue avanzando con la zona vacía o disputada. No hay prórroga.
 
-El arma es un bláster con **proyectiles de energía dirigidos**. No existe un ataque radial.
+- Una sola persona viva dentro del nodo activo acumula tiempo de control.
+- Dos o más personas vivas dentro lo disputan: nadie acumula tiempo.
+- Sin ocupantes vivos, el nodo está vacío. Los otros cuatro nodos no puntúan.
+- Para ocuparlo, el centro del jugador debe estar a distancia menor o igual a su radio. Radio inicial del nodo: **64 unidades**.
+- Se puede mover y disparar mientras se controla. No existe canalización ni obligación de quedarse quieto.
+- Cada segundo completo acumulado da un punto: `score = Math.floor(controlTimeMs / 1000)`. Se conservan las fracciones al salir, morir, disputar o cambiar de nodo: 600 ms + 400 ms = 1 punto.
+- Morir conserva tiempo y puntos; reaparecer tarda **3 segundos**.
 
-- Vida: 100; recarga del disparo: 350 ms.
-- Velocidad: 480 unidades/s; alcance: 320 unidades.
-- Daño: redondear 30 - 10 * distanciaRecorrida / 320 dentro de [0, 320]. Fuera de alcance no impacta.
-- El proyectil termina en la primera pared o rival alcanzado. No daña a su dueño, no rebota y no atraviesa.
-- Vida, daño, impactos y enfriamiento se resuelven en el servidor.
-- Muerte: carga al suelo, muertes +1, baja al atacante y respawn tras 3 segundos.
-- Los puntos sincronizados nunca se pierden al morir.
+Gana quien tenga más puntos; desempate por más bajas y después menos muertes. Si persiste la igualdad, empate entre quienes compartan el mejor resultado. El tiempo fraccionario no es otro desempate. Quien abandona definitivamente no puede ganar; si solo queda un participante, gana por abandono. Una partida sin participantes queda abortada, sin ganador.
 
-La distancia es la recorrida por el proyectil desde su origen. Un tick debe comprobar el segmento completo contra paredes y jugadores para evitar atravesarlos a alta velocidad.
+Ejemplo: controlas el centro durante 2,6 segundos. Entra un rival y la puntuación se detiene. Al salir él, acumulas otros 0,4 segundos: tienes 3 puntos. Cuando el objetivo cambia, hay que desplazarse al siguiente nodo.
 
-## Mundo y controles
+## Combate e inventario
 
-24 columnas x 16 filas, casillas de 32 unidades: 768 x 512 unidades. Paredes modulares con variaciones por semilla, apariciones seguras y caminos al nodo. Verificar conectividad y disponer de un fallback válido.
+El arma es un bláster de **proyectiles de energía dirigidos**:
 
-Los jugadores colisionan con paredes y límites; no bloquean físicamente el movimiento de otros jugadores en esta primera versión. Los disparos sí interactúan con rivales.
+- Vida: 100; movimiento: 160 unidades/s; radio del jugador: 10.
+- Intervalo de disparo: 350 ms; velocidad del proyectil: 480 unidades/s.
+- Alcance: 320 unidades; radio del proyectil: 3.
+- Daño: `Math.round(30 - 10 * distanciaRecorrida / 320)` dentro de [0, 320]. Fuera de alcance no impacta.
+- El proyectil termina en la primera pared o rival alcanzado. No daña al dueño, no rebota ni atraviesa.
+- La simulación comprueba el segmento recorrido para evitar atravesar paredes o jugadores entre ticks.
+- Una muerte suma una baja al atacante y una muerte a la víctima. Los proyectiles ya disparados siguen su recorrido.
 
-Movimiento: 160 unidades/s, radio 10. Normalizar diagonales. PC: WASD/flechas + ratón + clic izquierdo mantenido. Móvil: joystick izquierdo y botón/control derecho de apuntado y disparo, simultáneos.
+El inventario contiene **como máximo una carga de escudo**. Se recoge automáticamente al tocar una recogida disponible. Absorbe por completo el siguiente impacto de un proyectil enemigo y se consume junto con ese proyectil. No requiere otro botón, no da invulnerabilidad temporal y no se acumula si ya se lleva una carga. Al morir se pierde; se reaparece con 100 de vida y sin escudo. No se deja botín.
 
-Fragmentos fijos reaparecen tras 8 segundos; la carga caída por eliminación caduca a los 15 segundos si no se recoge. Estos valores y la densidad de recogidas se pueden afinar con playtesting sin cambiar el contrato.
+Las recogidas de escudo reaparecen a los **8 segundos**. A propone ubicaciones accesibles fuera de los nodos; B valida posiciones y resuelve recogidas simultáneas de forma determinista. El servidor decide impactos, vida, inventario, recogidas y puntos.
 
-## Ciclo de sala
+## Arena y controles
 
-lobby -> countdown (3 segundos) -> playing -> finished -> lobby al pedir revancha.
+**Una arena base**, de 24 columnas × 16 filas y casillas de 32 unidades: mundo de 768 × 512. A diseña el trazado; B implementa variaciones de obstáculos por semilla dentro de espacios permitidos. La guía completa y el entregable de A están en [maps.md](maps.md).
 
-Solo el anfitrión inicia con 2-4 personas y todos listos. Si sale del lobby, se transfiere el anfitrión. No se incorporan participantes nuevos durante una ronda. La revancha crea otro matchId, otra semilla y reinicia Listo y estadísticas de ronda.
+Todos reciben el mismo mapa validado por el servidor. Se conserva durante toda la ronda. Jugadores colisionan con paredes/límites y no se bloquean entre sí. Las diagonales se normalizan.
 
-Inputs caducan a los 250 ms. Reconexión del mismo usuario: hasta 15 segundos; el jugador permanece en el mundo, detenido y vulnerable. Al vencer el plazo se registra abandono. Si queda un participante, finalizar por abandono después de resolver los plazos. Si no queda ninguno, marcar partida abortada, sin victoria; las partidas abortadas no entran al win rate de completadas.
+PC: WASD/flechas, ratón y clic izquierdo mantenido. Móvil: joystick izquierdo y control derecho para apuntar y disparar, utilizables simultáneamente. El cliente presenta y envía intención; no decide posiciones válidas ni resultados.
 
-## Presentación
+## Ciclo de sala y reconexión
 
-Pantallas: autenticación, lobby, partida y resultados. HUD: vida, carga, puntos, tiempo y clasificación compacta. Mostrar progreso de sincronización y tiempo de respawn. Diagnósticos plegables: conexión, RTT, FPS y coordenadas autoritativas.
+`lobby -> countdown (3 s) -> playing -> finished -> lobby` al pedir revancha.
 
-A define paleta y elementos dentro de la dirección de circuitos/energía. Usar formas legibles y efectos acotados. El fixture de desarrollo y la pantalla de bootstrap no representan una partida online.
+Solo el anfitrión inicia, con 2–4 personas, todas listas y conectadas. Si sale del lobby, se transfiere el anfitrión. No se admiten participantes nuevos durante la ronda. Si durante countdown dejan de cumplirse las condiciones, se vuelve a lobby. La revancha crea otro matchId y semilla, limpia Listo y estadísticas; una semilla nueva puede producir una variante ya vista.
 
-## Fuera del alcance inicial
+Los inputs caducan a los 250 ms. El mismo usuario puede reconectar durante 15 segundos sin duplicar jugador. Mientras tanto permanece detenido y vulnerable; si está vivo sigue contando como ocupante de la zona. Al vencer el plazo se registra abandono, se retira del mundo y deja de ocuparla. La salida voluntaria durante playing equivale a abandono inmediato. Si solo queda un participante, se resuelve el fin por abandono; si no queda ninguno, se aborta. Estas decisiones se realizan una sola vez en el servidor.
 
-Campaña, clases, tienda, skins, múltiples armas, rebotes, chat, matchmaking global, bots y múltiples instancias de servidor. Agregar contenido solo si existe una ronda completa, las pruebas están verdes y queda tiempo.
+## Presentación y alcance
+
+Pantallas: autenticación, salas/lobby, cuenta regresiva, partida y resultados/revancha. HUD: vida, escudo 0/1, puntos, tiempo de ronda, clasificación, nodo activo, tiempo hasta rotación y estado vacío/controlado/disputado; preaviso del siguiente nodo. Mostrar respawn y reconexión. Diagnósticos plegables: conexión, RTT, FPS y coordenadas autoritativas.
+
+El acabado de circuitos y energía debe permitir distinguir paredes, jugadores, balas, escudos y zonas. No depender únicamente del color. Una zona disputada debe entenderse sin abrir instrucciones.
+
+No se implementarán transporte de fragmentos, entrega central, `carry`, `syncProgress` ni botín al morir. Quedan fuera del alcance inicial campaña, equipos, banderas, clases, tienda, múltiples armas, chat, bots y múltiples instancias del servidor. El objetivo es completar y pulir una ronda online, con persistencia y evaluación verificable.
