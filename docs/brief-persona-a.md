@@ -1,97 +1,68 @@
-# Contexto y primer encargo para la persona A
+# A — Guía completa de cliente, arte y mapas
 
-Este texto se puede copiar completo y compartir con la responsable del cliente y del diseño visual.
+Tu responsabilidad es `client/` y `docs/visual-references/`. B desarrolla cuentas, salas, sockets y simulación; C desarrolla datos, telemetría, pruebas globales y despliegue. Trabajamos con JavaScript ESM, Vite, HTML/CSS y Canvas 2D. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
-## Contexto del proyecto
+La referencia de reglas es [game-design.md](game-design.md), la de datos es [contracts.md](contracts.md) y la de arena es [maps.md](maps.md). Esta guía cubre todo tu alcance, no solo el primer bloque. Los payloads v2 están acordados documentalmente; B debe migrar shared antes de integrarlos.
 
-Somos tres personas desarrollando **CyberGrid: Breach & Sync**, un videojuego web multijugador para un concurso escolar. La entrega termina el domingo **25 de octubre de 2026 a las 23:59, hora de Ciudad de México**. Debemos entregar una URL pública y el repositorio. Tenemos experiencia media en JavaScript y utilizaremos JavaScript con módulos ESM, Vite, Canvas 2D, HTML y CSS. El servidor usa Node.js, Express y WebSockets con `ws`. Compartimos reglas y esquemas Zod desde `@cybergrid/shared`.
+## Qué estamos construyendo
 
-Tu rol es **A: dirección visual, cliente Canvas, controles e interfaz**. B implementa cuentas, salas, sockets y simulación; C implementa persistencia, telemetría, pruebas de integración, CI y despliegue. Tus primeras propuestas visuales pueden comenzar antes de que el repositorio esté en GitHub.
+Arena de 2–4 personas, todos contra todos, con rondas de 150 segundos y proyectiles de energía dirigidos. Cinco zonas se activan de una en una durante 30 segundos cada una: centro, superior izquierda, superior derecha, inferior derecha, inferior izquierda. Hay aviso del siguiente nodo durante los últimos 5 segundos.
 
-## De qué trata el juego
+Una persona viva sola dentro acumula un punto por segundo; dos o más disputan y nadie puntúa. Se puede moverse y disparar dentro. Las fracciones de segundo y los puntos se conservan al salir o morir. Respawn: 3 segundos. Gana más puntuación, luego bajas, luego menos muertes; empate si persiste. Una carga de escudo recogible absorbe el siguiente impacto automáticamente. No hay transporte de fragmentos, entrega ni barra de sincronización.
 
-Es una arena competitiva vista desde arriba para **2 a 4 jugadores**, todos contra todos. Cada ronda dura **150 segundos**. Controlas a un intruso dentro de una red informática: recorres pasillos, recoges fragmentos de datos y los llevas a un **nodo central de sincronización**.
+## Tu mapa y sus variantes
 
-Puedes transportar hasta **5 fragmentos**. Transportarlos todavía no suma puntos: necesitas quedarte quieto dentro del nodo durante **2 segundos** para asegurar toda tu carga. Moverte, disparar o recibir daño cancela ese progreso. Al eliminarte, pierdes la carga transportada, pero conservas los puntos ya asegurados; reapareces tras **3 segundos**.
+Diseña **una sola arena base**, no dos mapas ni un mapa por nodo. Cuadrícula 24 × 16, tile de 32, mundo 768 × 512. B generará variantes de obstáculos por semilla; tú dibujas la plantilla y los grupos que pueden variar. El mapa permanece igual durante la ronda aunque cambie el objetivo.
 
-Gana quien más datos haya sincronizado. Se desempata por más bajas y luego por menos muertes; si persiste, hay empate.
+Entrega el trazado con paredes fijas, cinco círculos de radio 64, al menos cuatro apariciones, recogidas de escudo, rutas protegidas y variantes permitidas de cobertura. Un dibujo con cuadrícula y coordenadas basta para empezar; B ayuda a convertirlo a datos. Todos los criterios de accesos, conectividad, fallback y reparto están en [maps.md](maps.md). No crees un generador propio en el cliente: renderiza el mapa resuelto que recibe del servidor.
 
-El arma está definida: **disparos de energía dirigidos**, con proyectiles visibles. NO usamos un pulso radial como ataque. Un proyectil viaja en línea recta y desaparece al impactar una pared, al primer rival o al alcanzar su límite. La vida inicial es 100; el daño baja de 30 a 20 con la distancia; el intervalo de disparo es 350 ms, la velocidad 480 unidades/s y el alcance 320 unidades. Estos valores se afinan juntos tras jugar.
+## Dirección visual y recursos
 
-Ejemplo: llevas cuatro fragmentos y empiezas a sincronizar. Otro jugador te dispara desde un pasillo. Puedes intentar terminar, retirarte o defenderte. Si mueres antes de terminar, ese jugador puede recoger tu carga.
+Estética cenital de circuitos y energía. Una posible paleta es fondo `#070B14`, paredes `#162034`, energía `#54E7FF`, peligro `#FF6A8B`, acentos `#FFD166` y texto `#F4F7FC`; puedes ajustarla manteniendo contraste y legibilidad.
 
-## Controles y pantallas
+Necesitamos elementos coherentes para jugador y orientación, pared sólida, suelo/decoración, proyectil, impacto, escudo disponible/equipado y nodo inactivo/activo/controlado/disputado/próximo. Distingue jugadores con contorno, nombre u otra señal además del color. El nodo debe mostrar un límite preciso; evita que el brillo oculte balas, paredes o accesos.
 
-- PC: WASD o flechas para moverte, ratón para apuntar y clic izquierdo mantenido para disparar repetidamente.
-- Móvil: joystick izquierdo para movimiento y un control de disparo derecho que se arrastra para apuntar; mantenerlo activo permite disparar. Apuntar es independiente del movimiento. Debe verse como un botón de acción claramente identificable.
-- En PC los controles táctiles deben ocultarse. En móvil deben permitir mover y disparar a la vez, sin hacer scroll de la página.
-- Pantallas: registro/login, crear o entrar a sala por código, lobby con estados Listo, cuenta regresiva, partida, resultados y revancha.
-- Estados adicionales que deben tener diseño: conectando, error de credenciales, sala llena, rival desconectado, reconectando, respawn y empate.
+Mantén una sola dirección artística. Si aún faltan referencias, limita la búsqueda a 30–45 minutos y reúne 6–8 con una frase de intención cada una:
 
-## Primera dirección visual propuesta
+- Geometry Wars: claridad de formas, energía y contraste. [Capturas del editor](https://blog.activision.com/fr/more-games/archives/pre-order-geometry-wars-3-dimensions-to-gain-two-exclusive-bonus-levels).
+- Transistor: paleta y ambiente tecnológico. [Galería oficial](https://www.supergiantgames.com/games/transistor/).
+- Brawl Stars: lectura del personaje y distribución móvil. [Página oficial](https://supercell.com/en/games/brawlstars/).
+- Búsquedas: `top down neon arena shooter`, `twin stick shooter mobile HUD`, `hardpoint objective HUD`, `sci fi control point`, `2d energy projectile VFX`.
 
-Buscamos **ciencia ficción de circuitos y energía**, con lectura rápida de la arena. Puedes explorar dos variantes dentro de esa dirección y recomendar una. La cámara es cenital 2D; el mapa lógico mide **24 x 16 casillas de 32 unidades**, equivalente a 768 x 512 unidades. El Canvas se adapta sin estirar el mundo y tiene que seguir siendo legible en teléfono apaisado.
+Guarda recursos integrados dentro de client y referencias/bocetos en docs/visual-references. Anota origen y licencia de recursos externos. Prioriza formas Canvas simples y efectos acotados. Sonido, si alcanza el tiempo, debe activarse tras interacción y poder silenciarse.
 
-Una base posible, que puedes mejorar:
+## Todas las pantallas y estados
 
-- Fondo: azul casi negro, por ejemplo `#070B14`.
-- Paredes: grafito azulado, por ejemplo `#162034`.
-- Energía/interacción: cian, por ejemplo `#54E7FF`.
-- Peligro/impactos: coral, por ejemplo `#FF6A8B`.
-- Datos y puntos: ámbar, por ejemplo `#FFD166`.
-- Texto: blanco suave, por ejemplo `#F4F7FC`.
+- Registro/login con validación, carga, credenciales incorrectas y sesión expirada.
+- Crear sala o entrar por código; errores de código, sala llena o ronda iniciada.
+- Lobby con participantes, conexión, anfitrión, Listo y botón de inicio según permisos.
+- Cuenta regresiva y vuelta al lobby si se cancela.
+- Partida: Canvas, HUD, controles, respawn y reconexión.
+- Resultados: ganador/empate/abandono, puntos, control, bajas, muertes y revancha del anfitrión.
+- Error de conexión y recuperación sin duplicar jugador ni mostrar un éxito ficticio.
 
-Queremos formas simples dibujables en Canvas: intrusos o drones geométricos, paredes modulares, fragmentos de datos, proyectiles con estela y un nodo con anillo de progreso. Diferencia jugadores con color, contorno, nombre y orientación; los elementos no deben distinguirse únicamente por color.
+HUD: vida, escudo 0/1, puntos, tiempo de ronda, clasificación compacta, nodo activo, tiempo hasta cambio, estado vacío/controlado/disputado y preaviso del próximo nodo. La progresión es tiempo de control acumulado; no dibujar un porcentaje de captura que sugiera otra regla.
 
-El HUD necesita vida, carga `0/5`, puntos asegurados, tiempo restante y clasificación compacta. El progreso de sincronización, el daño y la dirección de apuntado deben entenderse de inmediato. FPS, ping y coordenadas pertenecen a un panel de diagnóstico discreto y plegable.
+## Controles completos
 
-## Qué buscar como referencia y para qué
+PC: WASD/flechas, ratón y clic izquierdo mantenido. Móvil: joystick izquierdo y acción derecha que se arrastra para apuntar y mantener disparo. Ambos controles funcionan a la vez; se ocultan en PC. Evitar scroll/zoom accidental sobre la superficie de juego y liberar entradas al terminar/cancelar un gesto, perder foco o cambiar de pantalla.
 
-Dedica como máximo **30-45 minutos a referencias**. Reúne entre 6 y 8 imágenes y escribe una frase por imagen explicando qué quieres tomar como idea. Estudia lenguaje visual y funcionamiento; diseña nuestros elementos propios.
+Enviar `seq`, `moveX`, `moveY`, `aimX`, `aimY`, `attack` según contrato. Apuntar es independiente de moverse. Convertir ratón/touch desde tamaño CSS y encuadre hasta coordenadas del mundo; contemplar barras de ajuste, escala y DPR. No enviar coordenadas del jugador para moverlo.
 
-1. **Geometry Wars**: formas luminosas, contraste entre proyectiles y fondo, claridad del movimiento. Referencia del editor con capturas: https://blog.activision.com/fr/more-games/archives/pre-order-geometry-wars-3-dimensions-to-gain-two-exclusive-bonus-levels
-2. **Transistor**: ambientes tecnológicos y combinación de color, arquitectura y energía. Nos interesa la dirección artística; nuestra vista seguirá siendo cenital y nuestra geometría mucho más sencilla. Galería oficial: https://www.supergiantgames.com/games/transistor/
-3. **Brawl Stars**: observar distribución de controles y legibilidad de personajes en pantalla móvil. Nuestro disparo mantenido tiene reglas propias. Página oficial: https://supercell.com/en/games/brawlstars/
+## Canvas, red y diagnóstico
 
-Búsquedas útiles para ampliar el moodboard:
+Canvas conserva proporciones al redimensionar y ajustar densidad de píxeles; HUD/menús usan HTML/CSS. Bucle con requestAnimationFrame y delta, sin cambiar velocidad según refresco. No acumular loops, listeners ni timers al cambiar de pantalla/reconectar.
 
-- `top down neon arena shooter gameplay`
-- `cyberpunk 2d top down tileset`
-- `twin stick shooter mobile HUD`
-- `energy projectile game VFX 2D`
-- `capture point progress ring game UI`
-- `sci fi game lobby UI`
+Consume HTTP y WebSocket reales, controla errores y deduplica efectos por eventId. Interpola rivales y proyectiles entre snapshots; corrige predicción local con estado autoritativo y lastProcessedSeq. Sincroniza temporizadores con serverTimeMs y los plazos recibidos; el cliente no suma puntos ni decide impactos, ocupación o recogidas.
 
-## Entregable de diseño para la primera hora
+Mostrar FPS, RTT y conexión en diagnóstico plegable. Mantener `data-testid="player-state"` con `data-player-x` y `data-player-y` recibidos del servidor, no de la animación predicha. Coordinar selectores estables con C para login, sala, Listo e inicio.
 
-1. Un moodboard breve, con referencias comentadas y una dirección recomendada.
-2. Una composición de partida para escritorio, por ejemplo 1440 x 900.
-3. Una composición de partida para móvil horizontal, por ejemplo 844 x 390.
-4. Un boceto del lobby y de la pantalla de resultados. Pueden ser wireframes simples.
-5. Una paleta y una minihoja de elementos: jugador, pared, datos, nodo, proyectil, impacto y botones.
+Se pueden usar escenas locales para avanzar antes del backend, claramente rotuladas como fixture. Retirarlas del recorrido online final. No convertir respuestas inventadas en una partida aparentemente conectada.
 
-Usa la herramienta que ya domines: Figma, Canva, un editor de dibujo o bocetos. Las referencias y bocetos pueden enviarse al equipo para revisión; los recursos que se integren se guardarán dentro del repositorio. Prioriza una propuesta clara sobre muchas variantes.
+## Pruebas, integración y definición de terminado
 
-## Tu implementación después del diseño
+Tus dos pruebas funcionales cubren interpolación normal y comportamiento con intervalos extremos/falta de muestras, sin NaN ni saltos fuera de la política acordada. Ayuda a C con E2E de controles reales PC y móvil; el segundo cliente debe observar el movimiento recibido del servidor.
 
-Primero: un Canvas adaptable con una arena de prueba, un jugador, una pared, datos y el nodo; HUD en HTML/CSS y controles que produzcan inputs normalizados. La escena de prueba debe estar claramente identificada como **fixture local**, sin simular que ya existe una partida online.
+Trabaja en `feat/client-shell` y luego ramas pequeñas por tarea, con PR hacia main. B mantiene shared; coordina cambios de protocolo o dependencias. Lee [github-workflow.md](github-workflow.md).
 
-Después: conexión a HTTP/WebSocket, renderizado de snapshots, interpolación, mira, proyectiles, resultados y efectos. Coordina con B cualquier cambio del contrato antes de incorporarlo. El documento `docs/contracts.md` es la referencia técnica.
-
-Un input llevará `seq`, `moveX`, `moveY`, `aimX`, `aimY` y `attack`. Los vectores de apuntado son independientes del movimiento. La conversión del ratón debe considerar el tamaño CSS del Canvas y el encuadre del mundo.
-
-Tú presentas el estado; el servidor decide posiciones válidas, daño, impactos, carga y puntuación. Los efectos visuales no cambian esas reglas. La predicción de movimiento local es visual y siempre se corrige con el estado del servidor.
-
-Tu carpeta principal es `client/`. Tus pruebas iniciales son las dos de interpolación. Los archivos de `shared/` se coordinan con B. No instales otro motor ni cambies el protocolo por tu cuenta. La UI usa HTML/CSS y el mundo usa Canvas 2D.
-
-## Cuándo está terminado tu primer bloque
-
-- El equipo puede revisar los dos diseños de partida y aprobar una dirección visual.
-- En el navegador se ve una escena Canvas que conserva proporciones al redimensionar.
-- El HUD diferencia claramente carga transportada y puntuación asegurada.
-- Se pueden mover y apuntar en direcciones diferentes.
-- En móvil aparecen controles utilizables simultáneamente; en PC se ocultan.
-- Los disparos de energía son visualmente distintos de los fragmentos que se recogen.
-- No dependes de que el servidor esté completo para avanzar en la presentación y el input.
-
-El objetivo del fin de semana es una partida pequeña y pulida que podamos demostrar de principio a fin. Tu mayor aporte será que las acciones se entiendan, el control se sienta bien y la identidad visual sea coherente.
+Tu parte termina cuando todas las pantallas funcionan con el servidor real, el mapa recibido coincide entre clientes, los tres estados del nodo y su rotación son claros, se puede moverse/disparar simultáneamente en móvil y PC, y los resultados/revancha corresponden al servidor. Debe pasar npm run verify; al integrar C3 también verify:release. Pulir efectos después de cerrar ese recorrido.

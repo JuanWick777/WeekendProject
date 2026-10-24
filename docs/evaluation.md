@@ -1,6 +1,6 @@
 # Evaluación y entrega
 
-Checklist de requisitos, no afirmación de cumplimiento. La base inicial solo implementa arranque, health y contratos.
+Checklist de requisitos, no afirmación de cumplimiento. La base inicial implementa arranque, health y esquemas de entrada. Las reglas/payloads v2 están documentados y pendientes de implementar.
 
 ## Obligatorio
 
@@ -17,6 +17,21 @@ Checklist de requisitos, no afirmación de cumplimiento. La base inicial solo im
 - [ ] Actions en cada PR, incluyendo E2E; historial en verde.
 - [ ] URL pública, HTTPS válido y endpoints activos.
 - [ ] Entregar URL pública y URL del repositorio.
+
+## Aceptación del modo elegido por el equipo
+
+Estos puntos son decisiones de diseño para cumplir el proyecto; no son nuevas exigencias del profesor:
+
+- [ ] Una arena base con variantes de cobertura por semilla; mapa reproducible y transitable, con fallback probado.
+- [ ] Todos los clientes ven el mismo mapa; rotar el objetivo no cambia paredes.
+- [ ] Cinco nodos, uno activo por 30 s, ronda de 150 s y aviso de 5 s.
+- [ ] Único ocupante vivo puntúa; vacío/disputado no. Las fracciones se conservan y el control total no supera la duración.
+- [ ] Proyectiles dirigidos, escudo 0/1, muerte y respawn autoritativos.
+- [ ] Empate, abandono, reconexión y revancha sin duplicar jugador ni resultado.
+- [ ] MatchResult guarda control y semilla/versiones; datos sintéticos respetan estas reglas.
+- [ ] HUD y resultados representan los campos v2; se retiraron carga y sincronización de la modalidad anterior.
+
+Fuentes internas: [reglas](game-design.md), [mapas](maps.md), [contrato](contracts.md). Los cinco nodos y el escudo son decisiones del equipo; no atribuir al PDF sus valores o mecánicas.
 
 ## Payload decidido por el equipo
 

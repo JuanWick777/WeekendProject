@@ -2,11 +2,11 @@
 
 Repositorio privado: https://github.com/JuanWick777/WeekendProject
 
-El dueño conserva el acceso y agrega a A y C como colaboradores desde Settings > Collaborators (el nombre puede variar con el idioma). Cada persona acepta la invitación con su propia cuenta. No compartir contraseñas ni tokens. El profesor necesitará acceso al repositorio si va a revisarlo; conservarlo privado no concede acceso por compartir únicamente la URL.
+El bootstrap ya está en main y A/C ya aceptaron las invitaciones. Cada persona trabaja con su propia cuenta; no compartir contraseñas ni tokens. El profesor necesitará acceso al repositorio si va a revisarlo; conservarlo privado no concede acceso por compartir únicamente la URL.
 
 ## Flujo acordado
 
-main es la base integrada del equipo. La primera publicación pone el bootstrap en main; después cada cambio funcional entra por un pull request.
+main es la base integrada del equipo. El bootstrap está publicado; los siguientes cambios, incluida la documentación v2, entran por un pull request.
 
 Se crea una rama por tarea, no una rama permanente por persona:
 
@@ -18,9 +18,11 @@ Se crea una rama por tarea, no una rama permanente por persona:
 
 Tras integrar una tarea, crear otra rama desde main actualizado. Ejemplos siguientes: feat/lobbies, feat/telemetry y feat/client-network. No necesitamos una rama develop durante este fin de semana.
 
+La documentación v2 se prepara en docs/rotating-control. B migra después las reglas compartidas en una tarea separada B0.1 y retoma feat/auth desde main actualizado. Leer las reglas nuevas antes de integrar gameplay: el bootstrap aún conserva constantes de la modalidad anterior.
+
 ## A y C: primera preparación
 
-Después de aceptar la invitación, cada persona clona el repositorio en su propia computadora:
+Si aún no tienen un checkout, cada persona clona el repositorio en su propia computadora:
 
 ~~~powershell
 git clone https://github.com/JuanWick777/WeekendProject.git
@@ -109,12 +111,10 @@ No continuar desarrollando sobre una rama que ya se integró por squash.
 
 ## Acciones iniciales del dueño
 
-1. Confirmar que la base esté disponible en main.
-2. Agregar A y C como colaboradores; cada persona acepta la invitación.
-3. Compartir los enlaces a sus briefs, contrato y tareas.
-4. Acordar que toda función nueva entra por PR, con comprobaciones y una revisión del equipo.
-5. Revisar la pestaña Actions del primer commit y de los primeros PR.
-6. Dar al evaluador el acceso necesario antes de entregar URL pública y repositorio.
+1. Mantener el acuerdo de PR, comprobaciones y una revisión de otra persona antes de integrar.
+2. Compartir los cambios de contratos y revisar los primeros PR pronto.
+3. Revisar Actions del commit que se va a integrar; el bootstrap verde no acredita la suite completa.
+4. Dar al evaluador el acceso necesario antes de entregar URL pública y repositorio.
 
 Este documento fija el acuerdo del equipo. No presupone que existan reglas automáticas de protección de ramas configuradas en GitHub.
 

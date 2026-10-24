@@ -1,127 +1,154 @@
-# Contrato técnico v1
+# Contrato técnico v2 — Rotating control
 
-Referencia común para A, B y C. Coordinar cambios antes de integrar. Las firmas de esta guía son acuerdos de implementación; solamente constants.js, protocol.js y los esquemas de entrada están implementados en el bootstrap.
+Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Esta actualización es documental:** `shared/src/constants.js` y `PROTOCOL_VERSION` siguen en v1 hasta la tarea B0.1. No interpretar estos ejemplos como endpoints o simulación ya implementados.
 
-## Lenguaje, unidades y responsabilidades
+## Convenciones y autoridad
 
-- JavaScript ESM. Variables camelCase, constantes UPPER_SNAKE_CASE y archivos kebab-case.js.
-- Código/protocolo en inglés; UI en español.
-- Coordenadas de centros en unidades del mundo; eje x hacia la derecha, eje y hacia abajo.
-- Tiempos del protocolo en ms; delta interno de simulación en segundos con nombre dtSeconds.
-- Servidor a 30 ticks/s, input a 20/s, snapshots a 15/s y render objetivo 60 FPS.
-- shared/ contiene reglas importables; importar una regla en cliente no concede autoridad.
-- Servidor decide posición, paredes, proyectiles, inventario, daño y puntuación.
-- Un proceso para salas/partidas en memoria; PostgreSQL para cuentas, sesiones y resultados.
+- JavaScript ESM; código/protocolo en inglés, UI en español. camelCase para variables y kebab-case.js para archivos.
+- Centros en unidades de mundo, x derecha e y abajo; tiempos externos en milisegundos. Delta interno `dtSeconds`.
+- Mundo 24 × 16, tileSize 32; jugador radio 10 y velocidad 160 unidades/s.
+- Tick 30 Hz, input 20 Hz, snapshot 15 Hz; render objetivo 60 FPS. Inputs caducan a los 250 ms; ping cada 2 s; máximo mensaje WS 4096 bytes.
+- Servidor decide posición, colisiones, proyectiles, inventario, ocupación y puntos. Cliente interpola y corrige predicción local con snapshots.
+- Un proceso mantiene salas y simulación en memoria. PostgreSQL guarda usuarios, sesiones y resultados; no se consulta por cada tick.
+- `serverTimeMs` y fechas `*AtMs` usan el reloj epoch del servidor. La simulación usa elapsed monotónico; no usa la hora ni el dt del cliente para puntuar.
 
-## HTTP
+## HTTP y sesión
 
-Desarrollo: cliente http://127.0.0.1:5173 y API http://127.0.0.1:3000. Vite hace proxy de /api y /ws; el cliente usa rutas relativas. En producción, un origen HTTPS sirve cliente, API y sockets.
+Desarrollo: navegador `http://127.0.0.1:5173`, servidor `http://127.0.0.1:3000`; Vite hace proxy de `/api` y `/ws`. Cliente usa rutas relativas. Producción: un origen HTTPS para cliente, API y socket.
 
-Éxito: { ok: true, data: ... }. Error: { ok: false, error: { code, message } }. Todas las operaciones exitosas de la tabla responden 200; errores usan 400, 401, 403, 404, 409, 413 o 429 según corresponda.
+Éxito: `{ ok: true, data: ... }`; error: `{ ok: false, error: { code, message } }`. Éxitos de esta tabla responden 200; errores usan 400, 401, 403, 404, 409, 413 o 429 según el caso.
 
-| Método | Ruta | Entrada o función |
+| Método | Ruta | Entrada o salida data |
 | --- | --- | --- |
-| GET | /api/health | Liveness; en bootstrap declara servicios pendientes |
-| POST | /api/auth/register | { username, displayName, password }; crea usuario y sesión |
-| POST | /api/auth/login | { username, password }; crea sesión |
-| POST | /api/auth/logout | Invalida cookie/sesión; { loggedOut: true } |
-| GET | /api/auth/me | { user, roomCode }; 401 sin sesión |
-| POST | /api/rooms | { name }; devuelve vista de sala |
+| GET | /api/health | Liveness y estado real de servicios |
+| POST | /api/auth/register | `{ username, displayName, password }` -> `{ user }` y cookie |
+| POST | /api/auth/login | `{ username, password }` -> `{ user }` y cookie |
+| POST | /api/auth/logout | Invalida sesión -> `{ loggedOut: true }` |
+| GET | /api/auth/me | `{ user, roomCode }`; 401 sin sesión |
+| POST | /api/rooms | `{ name }` -> vista de sala |
 | GET | /api/rooms/:code | Vista de sala; requiere pertenencia |
-| POST | /api/rooms/:code/join | Entrada a sala; devuelve vista de sala |
-| POST | /api/rooms/:code/leave | Salida; { left: true } |
-| PATCH | /api/rooms/:code/ready | { ready: boolean }; devuelve vista de sala |
-| POST | /api/rooms/:code/start | Solo host; devuelve vista countdown |
-| POST | /api/rooms/:code/rematch | Solo host; devuelve nuevo lobby |
-| GET | /api/test/telemetry | Agregados; filtro source=all, live o seed |
-| POST | /api/test/seed | { seed, matches, batchId } |
+| POST | /api/rooms/:code/join | Sin body -> vista de sala |
+| POST | /api/rooms/:code/leave | Sin body -> `{ left: true }` |
+| PATCH | /api/rooms/:code/ready | `{ ready: boolean }` -> vista de sala |
+| POST | /api/rooms/:code/start | Solo host -> vista countdown |
+| POST | /api/rooms/:code/rematch | Solo host -> nuevo lobby |
+| GET | /api/test/telemetry | Agregados; `source=all`, `live` o `seed` |
+| POST | /api/test/seed | `{ seed, matches, batchId }` |
 
-Usuario público: { id, username, displayName }. username se normaliza a minúsculas; displayName conserva presentación. No devolver passwordHash, tokenHash ni token de sesión en JSON.
+Usuario público: `{ id, username, displayName }`. username se normaliza a minúsculas. Nunca devolver hashes ni token de sesión. Usuario pertenece a una sola sala; la sesión determina identidad, sin aceptar un userId del cliente para actuar como otro jugador.
 
-Vista de sala: { code, name, hostId, status, countdownEndsAtMs, players: [{ id, displayName, ready, connected }] }. countdownEndsAtMs es null fuera de countdown. La sesión decide el jugador: no aceptar userId o playerId del cliente para actuar por otra persona.
+Vista de sala: `{ code, name, hostId, status, countdownEndsAtMs, players: [{ id, displayName, ready, connected }] }`. Código: seis caracteres A–Z/0–9. `countdownEndsAtMs` es null fuera de countdown; `roomCode` es null sin sala.
 
-## Sesiones
-
-Cookie cg_session: HttpOnly, SameSite=Lax, Path=/, Secure en producción. Token aleatorio con hash persistido; plazo inicial 24 horas. Comprobar Origin en upgrade WebSocket y operaciones que cambian estado. APP_ORIGIN coincide con la URL de navegador; configuración de secretos solo en servidor.
+Cookie `cg_session`: HttpOnly, SameSite=Lax, Path=/, Secure en producción, duración inicial 24 h. Token aleatorio; solo su hash se persiste. Comprobar Origin en upgrades y operaciones que cambian estado. `APP_ORIGIN` coincide con el origen del navegador. Comprobar sesión y pertenencia también en backend.
 
 ## WebSocket
 
-Ruta /ws. El usuario ya autenticado recibe sus cambios de sala; no puede suscribirse a otra sala mediante un playerId o roomId arbitrario. Validar mensajes con shared/schemas y limitar payload a 4096 bytes.
-
-Input:
+Ruta `/ws`, sesión válida antes de aceptar. Un socket activo por usuario; una reconexión sustituye de forma controlada al anterior. Validar entradas con Zod, tamaño y frecuencia. Los nombres de mensajes y los inputs v1 se conservan; al implementar los payloads nuevos B eleva `PROTOCOL_VERSION` a 2.
 
 ~~~json
 {
   "type": "input",
-  "payload": {
-    "seq": 42,
-    "moveX": 1,
-    "moveY": 0,
-    "aimX": 0,
-    "aimY": -1,
-    "attack": true
-  }
+  "payload": { "seq": 42, "moveX": 1, "moveY": 0, "aimX": 0, "aimY": -1, "attack": true }
 }
 ~~~
 
-Cada componente es finito y está entre -1 y 1. El servidor normaliza movimiento diagonal y dirección de apuntado; disparar requiere dirección distinta de cero. Sin input reciente: movimiento cero y attack false. No confiar en dt, posición, inventario, vida ni daño del cliente.
+Ejes finitos en [-1, 1]; movimiento y apuntado independientes, normalizados en servidor. Disparar exige dirección no nula. No aceptar dt, posición, daño, puntos ni escudo del cliente. `seq` crece por conexión; `welcome.nextInputSeq` establece su inicio después de reconectar. Inputs antiguos, de socket sustituido o fuera de playing no alteran el juego. Al caducar: movimiento cero y attack false.
 
-seq es entero creciente por conexión. Tras reconectar, welcome proporciona nextInputSeq y se ignoran mensajes del socket sustituido.
-
-Ping: { type: 'ping', payload: { id, sentAtMs } }. Pong devuelve esos dos campos; RTT se calcula en el mismo reloj del cliente al recibir la respuesta. Es una medición de ida y vuelta, no latencia de una sola dirección.
+Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos campos; el cliente calcula RTT con su propio reloj. Un heartbeat de transporte detecta sockets muertos, además de este ping de aplicación.
 
 | Tipo servidor | Payload |
 | --- | --- |
-| welcome | { protocolVersion, user, roomCode, nextInputSeq } |
+| welcome | `{ protocolVersion, user, roomCode, nextInputSeq }` |
 | lobby | Vista de sala |
-| match:start | { matchId, map, endsAtMs, config, state } |
-| state | Snapshot definido abajo |
-| event | { eventId, tick, kind, actorId, targetId?, x, y } |
-| match:end | MatchResult definido abajo |
-| pong | { id, sentAtMs } |
-| error | { code, message } |
+| match:start | `{ matchId, map, endsAtMs, config, state }` |
+| state | Snapshot de esta guía |
+| event | `{ eventId, tick, kind, actorId, targetId, x, y }` |
+| match:end | MatchResult de esta guía |
+| pong | `{ id, sentAtMs }` |
+| error | `{ code, message }` |
 
-Map: { seed, columns, rows, tileSize, tiles, node }. tiles es un array por filas: 0 libre, 1 pared. node: { x, y, radius }. El servidor conserva el mapa y lo reenvía en una reconexión a partida en curso.
+`targetId` es null cuando no aplica. Los eventos solo crean efectos, se deduplican por eventId y nunca sustituyen el snapshot. Tipos previstos: `shot`, `hit`, `death`, `respawn`, `shield:pickup`, `shield:block`. El cambio de nodo se lee del estado objetivo; no depende de recibir un evento.
 
-Snapshot:
+## Mapa transmitido
+
+~~~text
+{
+  seed, templateId, templateVersion, generatorVersion,
+  columns: 24, rows: 16, tileSize: 32,
+  tiles: [[0, 1, ...], ...],
+  nodes: [{ id, x, y, radius }],
+  spawnPoints: [{ id, x, y }],
+  pickupSpawns: [{ id, type: 'shield', x, y, radius: 10 }]
+}
+~~~
+
+`seed` es uint32; versiones son enteros positivos. `tiles[row][column]`: 0 suelo, 1 pared. `nodes` contiene exactamente los cinco IDs de [game-design.md](game-design.md) en su orden de activación, con radio inicial 64. La plantilla y el generador siguen [maps.md](maps.md). Los espacios y variantes de generación son datos internos de B: al cliente se envía el mapa resuelto.
+
+El servidor reenvía `match:start` con mapa y snapshot actual al reconectar a una ronda. No regenera terreno por una rotación ni al entrar otro socket.
+
+`config` contiene únicamente reglas públicas de la ronda, sin secretos:
+
+~~~text
+{
+  mode: 'rotating_control', durationMs: 150000, respawnMs: 3000,
+  nodeDurationMs: 30000, nodePreviewMs: 5000,
+  scorePerSecond: 1, maxShieldCharges: 1, pickupRespawnMs: 8000
+}
+~~~
+
+## Snapshot y ocupación
 
 ~~~text
 {
   matchId, tick, serverTimeMs, remainingMs,
+  objective: {
+    activeNodeId, rotationIndex, status, controllerId,
+    changesAtMs, nextNodeId
+  },
   players: [{
-    id, displayName, x, y, aimX, aimY, hp, carry, score, kills, deaths,
-    alive, connected, respawnRemainingMs, syncProgress, lastProcessedSeq
+    id, displayName, x, y, aimX, aimY, hp, shieldCharges,
+    controlTimeMs, score, kills, deaths, alive, connected,
+    forfeited, respawnRemainingMs, lastProcessedSeq
   }],
-  pickups: [{ id, x, y, value }],
+  pickups: [{ id, type: 'shield', x, y, radius: 10 }],
   projectiles: [{ id, ownerId, x, y, dirX, dirY }]
 }
 ~~~
 
-syncProgress está entre 0 y 1. A interpola rivales/proyectiles y corrige la predicción local con el servidor. Los eventos son efectos visuales deduplicados por eventId: shot, hit, death, sync y respawn. Nunca suman daño o puntos en cliente.
+- `rotationIndex`: 0–4. `status`: `empty`, `controlled` o `contested`.
+- `controllerId`: único ocupante vivo válido si controlled; null en los otros estados.
+- `changesAtMs`: fin del intervalo activo; para el último, fin de ronda.
+- `nextNodeId`: siguiente nodo solo durante sus 5000 ms de preaviso; null el resto y durante todo el último intervalo.
+- Ocupación: centro del jugador dentro del círculo, vivo y no abandonado. Un desconectado dentro del plazo de gracia permanece vivo/vulnerable y cuenta como ocupante.
+- `controlTimeMs` es acumulado de la ronda, admite fracciones de ms; `score` es su parte entera en segundos. No redondear cada tick ni reiniciar fracciones al disputar/salir.
+- Resolver movimiento, proyectiles/muertes y luego ocupación en cada paso. Recortar el tiempo atribuido a límites de rotación y fin; no sumar dos veces un intervalo ni exceder 150000 ms de control total entre jugadores.
+- `shieldCharges`: entero 0/1. `pickups` solo contiene recogidas actualmente disponibles; su reaparición la controla B. No desaparecer una recogida al tocarla con inventario lleno. Adquirir exige distancia entre centros <= suma de radios; empates de recogida se resuelven por playerId ordenado.
+- `respawnRemainingMs` vale 0 estando vivo. Los abandonados no vuelven a ocupar ni disparar. HP, puntos y tiempos provienen del servidor.
 
-El HUD/diagnóstico refleja x/y recibidos en atributos data-player-x y data-player-y de un elemento con data-testid="player-state". Estas coordenadas representan el estado autoritativo, no la predicción visual. Los E2E envían controles y esperan esos cambios reales.
+El cliente refleja las x/y recibidas en `data-player-x` y `data-player-y` de un elemento `data-testid="player-state"`. Es estado autoritativo, separado de la predicción visual. C prueba movimiento real y espera esos cambios; no edita los atributos para hacer pasar E2E.
 
-MatchResult:
+## Resultado y persistencia
 
 ~~~text
 {
-  matchId, roomCode, seed, startedAtMs, endedAtMs, durationMs,
+  matchId, roomCode, mode: 'rotating_control',
+  seed, templateId, templateVersion, generatorVersion,
+  startedAtMs, endedAtMs, durationMs,
   status: 'completed' | 'aborted',
   finishReason: 'time' | 'forfeit' | 'empty',
-  winnerId: string | null,
-  drawPlayerIds: string[],
+  winnerId: string | null, drawPlayerIds: string[],
   players: [{
-    playerId, displayName, score, kills, deaths, aliveMs,
-    participatedMs, won, draw, forfeited
+    playerId, displayName, score, controlTimeMs, kills, deaths,
+    aliveMs, participatedMs, won, draw, forfeited
   }]
 }
 ~~~
 
-En empate winnerId es null, drawPlayerIds contiene los empatados y no se atribuye victoria individual. No incluir sockets, mapas completos, tokens o funciones en el objeto persistido.
+`durationMs` es tiempo simulado real de la ronda, hasta 150000; puede ser menor al terminar por abandono. Por jugador: `0 <= controlTimeMs <= aliveMs <= participatedMs <= durationMs`. La suma de control de todos no supera durationMs. La vida acumulada suma los intervalos vivo, no los tiempos de respawn. Los tiempos se guardan con precisión suficiente para conservar estas relaciones.
 
-## Persistencia: primeras interfaces que C entrega a B
+Clasificar candidatos no abandonados por score descendente, kills descendente y deaths ascendente. Si se mantiene igualdad en el primer puesto: winnerId null, drawPlayerIds con esos IDs, draw true y won false para ellos. En fin por abandono gana el único restante. En abortada no hay ganador ni empatados. El resultado se construye una sola vez; no incluye sockets, funciones, mapa completo ni secretos.
 
-Todas son asíncronas. La forma exacta debe mantenerse común o revisarse con el equipo:
+Todas estas interfaces de C son asíncronas:
 
 ~~~text
 users.createUser({ username, displayName, passwordHash }) -> User público
@@ -133,36 +160,42 @@ sessions.deleteSessionByTokenHash(tokenHash) -> void
 matches.saveMatch(matchResult) -> void
 ~~~
 
-username único normalizado; tokenHash único; matches.match_id único. saveMatch debe guardar cabecera/resultados de manera atómica e idempotente. No repetir la partida ante reconexión o retransmisión del evento final.
+username único normalizado, tokenHash único y match_id único. Duplicar username se comunica a B como error con `code: 'USERNAME_TAKEN'` para responder 409; no exponer errores SQL. La búsqueda de sesión puede devolver null si expiró; B comprueba expiresAtMs antes de autenticar en cualquier caso.
 
-Los repositorios convierten los valores numéricos de PostgreSQL a números JavaScript finitos y las fechas a ms antes de devolverlos al resto de la aplicación. No enviar importes/tasas como strings ni fechas Date implícitas donde el contrato espera ms.
+`saveMatch` guarda cabecera y resultados en una transacción idempotente por matchId. C asigna source=live desde la ruta interna de guardado; no lo acepta del jugador. Los repositorios convierten números PostgreSQL a números JS finitos y fechas a ms, sin strings numéricos ni Date implícitas. B coordina el manejo de fallos de guardado fuera del tick; no se declara persistido un resultado que falló.
 
-## Telemetría y semilla
+## Siembra y telemetría
 
-POST seed: seed entero uint32, matches entero de 100 a 1000, batchId de 3-64 caracteres alfanuméricos, guion o guion bajo. Respuesta: { batchId, insertedMatches, alreadyExists }. Repetir lote devuelve insertedMatches: 0 y alreadyExists: true, HTTP 200.
+POST seed admite `{ seed, matches, batchId }`: seed uint32, matches entero 100–1000, batchId 3–64 caracteres alfanuméricos, guion o guion bajo. Respuesta data: `{ batchId, insertedMatches, alreadyExists }`. Repetir batchId responde 200 con insertedMatches 0 y alreadyExists true; el primer lote queda intacto incluso si se envían otros parámetros.
 
-Los dos endpoints test estarán habilitados en el entorno de evaluación. No requieren sesión; aplicar validación, límites y control de frecuencia. La siembra únicamente agrega fixtures con source=seed y no modifica usuarios ni partidas live.
+Datos de prueba reproducibles, con source=seed y participantes sintéticos identificables, separados de cuentas humanas. Lote y resultados se guardan atómicamente. No borrar ni sobrescribir datos live. Generar resultados coherentes con duración, control, score, bajas/muertes y desempates. Este endpoint crea registros sintéticos; no ejecuta 1000 simulaciones online.
 
-Telemetry devuelve:
+Ambos endpoints test estarán habilitados en evaluación sin sesión, con validación, tamaño y frecuencia acotados. No exigir un secreto desconocido por el evaluador.
+
+Telemetry data:
 
 ~~~text
 {
   source, matches, playerResults,
-  overall: { wins, kills, deaths, winRate, kdr, averageAliveSeconds, survivalRate },
+  overall: {
+    wins, kills, deaths, winRate, kdr,
+    averageAliveSeconds, survivalRate, averageControlSeconds
+  },
   players: [{
     playerId, displayName, matches, wins, kills, deaths,
-    winRate, kdr, averageAliveSeconds, survivalRate
+    winRate, kdr, averageAliveSeconds, survivalRate,
+    averageControlSeconds
   }]
 }
 ~~~
 
-- source por defecto all; permitir live y seed.
-- Solo partidas completed entran a estas tasas. overall.matches es el número de partidas; winRate global usa las participaciones de jugador como denominador, no el número de partidas.
-- winRate = 100 * wins / participaciones completadas.
+`source=all` por defecto; aceptar live/seed. Solo partidas completed entran a estos contadores y tasas; abortadas se excluyen. `matches` raíz cuenta partidas, `playerResults` participaciones; `players[].matches` cuenta participaciones de ese jugador.
+
+- winRate = 100 * wins / participaciones completadas. Empates no suman victorias.
 - kdr = kills / max(1, deaths).
 - averageAliveSeconds = totalAliveMs / participaciones completadas / 1000.
 - survivalRate = 100 * totalAliveMs / totalParticipatedMs.
-- Denominador cero: devolver 0, nunca NaN o Infinity.
-- Las filas sintéticas usan participantes identificables de prueba, no se atribuyen a cuentas reales ni permiten suplantarlas.
+- averageControlSeconds = totalControlTimeMs / participaciones completadas / 1000.
+- overall se calcula desde sumas globales, no promediando porcentajes de filas. Denominador cero devuelve 0, nunca NaN/Infinity. Base vacía devuelve contadores 0 y players vacío.
 
-Medir respuesta HTTP completa y RTT en URL pública, incluyendo condiciones y muestras. No confundir responseTime de backend con el tiempo completo de red. Los objetivos del PDF son <100 ms para ping/pong y <200 ms para endpoints; una medición local no prueba el despliegue.
+Medir HTTP completo y RTT en la URL pública con muestras y condiciones. Tiempo de backend y prueba local no acreditan la red pública. Objetivos de evaluación: ping/pong <100 ms y endpoints <200 ms, con HTTP 200; registrar también arranque frío.
