@@ -18,7 +18,9 @@ Se crea una rama por tarea, no una rama permanente por persona:
 
 Tras integrar una tarea, crear otra rama desde main actualizado. Ejemplos siguientes: feat/lobbies, feat/telemetry y feat/client-network. No necesitamos una rama develop durante este fin de semana.
 
-La documentación v2 está en el PR de docs/rotating-control. La rama feat/auth-v2 parte de ese contrato e incorpora B0.1 y auth HTTP. Revisar/integrar primero la documentación y después la implementación; main sigue siendo la base para las siguientes tareas. Leer las reglas nuevas antes de integrar gameplay.
+La documentación v2 está en el PR de docs/rotating-control. feat/auth-v2 parte de ese contrato e incorpora B0.1/auth HTTP; feat/lobbies-ws parte de auth-v2 e incorpora B2. Mientras las anteriores esperan revisión, estas ramas conservan sus dependencias. Revisar/integrar documentación -> auth-v2 -> lobbies-ws; después volver a partir de main actualizado. Leer las reglas nuevas antes de integrar gameplay.
+
+**Push y merge son pasos distintos.** Push publica los commits de una rama en GitHub. El PR permite revisarlos; el merge incorpora el cambio a main. Tener una rama sincronizada y sin commits pendientes de push no significa que sus cambios ya estén en main. Un clon de main recibe solamente lo que se haya integrado allí.
 
 ## A y C: primera preparación
 

@@ -1,6 +1,6 @@
 # Tareas y orden de integración — v2
 
-Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap ya está en main y los colaboradores tienen acceso. B0 está publicado; B0.1 y la lógica HTTP de B1 están implementados en la rama de trabajo, pendientes de revisión/integración. B1 requiere cerrar la conexión real a PostgreSQL con C.
+Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap ya está en main y los colaboradores tienen acceso. B0.1, auth HTTP de B1 y salas/red B2 están implementados en sus ramas, pendientes de revisión/integración. B1 requiere cerrar la conexión real a PostgreSQL con C; B2/B3 se desarrollan sin esperar esa conexión usando repositorios aislados en pruebas.
 
 ## Trabajo y dependencias
 
@@ -14,7 +14,7 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 | B1 | B | Implementado: auth HTTP y middleware; pendiente comprobar con PostgreSQL | C1a; ver auth-integration.md |
 | A2 | A | Canvas adaptable, HUD de nodos e inputs independientes | B0.1 y diseño A1 |
 | C1b | C | saveMatch v2 transaccional e idempotente; primer despliegue público | MatchResult y cuenta/base de hosting |
-| B2 | B | Salas, Listo, countdown y sockets autenticados entre dos cuentas | B1 + C1a |
+| B2 | B | Implementado: salas, Listo, countdown con hook y sockets entre dos cuentas | Auth inyectada; integración PostgreSQL pendiente con C1a |
 | A3 | A | Auth/lobby online, snapshots e interpolación; coordenadas DOM | B2 y contratos v2 |
 | B3a | B | Mapa procedural válido, movimiento y control/rotación/fin | B2 + plantilla A1 |
 | B3b | B | Bláster, escudo, muerte/respawn y resultado persistido | B3a + C1b |
@@ -26,7 +26,7 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 
 ## Próximo trabajo de B
 
-Revisar/integrar D2 y la rama feat/auth-v2. Conectar users/sessions de C al servicio de auth y comprobar dos cuentas con PostgreSQL. Después iniciar B2 desde main actualizado. No esperar al arte final ni crear una persistencia alternativa a la de C.
+Revisar/integrar D2, feat/auth-v2 y feat/lobbies-ws, en ese orden. Conectar users/sessions de C al runtime cuando estén listos. Mientras tanto avanzar B3a: mapa, movimiento y nodos mediante onStartMatch/onInput, sin dependencia de base por tick. Ver lobbies-network.md. No crear una persistencia alternativa a la de C.
 
 ## Puntos de encuentro
 
@@ -44,7 +44,7 @@ Integrar cambios pequeños cada 1–2 horas. Las firmas de almacenamiento, campo
 - C: 2 payloads Zod + 1 telemetría/semilla; coordina auth, lobby y Canvas reales en Playwright, incluida variante móvil.
 - Las 7 pruebas del bootstrap no prueban la simulación pendiente. Diez es el mínimo funcional, no un límite para dejar reglas esenciales sin comprobar.
 
-Cada cambio debe instalar/arrancar desde una base limpia, tener comprobación útil del comportamiento y pasar npm run verify. C3 añade verify:release a cada PR. No se admiten mocks ocultos como sustituto de juego/persistencia reales ni suites vacías aprobadas.
+Cada cambio debe instalar/arrancar desde una base limpia, tener comprobación útil del comportamiento y pasar npm run verify. Hasta B2 hay 41 casos aprobados; mapas/daño/interpolación y E2E siguen pendientes. C3 añade verify:release a cada PR. No se admiten mocks ocultos como sustituto de juego/persistencia reales ni suites vacías aprobadas.
 
 ## Git, propiedad y alcance
 

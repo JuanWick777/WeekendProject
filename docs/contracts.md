@@ -1,6 +1,6 @@
 # Contrato técnico v2 — Rotating control
 
-Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Estado de implementación:** constantes y PROTOCOL_VERSION ya son v2; auth HTTP está preparado con repositorios inyectados, pendiente conectar PostgreSQL de C. Salas, WebSocket y partida aún no están implementados. Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
+Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Estado de implementación:** constantes v2, auth HTTP, salas y WebSockets están preparados con autenticación inyectada; falta conectar PostgreSQL de C y construir la simulación. Ver [B2](lobbies-network.md). Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
 
 ## Convenciones y autoridad
 
@@ -59,7 +59,7 @@ Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos ca
 | Tipo servidor | Payload |
 | --- | --- |
 | welcome | `{ protocolVersion, user, roomCode, nextInputSeq }` |
-| lobby | Vista de sala |
+| lobby | Vista de sala; null para quien acaba de salir |
 | match:start | `{ matchId, map, endsAtMs, config, state }` |
 | state | Snapshot de esta guía |
 | event | `{ eventId, tick, kind, actorId, targetId, x, y }` |
@@ -85,6 +85,8 @@ Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos ca
 `seed` es uint32; versiones son enteros positivos. `tiles[row][column]`: 0 suelo, 1 pared. `nodes` contiene exactamente los cinco IDs de [game-design.md](game-design.md) en su orden de activación, con radio inicial 64. La plantilla y el generador siguen [maps.md](maps.md). Los espacios y variantes de generación son datos internos de B: al cliente se envía el mapa resuelto.
 
 El servidor reenvía `match:start` con mapa y snapshot actual al reconectar a una ronda. No regenera terreno por una rotación ni al entrar otro socket.
+
+La emisión match:start y la recuperación de la simulación se implementan en B3. B2 solo inicia countdown si recibe un manejador onStartMatch; sin él responde GAME_NOT_READY. Al reconectar, welcome reinicia la secuencia del socket con nextInputSeq y el cliente descarta su cola anterior.
 
 `config` contiene únicamente reglas públicas de la ronda, sin secretos:
 
