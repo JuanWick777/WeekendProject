@@ -1,16 +1,16 @@
 # B — Servidor, salas y simulación
 
-Este rol lo toma el coordinador de este chat. B0 está publicado en main; la implementación de autenticación no ha comenzado. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, index.js y config.js. C mantiene storage/telemetry y A client.
+Este rol lo toma el coordinador de este chat. B0 está publicado en main. La rama de implementación incorpora B0.1 y la lógica HTTP de B1; falta conectar PostgreSQL de C y comprobar persistencia real. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, index.js y config.js. C mantiene storage/telemetry y A client.
 
 Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). Este documento es un plan, no una lista de funciones ya disponibles.
 
-## B0.1 — Migración compartida antes de integrar el juego
+## B0.1 — Migración compartida implementada
 
 Actualizar constants.js al modo rotating_control: duración 150000, cinco intervalos de 30000, preaviso 5000, radio 64, escudo máximo 1, reaparición 3000 y recogidas cada 8000 ms. Retirar syncDurationMs, syncRadius, maxCarry y droppedPickupLifetimeMs. Mantener reglas de movimiento, bláster y red.
 
 Elevar PROTOCOL_VERSION a 2, mantener nombres de mensajes/rutas e inputs compatibles y dar a A/C fixtures documentados de mapa, snapshot y MatchResult v2. Comprobar que health publica la versión correcta. Este cambio es la primera tarea de código después de la documentación.
 
-## B1 — Autenticación
+## B1 — HTTP implementado; integración PostgreSQL pendiente
 
 1. Consumir las interfaces users/sessions de C mediante inyección; no crear otra persistencia de producción. Se puede avanzar con repositorios de prueba mientras C entrega PostgreSQL.
 2. Registro con username normalizado, displayName y hash scrypt asíncrono de node:crypto; no guardar contraseña. Duplicado -> 409, credenciales incorrectas -> 401.

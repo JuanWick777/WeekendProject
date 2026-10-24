@@ -21,6 +21,14 @@ afterAll(async () => {
 });
 
 describe('frontera HTTP del bootstrap', () => {
+  it('anuncia el protocolo v2 y el estado real de los servicios', async () => {
+    const response = await fetch(baseUrl + '/api/health');
+    expect(response.status).toBe(200);
+    expect((await response.json()).data).toMatchObject({
+      protocolVersion: 2, authentication: 'pending', websocket: 'pending', database: 'pending',
+    });
+  });
+
   it('no convierte una API de juego inexistente en una página HTML con HTTP 200', async () => {
     const response = await fetch(baseUrl + '/api/rooms/ABC123');
     expect(response.status).toBe(404);

@@ -1,6 +1,6 @@
 # Contrato técnico v2 — Rotating control
 
-Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Esta actualización es documental:** `shared/src/constants.js` y `PROTOCOL_VERSION` siguen en v1 hasta la tarea B0.1. No interpretar estos ejemplos como endpoints o simulación ya implementados.
+Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Estado de implementación:** constantes y PROTOCOL_VERSION ya son v2; auth HTTP está preparado con repositorios inyectados, pendiente conectar PostgreSQL de C. Salas, WebSocket y partida aún no están implementados. Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
 
 ## Convenciones y autoridad
 
@@ -43,7 +43,7 @@ Cookie `cg_session`: HttpOnly, SameSite=Lax, Path=/, Secure en producción, dura
 
 ## WebSocket
 
-Ruta `/ws`, sesión válida antes de aceptar. Un socket activo por usuario; una reconexión sustituye de forma controlada al anterior. Validar entradas con Zod, tamaño y frecuencia. Los nombres de mensajes y los inputs v1 se conservan; al implementar los payloads nuevos B eleva `PROTOCOL_VERSION` a 2.
+Ruta `/ws`, sesión válida antes de aceptar. Un socket activo por usuario; una reconexión sustituye de forma controlada al anterior. Validar entradas con Zod, tamaño y frecuencia. Los nombres de mensajes y los inputs v1 se conservan; `PROTOCOL_VERSION` ya vale 2; las emisiones de partida se implementarán en B3.
 
 ~~~json
 {

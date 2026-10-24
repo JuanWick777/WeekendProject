@@ -1,6 +1,6 @@
 # Evaluación y entrega
 
-Checklist de requisitos, no afirmación de cumplimiento. La base inicial implementa arranque, health y esquemas de entrada. Las reglas/payloads v2 están documentados y pendientes de implementar.
+Checklist de requisitos, no afirmación de cumplimiento. Ya hay arranque, health, constantes v2, esquemas y auth HTTP con repositorios inyectados. Falta conectar PostgreSQL y construir salas/partida; ninguna prueba de auth sustituye mapas, daño, interpolación o E2E.
 
 ## Obligatorio
 

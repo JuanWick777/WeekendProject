@@ -4,7 +4,8 @@ import { readConfig } from './config.js';
 import { attachSocketServer } from './net/socket-server.js';
 
 const config = readConfig();
-const server = createServer(createApp());
+// B wires C's PostgreSQL repositories with createAuthService({ users, sessions }).
+const server = createServer(createApp({ appOrigin: config.appOrigin, nodeEnv: config.nodeEnv }));
 attachSocketServer(server);
 
 server.on('error', (error) => {
@@ -14,7 +15,7 @@ server.on('error', (error) => {
 
 server.listen(config.port, config.host, () => {
   console.log('CyberGrid HTTP: http://' + config.host + ':' + config.port);
-  console.log('Etapa bootstrap: autenticación, salas y simulación pendientes.');
+  console.log('Auth HTTP preparado; persistencia, salas y simulación pendientes de integración.');
 });
 
 function shutdown() {

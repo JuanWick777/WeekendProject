@@ -1,6 +1,6 @@
 # Tareas y orden de integración — v2
 
-Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap ya está en main y los colaboradores tienen acceso. Los bloques siguientes siguen pendientes de implementación salvo B0.
+Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap ya está en main y los colaboradores tienen acceso. B0 está publicado; B0.1 y la lógica HTTP de B1 están implementados en la rama de trabajo, pendientes de revisión/integración. B1 requiere cerrar la conexión real a PostgreSQL con C.
 
 ## Trabajo y dependencias
 
@@ -8,10 +8,10 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 | --- | --- | --- | --- |
 | B0 | B | Bootstrap publicado; 7 pruebas iniciales, lint y build comprobados | Completado |
 | D2 | B coordina | Reglas, mapas, contratos y briefs de nodos rotatorios | Actualización documental actual; PR y revisión |
-| B0.1 | B | Constantes/protocolVersion v2 y ejemplos coherentes para A/C | D2 |
+| B0.1 | B | Implementado: constantes/protocolVersion v2 y fixture para A/C | D2; revisión/integración pendientes |
 | A1 | A | Una arena base con capas, variantes autorizadas y dirección visual | maps.md y brief A; sin esperar backend |
 | C1a | C | Bases dev/test, esquema y users/sessions con firmas acordadas | contracts.md; sin esperar partida |
-| B1 | B | Registro, login, me, logout y middleware con pruebas reales de rutas | Firmas C1a; iniciar con repositorios inyectados |
+| B1 | B | Implementado: auth HTTP y middleware; pendiente comprobar con PostgreSQL | C1a; ver auth-integration.md |
 | A2 | A | Canvas adaptable, HUD de nodos e inputs independientes | B0.1 y diseño A1 |
 | C1b | C | saveMatch v2 transaccional e idempotente; primer despliegue público | MatchResult y cuenta/base de hosting |
 | B2 | B | Salas, Listo, countdown y sockets autenticados entre dos cuentas | B1 + C1a |
@@ -26,7 +26,7 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 
 ## Próximo trabajo de B
 
-Tras integrar D2, hacer B0.1 en una rama propia y coordinar a A/C. Retomar después feat/auth desde main actualizado. Entregar login y lobby reales antes de incorporar toda la simulación. No esperar al arte final ni crear una base de datos alternativa a la de C.
+Revisar/integrar D2 y la rama feat/auth-v2. Conectar users/sessions de C al servicio de auth y comprobar dos cuentas con PostgreSQL. Después iniciar B2 desde main actualizado. No esperar al arte final ni crear una persistencia alternativa a la de C.
 
 ## Puntos de encuentro
 

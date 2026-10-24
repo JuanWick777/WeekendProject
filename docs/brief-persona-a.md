@@ -2,11 +2,11 @@
 
 Tu responsabilidad es `client/` y `docs/visual-references/`. B desarrolla cuentas, salas, sockets y simulación; C desarrolla datos, telemetría, pruebas globales y despliegue. Trabajamos con JavaScript ESM, Vite, HTML/CSS y Canvas 2D. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
-La referencia de reglas es [game-design.md](game-design.md), la de datos es [contracts.md](contracts.md) y la de arena es [maps.md](maps.md). Esta guía cubre todo tu alcance, no solo el primer bloque. Los payloads v2 están acordados documentalmente; B debe migrar shared antes de integrarlos.
+La referencia de reglas es [game-design.md](game-design.md), la de datos es [contracts.md](contracts.md) y la de arena es [maps.md](maps.md). Esta guía cubre todo tu alcance, no solo el primer bloque. Las constantes compartidas ya son v2. Puedes usar el [fixture de desarrollo](../shared/fixtures/README.md); sockets y partida online siguen pendientes.
 
 ## Qué estamos construyendo
 
-Arena de 2–4 personas, todos contra todos, con rondas de 150 segundos y proyectiles de energía dirigidos. Cinco zonas se activan de una en una durante 30 segundos cada una: centro, superior izquierda, superior derecha, inferior derecha, inferior izquierda. Hay aviso del siguiente nodo durante los últimos 5 segundos.
+Arena de 2–4 personas, todos contra todos, con rondas de 150 segundos y proyectiles de energía dirigidos. Cinco zonas se activan de una en una durante 30 segundos cada una: centro, norte (sector A), este (sector B), sur (sector C), oeste (sector D). Hay aviso del siguiente nodo durante los últimos 5 segundos.
 
 Una persona viva sola dentro acumula un punto por segundo; dos o más disputan y nadie puntúa. Se puede moverse y disparar dentro. Las fracciones de segundo y los puntos se conservan al salir o morir. Respawn: 3 segundos. Gana más puntuación, luego bajas, luego menos muertes; empate si persiste. Una carga de escudo recogible absorbe el siguiente impacto automáticamente. No hay transporte de fragmentos, entrega ni barra de sincronización.
 
