@@ -30,9 +30,9 @@ CREATE TABLE IF NOT EXISTS matches (
     template_id VARCHAR(50),
     template_version VARCHAR(20),
     generator_version VARCHAR(20),
-    started_at_ms BIGINT NOT NULL,
-    ended_at_ms BIGINT NOT NULL,
-    duration_ms NUMERIC(10, 3) NOT NULL,
+    started_at_ms NUMERIC(16, 3) NOT NULL,
+    ended_at_ms NUMERIC(16, 3) NOT NULL,
+    duration_ms NUMERIC(16, 3) NOT NULL,
     status VARCHAR(20) NOT NULL CHECK (status IN ('completed', 'aborted')),
     finish_reason VARCHAR(20) CHECK (finish_reason IN ('time', 'forfeit', 'empty')),
     winner_id UUID REFERENCES users(id),
@@ -49,11 +49,11 @@ CREATE TABLE IF NOT EXISTS player_results (
     player_id UUID REFERENCES users(id) ON DELETE CASCADE,
     display_name VARCHAR(50) NOT NULL,
     score INT NOT NULL DEFAULT 0,
-    control_time_ms NUMERIC(10, 3) NOT NULL DEFAULT 0,
+    control_time_ms NUMERIC(16, 3) NOT NULL DEFAULT 0,
     kills INT NOT NULL DEFAULT 0,
     deaths INT NOT NULL DEFAULT 0,
-    alive_ms NUMERIC(10, 3) NOT NULL DEFAULT 0,
-    participated_ms NUMERIC(10, 3) NOT NULL DEFAULT 0,
+    alive_ms NUMERIC(16, 3) NOT NULL DEFAULT 0,
+    participated_ms NUMERIC(16, 3) NOT NULL DEFAULT 0,
     won BOOLEAN NOT NULL DEFAULT FALSE,
     draw BOOLEAN NOT NULL DEFAULT FALSE,
     forfeited BOOLEAN NOT NULL DEFAULT FALSE,
@@ -67,3 +67,8 @@ CREATE TABLE IF NOT EXISTS seed_batches (
     inserted_matches INT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migraciones para tablas previamente creadas (asegura tipos fraccionarios sin perder datos)
+ALTER TABLE matches ALTER COLUMN started_at_ms TYPE NUMERIC(16, 3) USING started_at_ms::NUMERIC(16, 3);
+ALTER TABLE matches ALTER COLUMN ended_at_ms TYPE NUMERIC(16, 3) USING ended_at_ms::NUMERIC(16, 3);
+ALTER TABLE matches ALTER COLUMN duration_ms TYPE NUMERIC(16, 3) USING duration_ms::NUMERIC(16, 3);

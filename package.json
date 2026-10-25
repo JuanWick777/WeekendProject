@@ -25,7 +25,8 @@
     "test:e2e": "playwright test",
     "verify": "npm run lint && npm test && npm run build",
     "verify:release": "npm run verify && npm run test:e2e",
-    "db:init": "node --env-file=.env scripts/db-init.js"
+    "db:init": "node --env-file=.env scripts/db-init.js",
+    "test:storage": "node --env-file=.env scripts/test-storage.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
