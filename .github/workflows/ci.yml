@@ -11,6 +11,22 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: cybergrid_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,8 +34,15 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: npm run verify
-
-      # C3: agregar servicio PostgreSQL aislado, instalar Chromium y ejecutar
-      # npm run test:e2e cuando existan auth.spec.js, lobby.spec.js y gameplay.spec.js.
-      # Este workflow inicial NO representa la suite completa de la rúbrica.
+      - name: Inicializar esquema de BD
+        env:
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
+          TEST_DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
+        run: npm run db:init
+      - name: Ejecutar verificaciones (Lint, Test, Build)
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
+          TEST_DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
+          SESSION_SECRET: test_session_secret_key_32_chars_min!!
+        run: npm run verify
