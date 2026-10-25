@@ -1,8 +1,8 @@
 # B — Servidor, salas y simulación
 
-Este rol lo toma el coordinador de este chat. B0 está publicado en main; B0.1/B1 y B2 están preparados en feat/auth-v2 y feat/lobbies-ws. Falta conectar PostgreSQL de C y construir la simulación B3. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, runtime.js, index.js y config.js. C mantiene storage/telemetry y A client. La integración B2 está en [lobbies-network.md](lobbies-network.md).
+Este rol lo toma el coordinador de este chat. B0/B0.1/B1/B2 están integrados en main (PR #1–#3). B3 implementa mapa, movimiento, nodos, combate, reconexión y resultado; falta conectar PostgreSQL de C y el cliente de A. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, runtime.js, index.js y config.js. C mantiene storage/telemetry y A client. La integración B2 está en [lobbies-network.md](lobbies-network.md).
 
-Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). Este documento es un plan, no una lista de funciones ya disponibles.
+Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). El estado implementado y la integración actual se detallan en [game-server.md](game-server.md); los criterios de cierre requieren comprobar también PostgreSQL y cliente reales.
 
 ## B0.1 — Migración compartida implementada
 
@@ -30,7 +30,7 @@ Terminado: registro/login crean sesión; me reconoce sesión válida, rechaza au
 
 Terminado: dos cuentas en navegadores distintos comparten sala, Listo y cuenta regresiva reales. Usuario sin sesión no accede a HTTP protegido ni a WebSocket.
 
-## B3a — Primera partida integrada
+## B3a — Simulación implementada; plantilla y cliente por integrar
 
 1. Convertir el boceto de A en plantilla y generar/validar variantes por semilla con fallback según maps.md.
 2. Tick fijo 30 Hz y movimiento normalizado con colisiones; reloj del servidor.
@@ -40,7 +40,7 @@ Terminado: dos cuentas en navegadores distintos comparten sala, Listo y cuenta r
 
 Primer encuentro con A: dos jugadores llegan al nodo, uno puntúa, con dos se detiene, al salir uno continúa y al rotar deja de puntuar la zona anterior. Este es el primer recorrido a integrar, antes del acabado visual.
 
-## B3b — Combate, inventario y resultados
+## B3b — Combate implementado; guardado PostgreSQL por integrar
 
 - Bláster: intervalo 350 ms, velocidad 480, alcance 320, radio 3 y daño 30→20. Detectar primer impacto por segmento completo.
 - Una carga de escudo, recogida automática, absorción de un impacto, reaparición de recogida a 8 s.
@@ -58,4 +58,4 @@ Input caducado a 250 ms, secuencias antiguas ignoradas y socket sustituido inact
 
 Cinco casos funcionales base: dos de mapas (determinismo y transitabilidad/validez), dos de daño (fórmula y límites) y uno de autoridad (input no atraviesa paredes ni excede velocidad). Añadir casos de nodo vacío/único/disputado, fracciones, rotación y fin sin exceso de tiempo; escudo/respawn y sesiones deben tener verificaciones útiles. Las siete pruebas iniciales no sustituyen esta cobertura.
 
-Entregar a A login/lobby reales y ejemplos v2; a C interfaces estables y resultado definitivo; a ambos fallos de protocolo explícitos. Trabajar por ramas pequeñas con PR y revisión, comenzando por B0.1 y después retomando feat/auth desde main actualizado. No mezclar cambios ajenos ni otro motor/transporte.
+Entregar a A login/lobby reales y ejemplos v2; a C interfaces estables y resultado definitivo; a ambos fallos de protocolo explícitos. Trabajar por ramas pequeñas con PR y revisión; B3 parte de main actualizado en feat/game-simulation. Las 65 pruebas actuales pasan junto con lint y build; no sustituyen los E2E con PostgreSQL y Canvas. No mezclar cambios ajenos ni otro motor/transporte.

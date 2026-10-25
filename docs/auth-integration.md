@@ -1,6 +1,6 @@
 # B1 — Autenticación implementada y conexión con C
 
-Estado: servicio, rutas HTTP, cookies, middleware, validación y pruebas implementados en feat/auth-v2. B2 añade [salas y WebSockets](lobbies-network.md) en feat/lobbies-ws. **Falta conectar los repositorios PostgreSQL de C al arranque y probar esa integración.** El servidor normal conserva health y responde 503 AUTH_NOT_READY en auth hasta recibirlos; no crea un almacenamiento en memoria de producción.
+Estado: auth y [salas/WebSockets](lobbies-network.md) integrados en main por los PR #2 y #3. B3 añade [simulación y guardado inyectado](game-server.md). **Falta conectar los repositorios PostgreSQL de C al arranque y probar esa integración.** El servidor normal conserva health y responde 503 AUTH_NOT_READY en auth hasta recibirlos; no crea un almacenamiento en memoria de producción.
 
 ## Archivos disponibles
 
@@ -29,10 +29,11 @@ Cuando estén listos, B/C conectan en server/src/index.js antes de crear el serv
 import { createAuthService } from './auth/auth-service.js';
 import { createServerRuntime } from './runtime.js';
 
-// users y sessions son los repositorios PostgreSQL inicializados por C.
+// users, sessions y matches son los repositorios PostgreSQL inicializados por C.
 const authService = createAuthService({ users, sessions });
 const runtime = createServerRuntime({
   authService,
+  saveMatch: (result) => matches.saveMatch(result),
   appOrigin: config.appOrigin,
   nodeEnv: config.nodeEnv,
 });
@@ -61,6 +62,6 @@ Hay 20 intentos combinados de registro/login por minuto e IP por defecto y como 
 
 ## Verificación y cierre de B1
 
-Con Node 24: npm run verify. B1 aprobó 20 pruebas; junto con B2, el total es 41 pruebas, lint y build aprobados. Los tests de auth cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
+Con Node 24: npm run verify. B1 aprobó 20 pruebas; junto con B2/B3, el total es 65 pruebas, lint y build aprobados. Los tests de auth cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
 
 Para cerrar B1 faltan dos cuentas reales con PostgreSQL, reinicio del servidor conservando usuarios/sesiones y rechazo de sesión después de logout/expiración. C añade esa integración a su base de pruebas; el recorrido de navegador con auth, lobby y Canvas sigue pendiente de C3/A/B2.

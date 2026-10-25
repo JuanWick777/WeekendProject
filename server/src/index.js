@@ -13,7 +13,7 @@ server.on('error', (error) => {
 
 server.listen(config.port, config.host, () => {
   console.log('CyberGrid HTTP: http://' + config.host + ':' + config.port);
-  console.log('Auth, salas y WebSockets preparados; PostgreSQL y simulación pendientes de integración.');
+  console.log('Servidor de partida preparado; conectar autenticación y guardado con PostgreSQL.');
 });
 
 function shutdown() {

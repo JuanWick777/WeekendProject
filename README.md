@@ -8,13 +8,13 @@ Cinco nodos se activan de uno en uno cada 30 segundos. Un único ocupante vivo a
 
 Hay workspaces npm, un cliente Vite con Canvas provisional, un servidor Express con GET /api/health, reglas compartidas, esquemas Zod, pruebas de contrato y configuración inicial de CI.
 
-**B0.1, B1 y B2 implementados en las ramas de trabajo:** constantes v2, auth HTTP, salas y WebSockets con autenticación inyectada. El arranque normal responde AUTH_NOT_READY hasta conectar users/sessions PostgreSQL de C; ver [integración de autenticación](docs/auth-integration.md) y [salas/red](docs/lobbies-network.md). Los cambios publicados en una rama llegan a main solo cuando se integra su PR.
+**B0.1, B1 y B2 integrados en main mediante los PR #1–#3. B3 implementado:** mapa por semilla, movimiento, nodos, combate, escudo, respawn, reconexión y resultados de servidor. Ver [simulación B3 y conexión de A/C](docs/game-server.md). Los cambios nuevos llegan a main mediante su PR.
 
-**Todavía no hay autenticación conectada a PostgreSQL ni partida jugable.** El runtime acepta sockets y operaciones de sala cuando recibe authService; las pruebas usan HTTP/WebSocket reales con repositorios aislados. Sin esos repositorios el arranque normal rechaza autenticación/upgrades; sin simulación B3 el inicio responde GAME_NOT_READY. Endpoints de evaluación pendientes.
+**Todavía falta conectar PostgreSQL y el cliente jugable de A.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. El Canvas actual es provisional; también faltan los endpoints de evaluación.
 
 Repositorio privado del equipo: https://github.com/JuanWick777/WeekendProject. Todavía no se ha desplegado el juego. Un CI de bootstrap en verde no sustituye los tres E2E y la cobertura funcional de la entrega.
 
-Verificación hasta B2 con Node 24.22.1: lint aprobado, 41 pruebas aprobadas y build aprobado. Las pruebas todavía no acreditan PostgreSQL, una partida online ni las mediciones públicas. Las áreas funcionales de mapas, daño e interpolación siguen pendientes aunque el total de casos supere diez.
+Verificación hasta B3 con Node 24.22.1: lint aprobado, 65 pruebas aprobadas y build aprobado. Ya se cubren mapas, daño y simulación sobre conexiones reales; faltan PostgreSQL, interpolación del cliente, E2E de navegador y mediciones públicas.
 
 ## Empezar
 
@@ -35,7 +35,8 @@ El bootstrap arranca sin base de datos. La aplicación completa necesitará Post
 - [Mapas: una arena base, variantes y entregable de A](docs/maps.md)
 - [Contrato técnico y funciones de persistencia](docs/contracts.md)
 - [Autenticación implementada y conexión con C](docs/auth-integration.md)
-- [Salas y WebSockets: conexión de A/C y puntos de B3](docs/lobbies-network.md)
+- [Salas y WebSockets: conexión de A/C](docs/lobbies-network.md)
+- [Simulación B3: mensajes, mapa y guardado para A/C](docs/game-server.md)
 - [Tareas y dependencias](docs/tasks.md)
 - [Árbol y propiedad de archivos](docs/project-tree.md)
 - [GitHub: ramas, pull requests e integración](docs/github-workflow.md)
@@ -67,7 +68,7 @@ El comando db:init se agregará en C1, junto con el esquema PostgreSQL. No exist
 - Los archivos .gitkeep conservan las carpetas todavía vacías al clonar. Se pueden quitar al implementar cada carpeta.
 - Diseños y datos de prueba son fixtures identificados; el multijugador final siempre usa el servidor real.
 
-Siguiente integración: conectar users/sessions de C con createAuthService y createServerRuntime y comprobar dos cuentas con PostgreSQL. B puede avanzar la simulación B3 mediante los hooks del runtime; A puede consumir el [fixture v2](shared/fixtures/README.md) mientras conecta su cliente.
+Siguiente integración: conectar users/sessions y matches.saveMatch de C al runtime y comprobar dos cuentas con PostgreSQL. A conecta el Canvas a match:start/state/event/match:end siguiendo [B3](docs/game-server.md); el [fixture v2](shared/fixtures/README.md) sigue disponible para presentación aislada.
 
 ## Entrega
 

@@ -2,7 +2,7 @@
 
 Tu responsabilidad es `client/` y `docs/visual-references/`. B desarrolla cuentas, salas, sockets y simulación; C desarrolla datos, telemetría, pruebas globales y despliegue. Trabajamos con JavaScript ESM, Vite, HTML/CSS y Canvas 2D. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
-La referencia de reglas es [game-design.md](game-design.md), la de datos es [contracts.md](contracts.md) y la de arena es [maps.md](maps.md). Esta guía cubre todo tu alcance, no solo el primer bloque. Las constantes compartidas ya son v2 y el servidor de salas/sockets está preparado; su [guía de conexión](lobbies-network.md) explica welcome, lobby/null, reconexión y errores. Falta integrar PostgreSQL y la partida B3. Puedes usar el [fixture de desarrollo](../shared/fixtures/README.md) para presentación.
+La referencia de reglas es [game-design.md](game-design.md), la de datos es [contracts.md](contracts.md) y la de arena es [maps.md](maps.md). Esta guía cubre todo tu alcance, no solo el primer bloque. Las constantes compartidas ya son v2 y el servidor de salas/sockets está preparado; su [guía de conexión](lobbies-network.md) explica welcome, lobby/null, reconexión y errores. B3 ya emite mapa, snapshots, eventos y resultado: sigue [game-server.md](game-server.md) para conectar el Canvas y recuperar la ronda. Falta integrar PostgreSQL. Puedes usar el [fixture de desarrollo](../shared/fixtures/README.md) para presentación aislada.
 
 ## Qué estamos construyendo
 

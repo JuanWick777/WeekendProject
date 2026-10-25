@@ -21,6 +21,7 @@ export function createApp({
   roomManager = null,
   websocketReady = false,
   onSessionInvalidated,
+  simulationReady = false,
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -36,6 +37,7 @@ export function createApp({
         authentication: authService ? 'ready' : 'pending',
         websocket: websocketReady ? 'ready' : 'pending',
         rooms: roomManager ? 'ready' : 'pending',
+        simulation: simulationReady ? 'ready' : 'pending',
         database: 'pending',
       },
     });

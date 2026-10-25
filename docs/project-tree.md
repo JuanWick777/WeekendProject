@@ -26,12 +26,16 @@ GameWeekend/
     src/net/socket-server.js            B: upgrade autenticado, lobby, ping/pong y límites
     src/auth/                           B: servicio, rutas, sesiones, middleware y límite
     src/rooms/                          B: room-manager, rutas y errores
-    src/game/                           B: vacía, simulación pendiente
+    src/game/                           B: match, game-manager, movimiento, combate, nodos
+    src/game/maps/                      Plantilla provisional, generador y validador
     src/storage/, telemetry/            C: vacías
     test/app.test.js, auth.test.js      HTTP real; auth con repositorios de prueba
     test/helpers/auth-repositories.js   Solo tests, no persistencia de producción
     test/rooms.test.js, network.test.js  Salas y HTTP/WebSocket reales
     test/helpers/socket-client.js       Cliente ws para las pruebas
+    test/maps.test.js, combat.test.js    Semillas, validez, daño e impactos
+    test/match.test.js, game-network.test.js  Simulación y rondas por red
+    test/helpers/simulation-fixture.js   Mapas y entradas solo de prueba
   shared/                              B mantiene
     package.json
     src/constants.js                   Reglas v2 de nodos y escudo
@@ -42,7 +46,7 @@ GameWeekend/
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/
-    game-design.md, maps.md, contracts.md, auth-integration.md, lobbies-network.md
+    game-design.md, maps.md, contracts.md, auth-integration.md, lobbies-network.md, game-server.md
     brief-persona-a.md, brief-persona-b.md, brief-persona-c.md
     tasks.md, project-tree.md, github-workflow.md, evaluation.md
     visual-references/                  A: referencias, boceto y paleta
@@ -66,10 +70,10 @@ server/src/
   net/                                 B: socket-server y validación/heartbeat
   game/                                B
     maps/                              Plantilla de A, PRNG, generador y validación
-    match.js, loop.js                   Estado y tick de simulación
+    match.js, game-manager.js           Estado/tick y ciclo de partidas/salas
     movement.js, collision.js           Movimiento/colisiones
     objectives.js                       Nodos, ocupación, rotación y puntuación
-    combat.js, pickups.js               Proyectiles, daño y escudo
+    combat.js                           Proyectiles/daño; recogidas en match.js
     results.js                          Clasificación y MatchResult
   storage/                             C: schema.sql, pool, users, sessions, matches
   telemetry/                           C: routes, seed y metrics

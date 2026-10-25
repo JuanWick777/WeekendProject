@@ -6,7 +6,7 @@ El bootstrap ya está en main y A/C ya aceptaron las invitaciones. Cada persona 
 
 ## Flujo acordado
 
-main es la base integrada del equipo. El bootstrap está publicado; los siguientes cambios, incluida la documentación v2, entran por un pull request.
+main es la base integrada del equipo. Ya incorpora bootstrap, documentación v2, auth y salas/WebSocket (PR #1–#3). Los siguientes cambios entran por pull request.
 
 Se crea una rama por tarea, no una rama permanente por persona:
 
@@ -18,7 +18,7 @@ Se crea una rama por tarea, no una rama permanente por persona:
 
 Tras integrar una tarea, crear otra rama desde main actualizado. Ejemplos siguientes: feat/lobbies, feat/telemetry y feat/client-network. No necesitamos una rama develop durante este fin de semana.
 
-La documentación v2 está en el PR de docs/rotating-control. feat/auth-v2 parte de ese contrato e incorpora B0.1/auth HTTP; feat/lobbies-ws parte de auth-v2 e incorpora B2. Mientras las anteriores esperan revisión, estas ramas conservan sus dependencias. Revisar/integrar documentación -> auth-v2 -> lobbies-ws; después volver a partir de main actualizado. Leer las reglas nuevas antes de integrar gameplay.
+Los PR #1, #2 y #3 ya se integraron en ese orden, conservando las dependencias entre ramas mediante commits de merge. La nueva rama B3, feat/game-simulation, parte de main actualizado. A/C deben traer main a sus ramas antes de conectar cliente o persistencia.
 
 **Push y merge son pasos distintos.** Push publica los commits de una rama en GitHub. El PR permite revisarlos; el merge incorpora el cambio a main. Tener una rama sincronizada y sin commits pendientes de push no significa que sus cambios ya estén en main. Un clon de main recibe solamente lo que se haya integrado allí.
 
@@ -73,7 +73,7 @@ En GitHub, abrir Pull requests > New pull request:
 
 La base ejecuta lint, las pruebas existentes y build en cada PR. C ampliará el workflow con PostgreSQL y los tres E2E. Un check verde actual no significa que la rúbrica completa esté terminada.
 
-Si está listo, el dueño o un colaborador integra mediante Squash and merge, conservando un resumen claro. Después se puede eliminar la rama remota de esa tarea. No mezclar un cambio roto ni empujar directamente a main una nueva función.
+Si está listo, el dueño o un colaborador integra mediante Squash and merge para tareas independientes, conservando un resumen claro. Para ramas encadenadas se puede usar un commit de merge que preserve sus dependencias. Después se puede eliminar la rama remota de esa tarea. No mezclar un cambio roto ni empujar directamente a main una nueva función.
 
 ## Traer cambios de los demás durante una tarea
 

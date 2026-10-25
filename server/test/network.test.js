@@ -16,7 +16,7 @@ let time;
 let clients;
 
 async function listen(options = {}) {
-  runtime = createServerRuntime({ authService, appOrigin: origin, nodeEnv: 'test', now: () => time, ...options });
+  runtime = createServerRuntime({ authService, appOrigin: origin, nodeEnv: 'test', now: () => time, enableGame: false, ...options });
   await new Promise((resolve, reject) => {
     runtime.server.once('error', reject); runtime.server.listen(0, '127.0.0.1', resolve);
   });

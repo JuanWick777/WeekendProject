@@ -1,6 +1,6 @@
 # Contrato técnico v2 — Rotating control
 
-Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Estado de implementación:** constantes v2, auth HTTP, salas y WebSockets están preparados con autenticación inyectada; falta conectar PostgreSQL de C y construir la simulación. Ver [B2](lobbies-network.md). Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
+Acuerdo de implementación para A, B y C. Sustituye los payloads de partida del contrato v1. **Estado de implementación:** constantes v2, auth HTTP, salas, WebSockets y simulación B3 están preparados con autenticación/guardado inyectados; falta conectar PostgreSQL de C y el cliente de A. Ver [B2](lobbies-network.md) y [B3](game-server.md). Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
 
 ## Convenciones y autoridad
 
@@ -43,7 +43,7 @@ Cookie `cg_session`: HttpOnly, SameSite=Lax, Path=/, Secure en producción, dura
 
 ## WebSocket
 
-Ruta `/ws`, sesión válida antes de aceptar. Un socket activo por usuario; una reconexión sustituye de forma controlada al anterior. Validar entradas con Zod, tamaño y frecuencia. Los nombres de mensajes y los inputs v1 se conservan; `PROTOCOL_VERSION` ya vale 2; las emisiones de partida se implementarán en B3.
+Ruta `/ws`, sesión válida antes de aceptar. Un socket activo por usuario; una reconexión sustituye de forma controlada al anterior. Validar entradas con Zod, tamaño y frecuencia. Los nombres de mensajes y los inputs v1 se conservan; `PROTOCOL_VERSION` ya vale 2; las emisiones de partida están implementadas en B3.
 
 ~~~json
 {
@@ -86,7 +86,7 @@ Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos ca
 
 El servidor reenvía `match:start` con mapa y snapshot actual al reconectar a una ronda. No regenera terreno por una rotación ni al entrar otro socket.
 
-La emisión match:start y la recuperación de la simulación se implementan en B3. B2 solo inicia countdown si recibe un manejador onStartMatch; sin él responde GAME_NOT_READY. Al reconectar, welcome reinicia la secuencia del socket con nextInputSeq y el cliente descarta su cola anterior.
+El runtime conecta la simulación por defecto: al terminar countdown envía match:start con mapa real y estado. Al reconectar conserva el mismo cuerpo y mapa; welcome reinicia la secuencia con nextInputSeq y el cliente descarta su cola anterior. GAME_NOT_READY se conserva para un runtime con la simulación desactivada y sin manejador de inicio.
 
 `config` contiene únicamente reglas públicas de la ronda, sin secretos:
 
@@ -125,6 +125,7 @@ La emisión match:start y la recuperación de la simulación se implementan en B
 - `controlTimeMs` es acumulado de la ronda, admite fracciones de ms; `score` es su parte entera en segundos. No redondear cada tick ni reiniciar fracciones al disputar/salir.
 - Resolver movimiento, proyectiles/muertes y luego ocupación en cada paso. Recortar el tiempo atribuido a límites de rotación y fin; no sumar dos veces un intervalo ni exceder 150000 ms de control total entre jugadores.
 - `shieldCharges`: entero 0/1. `pickups` solo contiene recogidas actualmente disponibles; su reaparición la controla B. No desaparecer una recogida al tocarla con inventario lleno. Adquirir exige distancia entre centros <= suma de radios; empates de recogida se resuelven por playerId ordenado.
+- `lastProcessedSeq` vale -1 antes del primer input procesado y al recuperar una conexión; luego identifica el último input aplicado de esa conexión.
 - `respawnRemainingMs` vale 0 estando vivo. Los abandonados no vuelven a ocupar ni disparar. HP, puntos y tiempos provienen del servidor.
 
 El cliente refleja las x/y recibidas en `data-player-x` y `data-player-y` de un elemento `data-testid="player-state"`. Es estado autoritativo, separado de la predicción visual. C prueba movimiento real y espera esos cambios; no edita los atributos para hacer pasar E2E.
@@ -146,7 +147,7 @@ El cliente refleja las x/y recibidas en `data-player-x` y `data-player-y` de un 
 }
 ~~~
 
-`durationMs` es tiempo simulado real de la ronda, hasta 150000; puede ser menor al terminar por abandono. Por jugador: `0 <= controlTimeMs <= aliveMs <= participatedMs <= durationMs`. La suma de control de todos no supera durationMs. La vida acumulada suma los intervalos vivo, no los tiempos de respawn. Los tiempos se guardan con precisión suficiente para conservar estas relaciones.
+`durationMs` es tiempo simulado real de la ronda, hasta 150000; puede ser menor al terminar por abandono. Por jugador: `0 <= controlTimeMs <= aliveMs <= participatedMs <= durationMs`. La suma de control de todos no supera durationMs. La vida acumulada suma los intervalos vivo, no los tiempos de respawn. Los tiempos pueden tener hasta tres decimales de ms y deben guardarse sin redondearlos a enteros para conservar estas relaciones. La duración puede ser 0 si se abandona antes del primer tick.
 
 Clasificar candidatos no abandonados por score descendente, kills descendente y deaths ascendente. Si se mantiene igualdad en el primer puesto: winnerId null, drawPlayerIds con esos IDs, draw true y won false para ellos. En fin por abandono gana el único restante. En abortada no hay ganador ni empatados. El resultado se construye una sola vez; no incluye sockets, funciones, mapa completo ni secretos.
 
