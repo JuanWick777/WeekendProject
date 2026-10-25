@@ -22,7 +22,7 @@ Las reglas públicas continúan en [contracts.md](contracts.md). El generador no
 5. Renderizar `objective` y sus plazos: no sumar control desde el render. A los 150 segundos llega `match:end`; mostrar sus estadísticas y la revancha del anfitrión.
 6. Manejar `RESULT_NOT_SAVED` como fallo de guardado de una ronda terminada. Recibir `match:end` por sí solo no confirma persistencia.
 
-La plantilla actual `cardinal-sketch`, versión 2, es **provisional** y traduce la disposición cardinal del boceto, con coberturas simplificadas. A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
+La plantilla actual `cardinal-sketch`, versión 3, es **provisional** y traduce la disposición cardinal del boceto, con coberturas simplificadas. A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
 
 ## C/B: conectar PostgreSQL
 
@@ -54,10 +54,11 @@ Este fragmento muestra la unión; no presupone módulos de storage ya creados. C
 
 - `server/src/game/match.js`: estado, tick, inputs, recogidas, respawn y snapshots.
 - `server/src/game/game-manager.js`: ciclo de salas, difusión, reconexión, fin y guardado.
-- `server/src/game/maps/`: plantilla, generador y validador.
+- `shared/src/maps/`: plantilla, generador y validador canónicos; server/src/game/maps reexporta para conservar imports.
+- `shared/src/game/`: simulación pura usada por servidor y práctica local DEV; server/src/game conserva reexportaciones y game-manager/red siguen siendo exclusivos del servidor.
 - `server/src/game/movement.js` y `collision.js`: movimiento y geometría.
 - `server/src/game/combat.js`, `objectives.js` y `results.js`: combate, nodos y clasificación.
 
-Con Node 24, `npm run verify` pasa lint, **72 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
+Con Node 24, `npm run verify` pasa lint, **76 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
 
 Siguen pendientes: repositorios y guardado PostgreSQL reales, cliente online de B, revisión del mapa, pruebas de interpolación, tres E2E de navegador, telemetría/siembra y mediciones en URL pública. B4 cierra la integración y los fallos de conexión/guardado sobre ese recorrido completo.

@@ -18,13 +18,13 @@ Apariciones: NW 64,64; SE 704,576; NE 704,64; SW 64,576. Las primeras dos quedan
 
 ## Geometría y generación
 
-La fuente ejecutable es `server/src/game/maps/arena-template.js`: `cardinal-sketch` versión 2, generador versión 1. Adapta el boceto a paredes rectangulares y coberturas escalonadas. A/B todavía deben probar equilibrio y ajustar el trazado con jugadores.
+La fuente ejecutable es `shared/src/maps/arena-template.js` (el servidor reexporta la misma fuente): `cardinal-sketch` versión 3, generador versión 1. Adapta el boceto a paredes rectangulares y coberturas escalonadas. A/B todavía deben probar equilibrio y ajustar el trazado con jugadores.
 
-Hay perímetro y coberturas centrales fijas; 22 grupos permiten codos con distinta orientación y paredes presentes/ausentes. Los colores verde/rojo/amarillo del plano identifican categorías de diseño. La presentación del juego usa metal oscuro y luces cian/ámbar.
+Hay 372 tiles fijos, incluido el borde: bahías con dos salidas, hombros de perímetro, pilares, L y codos grandes, barras dobles laterales y cuatro tramos escalonados alrededor del núcleo. Doce grupos modifican codos/pilares pequeños y cuatro coberturas opcionales junto a las bahías. Incluso la combinación más abierta conserva 388 tiles sólidos; la más cerrada 400 (397 en semilla 42). Los colores verde/rojo/amarillo del plano identifican categorías de diseño. La presentación del juego usa metal oscuro y luces cian/ámbar.
 
-El PRNG mantiene geometría reproducible por semilla uint32. Se prueban hasta 16 combinaciones; si ninguna es válida, se usa la primera variante de cada grupo como fallback validado y se registra MAP_FALLBACK. La muestra automatizada de 64 semillas produce variación sin fallback.
+El PRNG mantiene geometría reproducible por semilla uint32. Se prueban hasta 16 combinaciones; si ninguna es válida, se usa la primera variante de cada grupo como fallback validado y se registra MAP_FALLBACK. La muestra automatizada de 64 semillas produce variación sin fallback. También se validan las combinaciones más abierta/cerrada y la unión de todas las variantes.
 
-Las rutas protegidas conectan sectores centrales y periféricos. El validador comprueba cuadrícula, bordes, círculos libres, separación, al menos dos accesos cardinales por nodo, apariciones, escudos y conectividad con espacio para el jugador. Las paredes permanecen iguales durante los 150 s; cambiar el nodo no genera otro terreno.
+Las rutas protegidas conectan sectores centrales y periféricos. El validador comprueba cuadrícula, bordes, círculos libres, separación, al menos dos accesos cardinales por nodo, apariciones, escudos y conectividad con espacio para el jugador. Para puntos sobre límites de tile, se comprueba acceso desde un centro cercano alcanzable mediante un segmento libre con radio 10, evitando falsos bloqueos por el muestreo de la cuadrícula. Las paredes permanecen iguales durante los 150 s; cambiar el nodo no genera otro terreno.
 
 ## Escudos
 

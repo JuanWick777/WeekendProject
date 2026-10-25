@@ -15,4 +15,4 @@ const { map, state } = fixture.matchStart;
 // Usar únicamente en la escena de desarrollo marcada como fixture.
 ~~~
 
-B consume el fixture en la vista de diseño local y C consulta MatchResult como ejemplo de forma. Se regeneró desde generateMap/createMatch reales; el ejemplo no se guarda como partida live. Mantener los cambios de este archivo coordinados con el contrato y las constantes compartidas.
+La práctica local de B genera una ronda con el motor compartido en lugar de modificar este fixture. C consulta MatchResult como ejemplo de forma. matchStart se regeneró desde generateMap/createMatch reales (plantilla v3); matchEnd conserva un resultado sintético de muestra; el ejemplo no se guarda como partida live. Mantener los cambios de este archivo coordinados con el contrato y las constantes compartidas.

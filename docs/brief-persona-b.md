@@ -6,9 +6,9 @@ B asume ahora client y shared, además de auth/rooms/net/game. A diseña y revis
 
 Bootstrap, autenticación HTTP inyectable, salas, WebSocket autenticado y simulación B3 están integrados por los PR #1–#4. Las pruebas usan conexiones HTTP/WebSocket reales y repositorios aislados; falta unir PostgreSQL.
 
-El bloque actual adapta la arena a 768 × 640, 48 × 40 tiles de 16; plantilla cardinal-sketch v2 y protocolo 3. Implementa cuatro recogidas iniciales y una aleatoria a la vez con cadencia 15 s. Conserva atributos, combate, nodos, resultado y firmas de persistencia. Ver [mapas](maps.md) y [contrato](contracts.md).
+El bloque actual adapta la arena a 768 × 640, 48 × 40 tiles de 16; plantilla cardinal-sketch v3 y protocolo 3. Implementa cuatro recogidas iniciales y una aleatoria a la vez con cadencia 15 s. Conserva atributos, combate, nodos, resultado y firmas de persistencia. Ver [mapas](maps.md) y [contrato](contracts.md).
 
-La [vista industrial de diseño](client-preview.md) incluye Canvas, drones, HUD, teclado/ratón, pads táctiles y cámara. Es local y solo se incluye en desarrollo; sirve para revisar presentación y física. No es el recorrido online y no otorga puntos ni guarda resultados.
+La [vista industrial de diseño](client-preview.md) incluye Canvas, drones, HUD, teclado/ratón, pads táctiles y cámara. Es local y solo se incluye en desarrollo; sirve para revisar presentación y física. La práctica ejecuta el motor compartido con captura, combate y resultados locales. No es el recorrido online ni guarda resultados.
 
 ## Siguiente trabajo del cliente
 
@@ -27,6 +27,6 @@ Cerrar reconexión de 15 s, secuencias, expiración de sesión, abandono, limpie
 
 ## Verificación
 
-72 pruebas actuales más lint/build aprobados. Hay casos de mapas, daño, autoridad, nodos/tiempos, escudos, sesiones, salas/red y encuadre. Faltan las pruebas de interpolación y los tres E2E de navegador con PostgreSQL/Canvas reales, coordinados con C. Diez casos es el mínimo de la rúbrica, no el objetivo final de cobertura.
+76 pruebas actuales más lint/build aprobados. Hay casos de mapas, daño, autoridad, nodos/tiempos, escudos, sesiones, salas/red y encuadre. Faltan las pruebas de interpolación y los tres E2E de navegador con PostgreSQL/Canvas reales, coordinados con C. Diez casos es el mínimo de la rúbrica, no el objetivo final de cobertura.
 
 Trabajar en ramas por tarea desde main actualizado, con PR y checks. No mezclar cambios ajenos. El objetivo inmediato es login -> lobby -> ronda -> resultado -> persistencia; efectos y sonido se pulen después.

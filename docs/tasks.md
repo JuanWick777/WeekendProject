@@ -5,8 +5,8 @@ Entrega domingo 25/10/2026 23:59, Ciudad de México; objetivo antes de 21:30. A 
 | Bloque | Responsable | Estado o siguiente resultado |
 | --- | --- | --- |
 | Bootstrap, contrato inicial, auth, salas, WS y simulación B3 | B | Integrados en main, PR #1–#4; PostgreSQL pendiente |
-| Adaptación de arena y escudos | B | Implementados: 768 × 640, plantilla v2, protocolo 3 y cadencia 15 s |
-| Vista industrial de diseño | B; A revisa | Canvas local, HUD, drones, teclado/táctil y capas de inspección |
+| Adaptación de arena y escudos | B | Implementados: 768 × 640, plantilla v3, protocolo 3 y cadencia 15 s |
+| Vista industrial de diseño | B; A revisa | Canvas local, cuatro diseños detallados, combate/escudos/respawn canónicos, HUD y controles |
 | Arte y pantallas | A | Colores y referencias recibidos; faltan menú, auth, lobby y resultados |
 | Repositorios C1a/C1b | C; B integra | users/sessions y saveMatch reales; dos cuentas y persistencia tras reinicio |
 | Cliente online | B | Conectar auth/lobby, mapa/snapshots, interpolación y reconciliación |
@@ -18,13 +18,13 @@ Entrega domingo 25/10/2026 23:59, Ciudad de México; objetivo antes de 21:30. A 
 
 ## Orden inmediato
 
-Revisar/publicar este bloque de mapa, escudos y vista de diseño. A revisa capturas mientras B conecta el cliente al servidor. C entrega users/sessions primero y después guardado; B coordina index.js para esa unión. No hace falta esperar a que A termine cada pantalla para comenzar sus funciones.
+Revisar/publicar la arena v3 y práctica de combate. A revisa capturas mientras B conecta el cliente al servidor. C entrega users/sessions primero y después guardado; B coordina index.js para esa unión. No hace falta esperar a que A termine cada pantalla para comenzar sus funciones.
 
-La vista de diseño está identificada como local y solo se incluye en desarrollo. No acredita multijugador, puntuación real ni guardado. El renderizador se reutilizará con el mapa/snapshots de servidor. Ver [client-preview.md](client-preview.md).
+La vista de diseño está identificada como local y solo se incluye en desarrollo. Calcula puntos/resultados locales con el motor compartido; no acredita multijugador ni guardado. El renderizador se reutilizará con el mapa/snapshots de servidor. Ver [client-preview.md](client-preview.md).
 
 ## Aceptación
 
-72 pruebas actuales, lint y build aprobados. Hay cobertura de mapas, daño, inputs Zod, tiempo/objetivos, escudos, encuadre y HTTP/WebSocket. Pendientes interpolación, PostgreSQL, telemetría/siembra y tres E2E de navegador, incluidos controles reales y observación desde otro cliente. La inspección de tamaños móviles no sustituye una prueba física de dos dedos.
+76 pruebas actuales, lint y build aprobados. Hay cobertura de mapas, daño, inputs Zod, tiempo/objetivos, escudos, encuadre y HTTP/WebSocket. Pendientes interpolación, PostgreSQL, telemetría/siembra y tres E2E de navegador, incluidos controles reales y observación desde otro cliente. La inspección de tamaños móviles no sustituye una prueba física de dos dedos.
 
 Conservar las firmas de repositorios de contracts.md. Protocolo 3 añade spawnKind al mapa y shieldSpawnIntervalMs a la configuración; MatchResult mantiene su forma. No consultar DB por tick ni introducir persistencia alternativa.
 
