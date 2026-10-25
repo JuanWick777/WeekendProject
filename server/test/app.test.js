@@ -25,7 +25,7 @@ describe('frontera HTTP del bootstrap', () => {
     const response = await fetch(baseUrl + '/api/health');
     expect(response.status).toBe(200);
     expect((await response.json()).data).toMatchObject({
-      protocolVersion: 3, authentication: 'pending', websocket: 'pending', database: 'pending',
+      protocolVersion: 4, authentication: 'pending', websocket: 'pending', database: 'pending',
     });
   });
 

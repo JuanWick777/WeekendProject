@@ -1,5 +1,6 @@
 import { PALETTE as P, PILOTS, NODE_NAMES } from './palette.js';
 import { drawSkin } from './drone-sprites.js';
+import { createArenaArt } from './arena-art.js';
 import { createViewport } from './viewport.js';
 
 export function drawDrone(context, player, index, local = false, labels = true) {
@@ -25,51 +26,6 @@ export function drawDrone(context, player, index, local = false, labels = true) 
   context.restore();
 }
 
-function staticArena(map) {
-  const layer = document.createElement('canvas'); const size = map.tileSize;
-  layer.width = map.columns * size; layer.height = map.rows * size;
-  const c = layer.getContext('2d');
-  c.fillStyle = P.background; c.fillRect(0, 0, layer.width, layer.height);
-  for (let row = 0; row < map.rows; row += 1) for (let col = 0; col < map.columns; col += 1) {
-    if (map.tiles[row][col]) continue;
-    const x = col * size; const y = row * size;
-    const noise = ((col * 73 + row * 137 + map.seed) % 19);
-    c.fillStyle = `rgb(${37 + noise / 3},${47 + noise / 3},${55 + noise / 3})`;
-    c.fillRect(x, y, size, size);
-    c.strokeStyle = '#111b2477'; c.lineWidth = 0.7; c.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-    if (noise === 3) { c.strokeStyle = '#6e7b8733'; c.beginPath(); c.moveTo(x + 3, y + 3); c.lineTo(x + 8, y + 10); c.lineTo(x + 7, y + 15); c.stroke(); }
-    if ((row + col) % 7 === 0) { c.fillStyle = '#80909b55'; c.fillRect(x + 2, y + 2, 1, 1); }
-  }
-  for (const [index, point] of map.spawnPoints.entries()) {
-    c.fillStyle = '#101b2599'; c.fillRect(point.x - 25, point.y - 23, 50, 46);
-    c.strokeStyle = '#5debff55'; c.lineWidth = 1; c.strokeRect(point.x - 25, point.y - 23, 50, 46);
-    c.fillStyle = '#5debff44'; c.fillRect(point.x - 18, point.y + 14, 36, 3);
-    c.fillStyle = '#c4d7e5'; c.font = 'bold 8px system-ui'; c.textAlign = 'center'; c.fillText('SPAWN ' + (index + 1), point.x, point.y + 35);
-  }
-  for (let row = 0; row < map.rows; row += 1) for (let col = 0; col < map.columns; col += 1) {
-    if (!map.tiles[row][col]) continue;
-    const x = col * size; const y = row * size;
-    c.fillStyle = '#050a0f'; c.fillRect(x + 2, y + 3, size, size);
-    c.fillStyle = '#35434e'; c.fillRect(x, y, size, size);
-    const above = map.tiles[row - 1]?.[col] === 1; const below = map.tiles[row + 1]?.[col] === 1;
-    const left = map.tiles[row]?.[col - 1] === 1; const right = map.tiles[row]?.[col + 1] === 1;
-    c.lineWidth = 1; c.strokeStyle = '#9babb6'; c.beginPath();
-    if (!above) { c.moveTo(x + 1, y + 1); c.lineTo(x + size - 1, y + 1); }
-    if (!left) { c.moveTo(x + 1, y + 1); c.lineTo(x + 1, y + size - 1); } c.stroke();
-    c.strokeStyle = '#040a10'; c.beginPath();
-    if (!below) { c.moveTo(x, y + size - 1); c.lineTo(x + size, y + size - 1); }
-    if (!right) { c.moveTo(x + size - 1, y); c.lineTo(x + size - 1, y + size); } c.stroke();
-    if (!above || !below || !left || !right) {
-      c.strokeStyle = !left && row % 5 === 0 ? P.amber : '#44cbe6';
-      c.shadowColor = c.strokeStyle; c.shadowBlur = 4; c.lineWidth = 1.7; c.beginPath();
-      if (!above || !below) { c.moveTo(x + (left ? 0 : 4), y + size / 2); c.lineTo(x + size - (right ? 0 : 4), y + size / 2); }
-      else if (!left || !right) { c.moveTo(x + size / 2, y + (above ? 0 : 4)); c.lineTo(x + size / 2, y + size - (below ? 0 : 4)); }
-      c.stroke(); c.shadowBlur = 0;
-    }
-  }
-  return layer;
-}
-
 function drawPickup(c, point, time) {
   c.save(); c.translate(point.x, point.y);
   c.fillStyle = '#0b141e'; c.strokeStyle = '#65818e'; c.lineWidth = 1;
@@ -81,11 +37,11 @@ function drawPickup(c, point, time) {
 }
 
 export function createRenderer(canvas, map) {
-  const context = canvas.getContext('2d'); const background = staticArena(map);
+  const context = canvas.getContext('2d'); const background = createArenaArt(map);
   let viewport = createViewport(1, 1, background.width, background.height);
   return {
     get viewport() { return viewport; },
-    draw(state, { localId, time = 0, zoom = 1, grid = false, collisions = false, projectiles = state.projectiles, effects = [] } = {}) {
+    draw(state, { localId, time = 0, zoom = 1, grid = false, collisions = false, routes = false, projectiles = state.projectiles, effects = [] } = {}) {
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(1, rect.width); const height = Math.max(1, rect.height); const ratio = Math.min(window.devicePixelRatio || 1, 2);
       const pixelWidth = Math.round(width * ratio); const pixelHeight = Math.round(height * ratio);
@@ -132,6 +88,14 @@ export function createRenderer(canvas, map) {
         context.beginPath(); context.arc(0, 0, 7 + age * (effect.kind === 'death' ? 45 : 28), 0, Math.PI * 2); context.stroke();
         context.fillStyle = color; context.font = 'bold 8px system-ui'; context.textAlign = 'center';
         context.fillText(effect.kind === 'shield:pickup' ? 'ESCUDO +1' : effect.kind === 'shield:block' ? 'BLOQUEADO' : effect.kind === 'death' ? 'BAJA' : effect.kind === 'respawn' ? 'REAPARICIÓN' : 'IMPACTO', 0, -25 - age * 12);
+        context.restore();
+      }
+      if (routes) {
+        context.save(); context.strokeStyle = '#99ed7099'; context.lineCap = 'round';
+        for (const route of map.protectedRoutes ?? []) {
+          context.lineWidth = route.clearance * 2; context.beginPath();
+          route.points.forEach(([x,y], i) => i ? context.lineTo(x,y) : context.moveTo(x,y)); context.stroke();
+        }
         context.restore();
       }
       if (grid) {

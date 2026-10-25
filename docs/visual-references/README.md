@@ -26,7 +26,9 @@ Imágenes entregadas por el equipo para orientar distribución, colores, persona
 - Cuatro recogidas iniciales aparecen una vez; después hay un aleatorio a la vez, con cadencia 15 s según contrato.
 - Solo un nodo está activo; todos tienen radio 64.
 - FFA individual: las menciones a equipos son errores de las imágenes.
-- Mundo vigente 768 × 640, cuadrícula 48 × 40 de 16; las dimensiones antiguas se conservan únicamente como referencia.
-- Las curvas/diagonales se adaptan a tiles y las paredes variables cambian entre rondas.
+- Mundo vigente 1280 × 1120, cuadrícula 160 × 140 de 8; las dimensiones antiguas se conservan únicamente como referencia.
+- Las curvas/diagonales se adaptan a tiles. Ahora se usa el trazado fijo de referencia; las variaciones se posponen hasta terminar pantallas.
+
+Los cinco menús nuevos de la carpeta local ui solo se analizaron; no se incorporan al cliente ni al commit de esta etapa. Ver [revisión de pantallas](../ui-notes.md).
 
 Las imágenes originales se conservan sin edición. El cliente dibuja sus propios elementos Canvas; no usa estas láminas como una imagen plana de la arena. Ver [mapa](../maps.md) y [vista de diseño](../client-preview.md).

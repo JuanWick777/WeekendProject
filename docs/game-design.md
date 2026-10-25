@@ -1,4 +1,4 @@
-# CyberGrid — Diseño acordado v3
+# CyberGrid — Diseño acordado v4
 
 Este documento sustituye la modalidad de extracción del diseño v1. B3 ya implementa estas reglas en la simulación de servidor; falta conectar el cliente jugable y PostgreSQL. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`. Ver [estado e integración B3](game-server.md).
 
@@ -46,7 +46,7 @@ Hay cuatro recogidas iniciales que aparecen una vez (R1/R3/R10/R12). A los **15 
 
 ## Arena y controles
 
-**Una arena base**, de 48 columnas × 40 filas y casillas de 16 unidades: mundo de 768 × 640. A proporciona el diseño; B programa cliente, trazado y variaciones de obstáculos por semilla dentro de espacios permitidos. La guía completa y el entregable de A están en [maps.md](maps.md).
+**Una arena base**, de 160 columnas × 140 filas y casillas de 8 unidades: mundo de 1280 × 1120. A proporciona el diseño; B programa cliente y trazado fijo v4, con holgura para las coberturas. Las variaciones de obstáculos se posponen hasta terminar las pantallas; el prototipo procedural solo se activa explícitamente en código. La guía completa y el entregable de A están en [maps.md](maps.md).
 
 Todos reciben el mismo mapa validado por el servidor. Se conserva durante toda la ronda. Jugadores colisionan con paredes/límites y no se bloquean entre sí. Las diagonales se normalizan.
 
@@ -56,7 +56,7 @@ PC: WASD/flechas, ratón y clic izquierdo mantenido. Móvil: joystick izquierdo 
 
 `lobby -> countdown (3 s) -> playing -> finished -> lobby` al pedir revancha.
 
-Solo el anfitrión inicia, con 2–4 personas, todas listas y conectadas. Si sale del lobby, se transfiere el anfitrión. No se admiten participantes nuevos durante la ronda. Si durante countdown dejan de cumplirse las condiciones, se vuelve a lobby. La revancha crea otro matchId y semilla, limpia Listo y estadísticas; una semilla nueva puede producir una variante ya vista.
+Solo el anfitrión inicia, con 2–4 personas, todas listas y conectadas. Si sale del lobby, se transfiere el anfitrión. No se admiten participantes nuevos durante la ronda. Si durante countdown dejan de cumplirse las condiciones, se vuelve a lobby. La revancha crea otro matchId y semilla, limpia Listo y estadísticas. El trazado de referencia permanece fijo; la nueva semilla modifica el flujo de escudos.
 
 Los inputs caducan a los 250 ms. El mismo usuario puede reconectar durante 15 segundos sin duplicar jugador. Mientras tanto permanece detenido y vulnerable; si está vivo sigue contando como ocupante de la zona. Al vencer el plazo se registra abandono, se retira del mundo y deja de ocuparla. La salida voluntaria durante playing equivale a abandono inmediato. Si solo queda un participante, se resuelve el fin por abandono; si no queda ninguno, se aborta. Estas decisiones se realizan una sola vez en el servidor.
 

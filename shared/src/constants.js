@@ -1,10 +1,10 @@
 export const GAME_CONFIG = Object.freeze({
   world: Object.freeze({
-    columns: 48,
-    rows: 40,
-    tileSize: 16,
-    width: 768,
-    height: 640,
+    columns: 160,
+    rows: 140,
+    tileSize: 8,
+    width: 1280,
+    height: 1120,
   }),
   room: Object.freeze({
     minPlayers: 2,

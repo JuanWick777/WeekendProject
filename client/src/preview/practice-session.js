@@ -8,7 +8,9 @@ export function createPracticeSession({ seed = 42, mode = 'round' } = {}) {
   if (!['round', 'combat'].includes(mode)) throw new RangeError('Invalid practice mode');
   if (mode === 'combat') {
     // A local drill near R1/R12. Online spawns remain in the four corners.
-    const positions = [[160, 112], [224, 112], [544, 528], [608, 528]];
+    const start = map.pickupSpawns.find((p) => p.id === 'R1');
+    const end = map.pickupSpawns.find((p) => p.id === 'R12');
+    const positions = [[start.x, start.y], [start.x + 64, start.y], [end.x - 64, end.y], [end.x, end.y]];
     map.spawnPoints.forEach((point, index) => { [point.x, point.y] = positions[index]; });
   }
   const players = Array.from({ length: 4 }, (_, index) => ({ id: 'local-' + index, displayName: 'P' + (index + 1) }));

@@ -5,6 +5,15 @@ import { createMatch } from '../../src/game/match.js';
 export function flatMap() {
   const map = generateMap(42);
   map.tiles = map.tiles.map((row, y) => row.map((_tile, x) => Number(y === 0 || x === 0 || y === map.rows - 1 || x === map.columns - 1)));
+  // Stable calibration coordinates keep simulation tests independent of art.
+  map.nodes = [
+    {id:'center',x:384,y:320,radius:64},{id:'north',x:384,y:128,radius:64},
+    {id:'east',x:640,y:320,radius:64},{id:'south',x:384,y:512,radius:64},{id:'west',x:128,y:320,radius:64},
+  ];
+  map.spawnPoints = [{id:'nw',x:64,y:64},{id:'se',x:704,y:576},{id:'ne',x:704,y:64},{id:'sw',x:64,y:576}];
+  map.pickupSpawns[0].x=160; map.pickupSpawns[0].y=112;
+  map.pickupSpawns = map.pickupSpawns.map((p,index) => index ? { ...p, x: 800+index*32, y: 160 } : p);
+  delete map.wallPaths; delete map.outline; delete map.protectedRoutes;
   return map;
 }
 

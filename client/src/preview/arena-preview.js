@@ -53,7 +53,7 @@ export function startArenaPreview() {
     session.select(selected); renderer = createRenderer(canvas, session.map);
     effects = []; controls.clear(); lastTime = null; paused = false;
     const { map } = session;
-    $('arena-spec').textContent = `768 × 640 · semilla ${map.seed} · plantilla v${map.templateVersion}`;
+    $('arena-spec').textContent = `${map.columns * map.tileSize} × ${map.rows * map.tileSize} · trazado fijo · v${map.templateVersion}`;
     updateSelection(); updateHud(); canvas.focus();
   }
   PILOTS.forEach((pilot, index) => {
@@ -88,7 +88,7 @@ export function startArenaPreview() {
     }
     effects = effects.filter((effect) => time - effect.bornAt < 800);
     renderer.draw(session.snapshot, { localId: local.id, time, zoom, effects,
-      grid: $('show-grid').checked, collisions: $('show-collisions').checked });
+      grid: $('show-grid').checked, routes: $('show-routes').checked, collisions: $('show-collisions').checked });
     if (time >= hudAt) { updateHud(); hudAt = time + 100; }
     frameCount += 1;
     if (time - measuredAt >= 1000) { $('fps').textContent = Math.round(frameCount * 1000 / (time - measuredAt)) + ' FPS'; frameCount = 0; measuredAt = time; }

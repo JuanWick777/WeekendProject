@@ -1,4 +1,4 @@
-# Árbol y propiedad — v3
+# Árbol y propiedad — v4
 
 Se distingue **existente** de **previsto**. Las carpetas vacías con .gitkeep no contienen implementaciones. No hace falta crear a mano toda esta lista: cada persona crea los módulos de su tarea cuando los utiliza.
 
@@ -17,7 +17,7 @@ GameWeekend/
     public/audio/
     src/main.js, styles.css             Shell industrial; preview solo en desarrollo
     src/net/api.js                     Solo health
-    src/game/                           Renderer, drone-sprites, palette, viewport
+    src/game/                           Renderer, arena-art, drone-sprites, palette, viewport
     src/input/controls.js               Teclado/ratón y pads de puntero
     src/preview/arena-preview.js         UI de práctica, solo DEV
     src/preview/practice-session.js      Adaptador de inputs al mismo motor que el servidor
@@ -45,19 +45,19 @@ GameWeekend/
     package.json
     src/constants.js                   Mundo/escudos vigentes
     src/collision.js, movement.js       Física compartida por servidor y preview
-    src/maps/                          Plantilla v3, generador y validador
+    src/maps/                          Plantilla v4, generador y validador
     src/game/                          Match, combate, objetivos, escudos, resultados puros
     src/random.js                      PRNG reproducible
-    src/protocol.js                    Rutas/mensajes; protocolVersion 3
+    src/protocol.js                    Rutas/mensajes; protocolVersion 4
     src/schemas.js, index.js            Zod de entradas/exportaciones
     test/schemas.test.js                Contratos iniciales
-    fixtures/                          Ejemplo JSON v3 de partida y resultado
+    fixtures/                          Ejemplo JSON v4 de partida y resultado
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/
     game-design.md, maps.md, contracts.md, auth-integration.md, lobbies-network.md, game-server.md
     brief-persona-a.md, brief-persona-b.md, brief-persona-c.md
-    tasks.md, project-tree.md, github-workflow.md, evaluation.md, client-preview.md
+    tasks.md, project-tree.md, github-workflow.md, evaluation.md, client-preview.md, ui-notes.md
     visual-references/                  A: referencias, boceto y paleta
   .github/workflows/ci.yml              Lint/test/build; C agregará PostgreSQL/E2E
 ~~~
