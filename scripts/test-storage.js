@@ -1,4 +1,4 @@
-import { createUser, findUserByUsername, findUserById } from '../server/src/storage/users.js';
+import { createUser } from '../server/src/storage/users.js';
 import { createSession, findSessionByTokenHash, deleteSessionByTokenHash } from '../server/src/storage/sessions.js';
 import { pool } from '../server/src/storage/pool.js';
 
