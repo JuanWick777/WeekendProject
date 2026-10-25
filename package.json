@@ -20,7 +20,7 @@
     "build": "npm run build --workspace @cybergrid/client",
     "start": "node --env-file-if-exists=.env server/src/index.js",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "verify": "npm run lint && npm test && npm run build",
