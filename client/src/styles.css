@@ -42,7 +42,7 @@ main { width: min(100% - 32px, 1380px); margin: 14px auto; }
 .local-status > span { color: #7f9aab; font-size: 9px; letter-spacing: .08em; }
 .local-status strong { font-size: 12px; font-weight: 500; }
 .local-status .shield-note { margin-top: 6px; color: var(--cyan); font-size: 10px; letter-spacing: 0; }
-.game-frame { grid-row: 2; grid-column: 2; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid #365364; box-shadow: 0 0 25px #000b; background: #080f16; }
+.game-frame { position: relative; grid-row: 2; grid-column: 2; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid #365364; box-shadow: 0 0 25px #000b; background: #080f16; }
 #game { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
 .touch-controls { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .control-pad { position: absolute; bottom: 58px; width: 100px; height: 100px; padding: 0; border: 2px solid #63dbf3; border-radius: 50%; background: radial-gradient(circle, #153f5477, #071622dd 75%); color: var(--cyan); box-shadow: 0 0 16px #0094ff33, inset 0 0 15px #5debff22; touch-action: none; user-select: none; -webkit-user-select: none; pointer-events: auto; }
@@ -123,9 +123,22 @@ body[data-controls="touch"] .touch-hint { display: inline; }
   .pilot-card { min-width: 0; }
   .pilot-card canvas { width: 24px; height: 24px; }
   .pilot-score { font-size: 8px; }
-  .game-frame { grid-column: 1; grid-row: 3; }
+  .game-frame { position: relative; grid-column: 1; grid-row: 3; }
   .local-status { display: none; }
   .arena-footer { grid-column: 1; grid-row: 4; }
   .control-pad { bottom: 65px; opacity: .85; }
   .connection-line > span:last-child { display: none; }
 }
+
+.pilot-detail { grid-column: 1 / -1; color: #89a8ba; font-size: 9px; font-variant-numeric: tabular-nums; }
+.game-status { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 18px); padding: 5px 10px; background: #07111bdb; border: 1px solid #5debff33; color: #b8e5ed; text-align: center; font-size: 9px; letter-spacing: .05em; pointer-events: none; }
+.local-result { position: absolute; inset: 0; display: grid; place-items: center; background: #030a12cc; padding: 16px; }
+.local-result > div { border: 1px solid #5debff88; background: #0d1b27; padding: 24px; text-align: center; box-shadow: 0 0 50px #0094ff33; }
+.result-kicker { color: #91aebe; font-size: 9px; letter-spacing: .1em; }
+.local-result h2 { color: var(--cyan); }
+.local-result p { white-space: pre-line; line-height: 1.8; font-size: 12px; }
+.local-result button { color: #b9efff; padding: 8px 16px; border: 1px solid #5debff99; background: #163446; }
+#map-seed { width: 110px; padding: 5px; border: 1px solid #3b5365; background: #142637; font-size: 11px; color: #edf5fc; }
+@media (max-width: 950px) { .pilot-detail { font-size: 8px; } .pilot-info { gap: 2px; } .game-status { font-size: 8px; padding: 4px; } }
+@media (max-height: 500px) and (orientation: landscape) { .pilot-detail { display: none; } }
+@media (max-width: 550px) and (orientation: portrait) { .pilot-detail { font-size: 7px; } .pilot-card { gap: 0; padding: 3px 1px; } }

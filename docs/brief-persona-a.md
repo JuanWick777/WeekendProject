@@ -25,4 +25,4 @@ Mundo adaptado: 768 × 640, 48 × 40 casillas de 16. El cliente dibuja las pared
 
 Con B, abrir npm run dev y revisar el mapa completo y el seguimiento del dron. Usar las capas de cuadrícula/colisión para señalar diferencias entre pared dibujada y espacio transitable. Comprobar el HUD a tamaño móvil, contraste de balas y personajes, nodo activo e inactivos y orientación del arma.
 
-La vista actual es local y está identificada; el recorrido online, interpolación y controles definitivos los implementa B. A aporta observaciones y prueba el diseño con B/C cuando se conecte la partida real.
+Las cuatro láminas detalladas ya están recreadas en sprites Canvas con rotación continua y atributos idénticos. La práctica de combate permite revisar recogida/bloqueo/daño/respawn. La vista actual es local y está identificada; el recorrido online, interpolación y controles definitivos los implementa B. A aporta observaciones y prueba el diseño con B/C cuando se conecte la partida real.

@@ -10,11 +10,11 @@ Hay workspaces npm, un cliente Vite con Canvas provisional, un servidor Express 
 
 **B0.1, B1, B2 y B3 integrados en main mediante los PR #1–#4:** mapa por semilla, movimiento, nodos, combate, escudo, respawn, reconexión y resultados de servidor. Ver [simulación B3 y conexión de A/C](docs/game-server.md). Los cambios nuevos llegan a main mediante su PR.
 
-**B asume también la programación del cliente; A diseña y revisa. Todavía falta conectar PostgreSQL y el cliente online.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. Ya hay una [vista industrial interactiva de diseño](docs/client-preview.md) solo en desarrollo: mapa 768 × 640, drones, HUD, teclado/táctil y diagnóstico. Está identificada como local; también faltan los endpoints de evaluación.
+**B asume también la programación del cliente; A diseña y revisa. Todavía falta conectar PostgreSQL y el cliente online.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. Ya hay una [vista industrial interactiva de diseño](docs/client-preview.md) solo en desarrollo: mapa 768 × 640 con coberturas v3, cuatro drones detallados, HUD, teclado/táctil y práctica de combate/escudo/respawn con el motor compartido. Está identificada como local; también faltan los endpoints de evaluación.
 
 Repositorio privado del equipo: https://github.com/JuanWick777/WeekendProject. Todavía no se ha desplegado el juego. Un CI de bootstrap en verde no sustituye los tres E2E y la cobertura funcional de la entrega.
 
-Verificación hasta B3 con Node 24.22.1: lint aprobado, 72 pruebas aprobadas y build aprobado. Ya se cubren mapas, daño y simulación sobre conexiones reales; faltan PostgreSQL, interpolación del cliente, E2E de navegador y mediciones públicas.
+Verificación de arena/práctica con Node 24.22.1: lint aprobado, 76 pruebas aprobadas y build aprobado. Ya se cubren mapas, daño y simulación sobre conexiones reales; faltan PostgreSQL, interpolación del cliente, E2E de navegador y mediciones públicas.
 
 ## Empezar
 

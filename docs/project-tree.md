@@ -1,4 +1,4 @@
-# Árbol y propiedad — v2
+# Árbol y propiedad — v3
 
 Se distingue **existente** de **previsto**. Las carpetas vacías con .gitkeep no contienen implementaciones. No hace falta crear a mano toda esta lista: cada persona crea los módulos de su tarea cuando los utiliza.
 
@@ -17,11 +17,13 @@ GameWeekend/
     public/audio/
     src/main.js, styles.css             Shell industrial; preview solo en desarrollo
     src/net/api.js                     Solo health
-    src/game/                           Renderer, palette, viewport
+    src/game/                           Renderer, drone-sprites, palette, viewport
     src/input/controls.js               Teclado/ratón y pads de puntero
-    src/preview/arena-preview.js         Escena local identificada, sin multijugador
+    src/preview/arena-preview.js         UI de práctica, solo DEV
+    src/preview/practice-session.js      Adaptador de inputs al mismo motor que el servidor
     src/ui/                             Pantallas online pendientes
     test/viewport.test.js               Escala, cámara y coordenadas; interpolación pendiente
+    test/practice-session.test.js        Escudo/daño/respawn, reloj, cambio de dron y cadencia
   server/
     package.json
     src/app.js, index.js, config.js      B: HTTP/arranque
@@ -30,7 +32,7 @@ GameWeekend/
     src/auth/                           B: servicio, rutas, sesiones, middleware y límite
     src/rooms/                          B: room-manager, rutas y errores
     src/game/                           B: match, game-manager, movimiento, combate, nodos
-    src/game/maps/                      Plantilla provisional, generador y validador
+    src/game/maps/                      Reexporta los mapas canónicos de shared
     src/storage/, telemetry/            C: vacías
     test/app.test.js, auth.test.js      HTTP real; auth con repositorios de prueba
     test/helpers/auth-repositories.js   Solo tests, no persistencia de producción
@@ -43,6 +45,9 @@ GameWeekend/
     package.json
     src/constants.js                   Mundo/escudos vigentes
     src/collision.js, movement.js       Física compartida por servidor y preview
+    src/maps/                          Plantilla v3, generador y validador
+    src/game/                          Match, combate, objetivos, escudos, resultados puros
+    src/random.js                      PRNG reproducible
     src/protocol.js                    Rutas/mensajes; protocolVersion 3
     src/schemas.js, index.js            Zod de entradas/exportaciones
     test/schemas.test.js                Contratos iniciales
@@ -87,6 +92,6 @@ scripts/                               C: db-init.js, measure-performance.js
 tests/e2e/                             C: auth.spec.js, lobby.spec.js, gameplay.spec.js
 ~~~
 
-Los diseños de A viven en docs/visual-references. B conserva una única plantilla de geometría ejecutable en server/src/game/maps; el cliente recibe su mapa resuelto por WebSocket. C guarda semilla/versiones y no mantiene otra copia del generador.
+Los diseños de A viven en docs/visual-references. B conserva una única plantilla de geometría ejecutable en shared/src/maps; server/src/game/maps reexporta esa fuente; el cliente recibe su mapa resuelto por WebSocket. C guarda semilla/versiones y no mantiene otra copia del generador.
 
 No editar ni subir node_modules, dist ni .env. Instalar dependencias desde la raíz y coordinar package.json/package-lock.json. El repositorio ya está publicado y A/C tienen acceso; continuar con ramas por tarea según github-workflow.md.

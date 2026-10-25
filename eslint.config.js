@@ -13,6 +13,7 @@ export default [
     ],
   },
   js.configs.recommended,
+  { files: ['shared/**/*.js'], languageOptions: { globals: { console: 'readonly', structuredClone: 'readonly' } } },
   {
     files: ['**/*.js'],
     languageOptions: {

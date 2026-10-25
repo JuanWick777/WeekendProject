@@ -11,6 +11,10 @@ Imágenes entregadas por el equipo para orientar distribución, colores, persona
 | [UnitsCG.jpeg](maps/UnitsCG.jpeg) | Referencia de espacios y accesos |
 | [WallsCG.jpeg](maps/WallsCG.jpeg) | Apariencia metálica y luces |
 | [CharactersCG.jpeg](characters/CharactersCG.jpeg) | Cuatro siluetas y colores rojo/amarillo/violeta/verde |
+| [RedCG.jpeg](characters/RedCG.jpeg) | Lámina detallada del hexagonal rojo y sus giros |
+| [YellowCG.jpeg](characters/YellowCG.jpeg) | Blindado amarillo, franjas y módulos laterales |
+| [PurpleCG.jpeg](characters/PurpleCG.jpeg) | Esférico violeta con anillos/pods |
+| [GreenCG.jpeg](characters/GreenCG.jpeg) | Romboidal verde, marco y módulos en flecha |
 | [escudoCG.jpeg](effects/escudoCG.jpeg) | Pedestal, recogida y desaparición |
 | [ColorsCG.jpeg](ui/ColorsCG.jpeg) | Paleta Industrial Tech |
 | [MobileUICG.jpeg](ui/MobileUICG.jpeg) | Composición del HUD común, con controles solo en móvil |
