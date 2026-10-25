@@ -1,6 +1,6 @@
 # CyberGrid — Diseño acordado v2
 
-Este documento sustituye la modalidad de extracción del diseño v1. Es una especificación: la base publicada todavía no contiene una partida jugable. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`.
+Este documento sustituye la modalidad de extracción del diseño v1. B3 ya implementa estas reglas en la simulación de servidor; falta conectar el cliente jugable y PostgreSQL. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`. Ver [estado e integración B3](game-server.md).
 
 ## Objetivo y puntuación
 

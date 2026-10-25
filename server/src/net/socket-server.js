@@ -6,7 +6,7 @@ import { readSessionToken } from '../auth/session.js';
 
 export function attachSocketServer(server, {
   authService = null, roomManager = null, appOrigin = 'http://127.0.0.1:5173',
-  now = Date.now, onInput = null, onPlayerLeft = null,
+  now = Date.now, onInput = null, onPlayerLeft = null, onConnected = null,
   heartbeatMs = 15_000, maxConnections = 200, maxMessagesPerSecond = 60,
 } = {}) {
   const wss = new WebSocketServer({
@@ -108,8 +108,9 @@ export function attachSocketServer(server, {
       if (!onInput) { sendError(record, 'GAME_NOT_READY', 'La simulación no está conectada.'); return; }
       if (payload.seq <= record.lastSeq) { sendError(record, 'STALE_INPUT', 'La secuencia de input ya fue procesada.'); return; }
       try {
-        onInput({ userId: user.id, roomCode: roomManager.getUserRoomCode(user.id), input: payload, receivedAtMs: now() });
-        record.lastSeq = payload.seq;
+        const accepted = onInput({ userId: user.id, roomCode: roomManager.getUserRoomCode(user.id), input: payload, receivedAtMs: now() });
+        if (accepted === false) sendError(record, 'INPUT_REJECTED', 'El input ya no corresponde a la ronda activa.');
+        else record.lastSeq = payload.seq;
       } catch { sendError(record, 'INPUT_FAILED', 'No se pudo procesar el input.'); }
     });
     // Register the replacement before closing the old socket, so its close event cannot disconnect this one.
@@ -120,6 +121,7 @@ export function attachSocketServer(server, {
     roomManager.setConnected(user.id, true);
     const roomCode = roomManager.getUserRoomCode(user.id);
     if (roomCode) send(record, SERVER_MESSAGES.LOBBY, roomManager.getRoom(roomCode, user.id));
+    onConnected?.({ userId: user.id, roomCode });
   }
 
   async function upgrade(request, socket, head) {
@@ -182,6 +184,10 @@ export function attachSocketServer(server, {
 
   return Object.freeze({
     broadcast,
+    sendToUser(userId, type, payload) {
+      const record = connections.get(userId);
+      if (record) send(record, type, payload);
+    },
     closeSession(token) {
       for (const record of connections.values()) {
         if (record.token === token) retire(record, 4401, 'Session invalidated');

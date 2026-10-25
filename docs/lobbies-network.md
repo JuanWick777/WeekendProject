@@ -1,6 +1,6 @@
 # B2 — Salas y WebSockets con autenticación inyectada
 
-Implementado en feat/lobbies-ws: administrador de salas en memoria, rutas protegidas, conexiones WebSocket autenticadas, difusión de lobby, ping/pong, heartbeat, límites y reconexión. Lint, 41 pruebas y build aprobados con Node 24. Las pruebas usan HTTP/WebSocket reales y repositorios de usuarios/sesiones aislados; **no acreditan PostgreSQL ni una partida jugable**.
+Integrado en main mediante el PR #3: administrador de salas en memoria, rutas protegidas, conexiones WebSocket autenticadas, difusión de lobby, ping/pong, heartbeat, límites y reconexión. B2 se verificó con 41 pruebas; B3 eleva el total a 65, con lint y build aprobados. Las pruebas usan HTTP/WebSocket reales y repositorios de usuarios/sesiones aislados; **no acreditan PostgreSQL ni el cliente jugable**. Ver [simulación B3](game-server.md).
 
 ## Integración con C
 
@@ -13,6 +13,7 @@ import { createServerRuntime } from './runtime.js';
 const authService = createAuthService({ users, sessions });
 const runtime = createServerRuntime({
   authService,
+  saveMatch: (result) => matches.saveMatch(result),
   appOrigin: config.appOrigin,
   nodeEnv: config.nodeEnv,
 });
@@ -21,7 +22,7 @@ const { server } = runtime;
 // Al apagar: await runtime.close(); después cerrar el pool de C.
 ~~~
 
-Los repositorios y su inicialización siguen pendientes de C. El arranque normal aún devuelve AUTH_NOT_READY sin ellos y rechaza upgrades con 503. No se habilita un repositorio de memoria como fallback de producción. Las salas activas son transitorias por diseño; las cuentas, sesiones y resultados finales necesitan persistencia.
+Los repositorios users/sessions/matches y su inicialización siguen pendientes de C. El arranque normal aún devuelve AUTH_NOT_READY sin ellos y rechaza upgrades con 503. No se habilita un repositorio de memoria como fallback de producción. Las salas activas son transitorias por diseño; las cuentas, sesiones y resultados finales necesitan persistencia.
 
 ## Recorrido que A debe conectar
 
@@ -29,7 +30,7 @@ Los repositorios y su inicialización siguen pendientes de C. El arranque normal
 2. Abrir un solo socket por usuario después del login; esperar welcome. El navegador adjunta la cookie y Origin automáticamente.
 3. Crear sala o entrar con su código por HTTP; leer las vistas de lobby transmitidas. GET me ahora incluye roomCode.
 4. Marcar Listo usando PATCH. Hace falta conexión WebSocket vigente para estar listo y todos deben estar conectados/listos antes de iniciar.
-5. Solo el anfitrión solicita start. Cuando B3 esté conectado se muestra countdown; perder un participante/conexión o quitar Listo cancela countdown.
+5. Solo el anfitrión solicita start. El runtime ya conecta B3: se muestra countdown y después llega match:start; perder un participante/conexión o quitar Listo cancela countdown.
 6. Salir por HTTP limpia la pertenencia. El socket del que sale recibe lobby con payload null; los demás reciben la vista actualizada y, si corresponde, otro anfitrión.
 
 ~~~js
@@ -50,18 +51,18 @@ POST join/leave/start/rematch acepta ausencia de body o un objeto vacío; rechaz
 
 ## Estado de la simulación
 
-**Sin manejador B3, start responde 503 GAME_NOT_READY**, conservando el lobby. No se inventa una ronda online ni se envía el fixture como match:start. El ciclo countdown -> playing se verifica con un manejador de partida de prueba.
+**B3 está conectado por defecto en createServerRuntime.** Countdown inicia la simulación con mapa generado y validado; state/event/match:end salen del servidor real. Si se desactiva explícitamente la simulación (`enableGame: false`) y no se aporta un manejador, start conserva el lobby y responde 503 GAME_NOT_READY.
 
-Puntos de integración de B3 en createServerRuntime:
+Estos puntos del runtime ya están conectados por B3; no hace falta que A/C implementen manejadores alternativos:
 
 - `onStartMatch({ matchId, seed, roomCode, startedAtMs, players })`: manejador síncrono que crea la simulación, el mapa validado y el primer mensaje de partida. Se llama una vez al terminar countdown; un fallo devuelve a lobby, limpia Listo y notifica MATCH_START_FAILED.
 - `onInput({ userId, roomCode, input, receivedAtMs })`: recibe únicamente payloads Zod válidos, con secuencia creciente del socket vigente y en playing. No consulta la base por input. Es un manejador síncrono de intención para la simulación.
-- `onPlayerLeft({ roomCode, userId, wasPlaying })`: avisa de salida voluntaria o expiración de gracia; B3 resolverá abandono, ganador y guardado final.
+- `onPlayerLeft({ roomCode, userId, wasPlaying })`: avisa de salida voluntaria o expiración de gracia; B3 resuelve abandono, ganador y guardado final.
 - `runtime.sockets.broadcast(roomCode, type, payload)`: enviar mapa/snapshots/eventos/resultados a miembros de esa sala.
 - `runtime.rooms.markFinished(roomCode)`: pasar de playing a finished cuando la simulación realmente termine.
 - Rematch, solo del host y en finished, vuelve a lobby y limpia Listo. El siguiente inicio genera otro matchId y semilla.
 
-B3 debe detener el input del desconectado leyendo las actualizaciones del administrador de salas; además aplicará la caducidad de 250 ms. El estado físico, los snapshots, los resultados y la persistencia de partida siguen pendientes. En welcome el cliente limpia inputs pendientes y adopta nextInputSeq; lastProcessedSeq de la simulación debe corresponder al socket vigente.
+B3 detiene el input del desconectado mediante las actualizaciones de sala y aplica caducidad de 250 ms. Al reconectar recupera mapa y estado físico sin reiniciar estadísticas. En welcome el cliente limpia inputs pendientes y adopta nextInputSeq; lastProcessedSeq comienza en -1 para esa conexión. El resultado y la llamada de guardado están implementados; falta conectar matches.saveMatch de PostgreSQL. Detalle en [game-server.md](game-server.md).
 
 ## Reconexión, sesión y límites
 
@@ -79,4 +80,4 @@ El patrón de upgrade autenticado y heartbeat usa las APIs de [ws](https://githu
 
 server/test/rooms.test.js cubre permisos/capacidad, fases, countdown, fallos de inicio, reconexión, abandono, revancha y limpieza. server/test/network.test.js comprueba dos cuentas, rutas HTTP, cookies/sockets, lobby, mensajes, Origin, expiración, logout, heartbeat e inputs en fase válida usando conexiones reales. Los tests previos de auth siguen pasando.
 
-Siguen pendientes integración PostgreSQL, cliente de A, simulación B3, pruebas de mapas/daño/interpolación y los tres E2E de navegador de C. El número total de pruebas no sustituye esas áreas de la rúbrica.
+B3 añade pruebas de mapas, daño, simulación y partida sobre HTTP/WebSocket real. Siguen pendientes integración PostgreSQL, cliente de A, interpolación y los tres E2E de navegador de C. El número total de pruebas no sustituye esas áreas de la rúbrica.

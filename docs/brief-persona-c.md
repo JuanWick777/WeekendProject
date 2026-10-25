@@ -2,7 +2,7 @@
 
 Tu responsabilidad es storage, telemetry, scripts, E2E, CI y despliegue. B mantiene autenticación, salas, red, simulación y shared; A cliente y arte. Usa JavaScript ESM, PostgreSQL y pg. No necesitas esperar a que la partida esté terminada.
 
-Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2, auth HTTP y salas/WebSocket con inyección de autenticación. Entrega users/sessions a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [lobbies-network.md](lobbies-network.md); todavía no hay partida online. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
+Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2, auth HTTP, salas/WebSocket y simulación B3 con autenticación/guardado inyectados. Entrega users/sessions y matches.saveMatch a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [game-server.md](game-server.md). El cliente y PostgreSQL todavía no están conectados al recorrido final. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
 ## Qué cambió y qué guardar
 
@@ -18,7 +18,7 @@ Conserva las estadísticas requeridas de victorias, bajas/muertes y supervivenci
 - Username normalizado único, tokenHash único, claves foráneas e índices para sesión/telemetría. Duplicado de username devuelve el código acordado USERNAME_TAKEN a B.
 - matches.saveMatch guarda cabecera y resultados en una transacción, idempotente por matchId. Una retransmisión del resultado no inserta otra partida.
 - Persistir fechas/duración/estado/motivo, winnerId/empate, modo y versión de mapa; por participante: score, controlTimeMs, kills, deaths, aliveMs, participatedMs, won, draw y forfeited.
-- Convertir números y fechas PostgreSQL a los tipos JS del contrato. Conservar precisión suficiente en tiempos; no almacenar todos los ticks ni inventario/transitorios en la base.
+- Convertir números y fechas PostgreSQL a los tipos JS del contrato. Conservar hasta tres decimales de ms, admitir duración 0 y mantener las desigualdades del contrato; no almacenar todos los ticks ni inventario/transitorios en la base.
 - Añadir scripts/db-init.js y npm run db:init, repetible sin borrar datos. Documentar configuración y migraciones que se necesiten.
 
 Las posiciones, proyectiles, ocupación y escudos se calculan en memoria por B. No consultar PostgreSQL por tick. Reportar fallos de escritura al servidor; el fin de una partida no debe fingir que se guardó correctamente.
@@ -44,7 +44,7 @@ Calcular el global desde sumas, sin promediar tasas de jugadores. Sin datos: cer
 
 ## Pruebas y Actions
 
-Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; A dos de interpolación; tú dos de payload Zod y uno de métricas/siembra. Los casos iniciales ayudan, pero no sustituyen la cobertura pendiente. Añadir con B verificaciones de ocupación, disputa, fracciones, rotación, escudo y fin; no detenerse en diez si faltan reglas esenciales.
+Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; A dos de interpolación; tú dos de payload Zod y uno de métricas/siembra. B3 ya aporta casos de mapas, daño, autoridad, ocupación, disputa, fracciones, rotación, escudo y fin: el total es 65 pruebas, incluidas conexiones HTTP/WebSocket reales. Faltan PostgreSQL, interpolación, métricas/siembra y E2E de navegador; no detenerse en diez si faltan reglas esenciales.
 
 Implementa los tres E2E con servidor y PostgreSQL reales, sin mocks como sustituto del recorrido final:
 

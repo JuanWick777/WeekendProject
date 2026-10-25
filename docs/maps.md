@@ -14,6 +14,14 @@ Se conserva como referencia de distribución, no como geometría final. A/B aún
 
 El círculo central aparece mayor en el dibujo, pero todos mantienen radio inicial 64 en las reglas; cualquier ajuste de tamaño se acuerda y comprueba durante playtesting. Hay un [fixture de formato](../shared/fixtures/README.md) con coordenadas ilustrativas, sin sustituir la plantilla definitiva.
 
+## Plantilla provisional implementada en B3
+
+`server/src/game/maps/arena-template.js` contiene `cardinal-sketch`, versión 1: nodos cardinales, cuatro apariciones en esquinas, dos escudos y coberturas simplificadas. Hay cuatro grupos con dos variantes cada uno (16 combinaciones), con rutas centrales y periféricas protegidas. Esto permite avanzar el servidor mientras A termina la geometría; no acredita balance final.
+
+El generador prueba hasta 16 candidatos deterministas, valida espacio/accesos/conectividad y usa la primera variante de cada grupo como fallback validado. Registra `MAP_FALLBACK` si lo necesita. Las pruebas cubren 64 semillas con más de una geometría y sin fallback en esa muestra, además de forzar y comprobar el fallback.
+
+A entrega ajustes de paredes, rutas, nodos, apariciones y variantes a B sobre esta plantilla. B actualiza los datos, incrementa templateVersion si cambia la geometría y vuelve a comprobar las semillas. Si cambia el algoritmo, incrementa generatorVersion. El cliente siempre dibuja el mapa resuelto recibido; ver [game-server.md](game-server.md).
+
 ## Entregable completo de A
 
 Una vista cenital sobre cuadrícula de **24 × 16 casillas**, cada una de 32 unidades. Origen arriba a la izquierda; x crece a la derecha e y hacia abajo. Se acepta dibujo anotado con coordenadas: B ayuda a traducirlo a datos, sin exigir que A programe el generador.

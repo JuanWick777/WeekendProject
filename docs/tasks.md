@@ -1,14 +1,14 @@
 # Tareas y orden de integración — v2
 
-Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap ya está en main y los colaboradores tienen acceso. B0.1, auth HTTP de B1 y salas/red B2 están implementados en sus ramas, pendientes de revisión/integración. B1 requiere cerrar la conexión real a PostgreSQL con C; B2/B3 se desarrollan sin esperar esa conexión usando repositorios aislados en pruebas.
+Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes de 21:30. A, B y C son las tres personas del equipo. El bootstrap, B0.1, auth HTTP de B1 y salas/red B2 están integrados en main mediante los PR #1–#3. B3 ya implementa simulación y combate; falta la revisión del mapa con A y conectar PostgreSQL de C. Las pruebas usan repositorios aislados sin reemplazar la persistencia de producción.
 
 ## Trabajo y dependencias
 
 | ID | Responsable | Resultado comprobable | Depende de |
 | --- | --- | --- | --- |
 | B0 | B | Bootstrap publicado; 7 pruebas iniciales, lint y build comprobados | Completado |
-| D2 | B coordina | Reglas, mapas, contratos y briefs de nodos rotatorios | Actualización documental actual; PR y revisión |
-| B0.1 | B | Implementado: constantes/protocolVersion v2 y fixture para A/C | D2; revisión/integración pendientes |
+| D2 | B coordina | Reglas, mapas, contratos y briefs de nodos rotatorios | Integrado en main, PR #1 |
+| B0.1 | B | Constantes/protocolVersion v2 y fixture para A/C | Integrado en main, PR #2 |
 | A1 | A | Una arena base con capas, variantes autorizadas y dirección visual | maps.md y brief A; sin esperar backend |
 | C1a | C | Bases dev/test, esquema y users/sessions con firmas acordadas | contracts.md; sin esperar partida |
 | B1 | B | Implementado: auth HTTP y middleware; pendiente comprobar con PostgreSQL | C1a; ver auth-integration.md |
@@ -16,8 +16,8 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 | C1b | C | saveMatch v2 transaccional e idempotente; primer despliegue público | MatchResult y cuenta/base de hosting |
 | B2 | B | Implementado: salas, Listo, countdown con hook y sockets entre dos cuentas | Auth inyectada; integración PostgreSQL pendiente con C1a |
 | A3 | A | Auth/lobby online, snapshots e interpolación; coordenadas DOM | B2 y contratos v2 |
-| B3a | B | Mapa procedural válido, movimiento y control/rotación/fin | B2 + plantilla A1 |
-| B3b | B | Bláster, escudo, muerte/respawn y resultado persistido | B3a + C1b |
+| B3a | B | Implementado: mapa por semilla, movimiento, nodos y fin | Revisar plantilla provisional con A e integrar su cliente |
+| B3b | B | Implementado: bláster, escudo, muerte/respawn y callback de resultado | Falta guardado PostgreSQL real mediante C1b |
 | C2 | C | Seed 100/1000, métricas coherentes y mediciones | C1b y contrato v2 |
 | B4 | B | Reconexión, abandono, secuencias, límites y limpieza verificados | Se desarrolla desde B2; cierre tras B3 |
 | A4 | A | Controles móviles reales, resultados/revancha y acabado | A3 + B3 |
@@ -26,7 +26,7 @@ Entrega: domingo 25/10/2026 23:59, Ciudad de México; objetivo de envío antes d
 
 ## Próximo trabajo de B
 
-Revisar/integrar D2, feat/auth-v2 y feat/lobbies-ws, en ese orden. Conectar users/sessions de C al runtime cuando estén listos. Mientras tanto avanzar B3a: mapa, movimiento y nodos mediante onStartMatch/onInput, sin dependencia de base por tick. Ver lobbies-network.md. No crear una persistencia alternativa a la de C.
+Publicar/revisar B3 y cerrar B4 con el cliente de A: nodos, combate, reconexión y revancha. Conectar users/sessions y matches.saveMatch de C cuando estén listos; comprobar guardado real y fallos sin bloquear el tick. Ver [game-server.md](game-server.md). No crear una persistencia alternativa a la de C.
 
 ## Puntos de encuentro
 
@@ -42,9 +42,9 @@ Integrar cambios pequeños cada 1–2 horas. Las firmas de almacenamiento, campo
 - B: 2 mapas + 2 daño/escalado + 1 autoridad; sumar casos de objetivo y límites de tiempo, escudo/respawn y sesiones.
 - A: 2 interpolación y apoyo de controles/DOM para E2E.
 - C: 2 payloads Zod + 1 telemetría/semilla; coordina auth, lobby y Canvas reales en Playwright, incluida variante móvil.
-- Las 7 pruebas del bootstrap no prueban la simulación pendiente. Diez es el mínimo funcional, no un límite para dejar reglas esenciales sin comprobar.
+- Las 7 pruebas del bootstrap no sustituyen los casos funcionales de simulación añadidos en B3. Diez es el mínimo funcional, no un límite para dejar reglas esenciales sin comprobar.
 
-Cada cambio debe instalar/arrancar desde una base limpia, tener comprobación útil del comportamiento y pasar npm run verify. Hasta B2 hay 41 casos aprobados; mapas/daño/interpolación y E2E siguen pendientes. C3 añade verify:release a cada PR. No se admiten mocks ocultos como sustituto de juego/persistencia reales ni suites vacías aprobadas.
+Cada cambio debe instalar/arrancar desde una base limpia, tener comprobación útil del comportamiento y pasar npm run verify. Hasta B3 hay 65 casos aprobados, incluyendo mapas/daño y cuatro recorridos HTTP/WebSocket de partida. Siguen pendientes PostgreSQL, interpolación y E2E de navegador. C3 añade verify:release a cada PR. No se admiten mocks ocultos como sustituto de juego/persistencia reales ni suites vacías aprobadas.
 
 ## Git, propiedad y alcance
 
