@@ -30,7 +30,7 @@ describe('mapas procedurales', () => {
     expect(fallback).toHaveLength(1);
     for (const seed of [-1, NaN, 0.1, 2 ** 32]) expect(() => generateMap(seed)).toThrow();
     const blocked = generateMap(42);
-    for (let row = 1; row < 15; row += 1) blocked.tiles[row][12] = 1;
+    for (let row = 1; row < blocked.rows - 1; row += 1) blocked.tiles[row][blocked.columns / 2] = 1;
     expect(validateMap(blocked).valid).toBe(false);
   });
 });

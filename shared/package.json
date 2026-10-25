@@ -8,6 +8,8 @@
     "./constants": "./src/constants.js",
     "./protocol": "./src/protocol.js",
     "./schemas": "./src/schemas.js",
+    "./collision": "./src/collision.js",
+    "./movement": "./src/movement.js",
     "./fixtures/rotating-control": "./fixtures/rotating-control.json"
   },
   "dependencies": {

@@ -21,29 +21,29 @@ describe('movimiento, control y ciclo de partida', () => {
     expect(expired.getSnapshot().players[0].x).toBeCloseTo(104, 5);
   });
   it('no atraviesa paredes ni límites al mantener el movimiento', () => {
-    const map = flatMap(); map.tiles[2][5] = 1;
+    const map = flatMap(); map.tiles[4][10] = 1;
     const match = testMatch({ map }); const d = driver(match);
     d.step(3000, { a: { moveX: 1 } });
     expect(match.getSnapshot().players[0].x).toBeCloseTo(150, 2);
     d.step(2000, { a: { moveY: -1 } });
-    expect(match.getSnapshot().players[0].y).toBeCloseTo(42, 2);
+    expect(match.getSnapshot().players[0].y).toBeCloseTo(26, 2);
   });
   it('distingue vacío, único ocupante y disputa; ignora muertos y abandonados', () => {
-    const map = flatMap(); const players = new Map([['a', playerState('a', 384, 256)], ['b', playerState('b', 704, 448)]]);
+    const map = flatMap(); const players = new Map([['a', playerState('a', 384, 320)], ['b', playerState('b', 704, 448)]]);
     const read = () => objectiveState(map, players, 0, 1000, GAME_CONFIG.match);
     expect(read()).toMatchObject({ status: 'controlled', controllerId: 'a' });
-    players.get('b').x = 384; players.get('b').y = 256;
+    players.get('b').x = 384; players.get('b').y = 320;
     expect(read().status).toBe('contested');
     players.get('b').alive = false; expect(read().controllerId).toBe('a');
     players.get('a').forfeited = true; expect(read().status).toBe('empty');
   });
   it('conserva fracciones y detiene/reanuda puntos al disputar el mismo nodo', () => {
     const match = testMatch(); const d = driver(match);
-    d.step(2000, { a: { moveX: 1 } }); d.step(1200, { a: { moveY: 1 } });
+    d.step(2000, { a: { moveX: 1 } }); d.step(1600, { a: { moveY: 1 } });
     const before = match.getSnapshot().players[0].controlTimeMs;
     d.step(600); d.step(400);
     expect(match.getSnapshot().players[0].controlTimeMs - before).toBe(1000);
-    d.step(2000, { b: { moveX: -1 } }); d.step(1200, { b: { moveY: -1 } });
+    d.step(2000, { b: { moveX: -1 } }); d.step(1600, { b: { moveY: -1 } });
     expect(match.getSnapshot().objective.status).toBe('contested');
     const disputed = match.getSnapshot().players[0].controlTimeMs;
     d.step(1000); expect(match.getSnapshot().players[0].controlTimeMs).toBe(disputed);
@@ -64,19 +64,19 @@ describe('movimiento, control y ciclo de partida', () => {
     expect(match.getStartPayload().map).toEqual(map);
     expect(match.getResult()).toMatchObject({ winnerId: null, drawPlayerIds: ['a', 'b'] });
   });
-  it('recoge un solo escudo y permite reaparecer la recogida sin consumirla con inventario lleno', () => {
+  it('recoge el escudo inicial una vez y conserva la carga sin caducidad', () => {
     const match = testMatch(); const d = driver(match);
-    d.step(1200, { a: { moveX: 1 } }); d.step(200, { a: { moveY: 1 } });
+    d.step(600, { a: { moveX: 1 } }); d.step(300, { a: { moveY: 1 } });
     expect(match.getSnapshot().players[0].shieldCharges).toBe(1);
-    expect(match.getSnapshot().pickups.some((p) => p.id === 'shield-nw')).toBe(false);
-    d.step(8000);
+    expect(match.getSnapshot().pickups.some((p) => p.id === 'R1')).toBe(false);
+    d.step(20000);
     expect(match.getSnapshot().players[0].shieldCharges).toBe(1);
-    expect(match.getSnapshot().pickups.some((p) => p.id === 'shield-nw')).toBe(true);
+    expect(match.getSnapshot().pickups.some((p) => p.id === 'R1')).toBe(false);
   });
   it('mata y reaparece a los 3 s conservando estadísticas e invariantes de tiempos', () => {
     const match = testMatch(); const d = driver(match);
     d.step(2000, { a: { moveX: 1 }, b: { moveX: -1 } });
-    d.step(1200, { a: { moveY: 1 }, b: { moveY: -1 } });
+    d.step(1600, { a: { moveY: 1 }, b: { moveY: -1 } });
     d.step(1100, { a: { attack: true } });
     expect(match.getSnapshot().players[1]).toMatchObject({ alive: false, hp: 0, deaths: 1 });
     const points = match.getSnapshot().players[0].score;

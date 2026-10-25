@@ -1,10 +1,10 @@
 export const GAME_CONFIG = Object.freeze({
   world: Object.freeze({
-    columns: 24,
-    rows: 16,
-    tileSize: 32,
+    columns: 48,
+    rows: 40,
+    tileSize: 16,
     width: 768,
-    height: 512,
+    height: 640,
   }),
   room: Object.freeze({
     minPlayers: 2,
@@ -21,7 +21,7 @@ export const GAME_CONFIG = Object.freeze({
     nodeRadius: 64,
     scorePerSecond: 1,
     nodeOrder: Object.freeze(['center', 'north', 'east', 'south', 'west']),
-    pickupRespawnMs: 8_000,
+    shieldSpawnIntervalMs: 15_000,
     pickupRadius: 10,
   }),
   player: Object.freeze({

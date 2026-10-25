@@ -21,11 +21,11 @@ afterAll(async () => {
 });
 
 describe('frontera HTTP del bootstrap', () => {
-  it('anuncia el protocolo v2 y el estado real de los servicios', async () => {
+  it('anuncia el protocolo vigente y el estado real de los servicios', async () => {
     const response = await fetch(baseUrl + '/api/health');
     expect(response.status).toBe(200);
     expect((await response.json()).data).toMatchObject({
-      protocolVersion: 2, authentication: 'pending', websocket: 'pending', database: 'pending',
+      protocolVersion: 3, authentication: 'pending', websocket: 'pending', database: 'pending',
     });
   });
 
