@@ -34,6 +34,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Crear .env para entorno CI
+        run: touch .env
       - name: Inicializar esquema de BD
         env:
           DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
