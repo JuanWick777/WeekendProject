@@ -1,6 +1,6 @@
 # C — Guía completa de datos, calidad y despliegue
 
-Tu responsabilidad es storage, telemetry, scripts, E2E, CI y despliegue. B mantiene autenticación, salas, red, simulación y shared; A cliente y arte. Usa JavaScript ESM, PostgreSQL y pg. No necesitas esperar a que la partida esté terminada.
+Tu responsabilidad es storage, telemetry, scripts, E2E, CI y despliegue. B mantiene cliente, autenticación, salas, red, simulación y shared; A diseño y revisión visual. Usa JavaScript ESM, PostgreSQL y pg. No necesitas esperar a que la partida esté terminada.
 
 Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2, auth HTTP, salas/WebSocket y simulación B3 con autenticación/guardado inyectados. Entrega users/sessions y matches.saveMatch a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [game-server.md](game-server.md). El cliente y PostgreSQL todavía no están conectados al recorrido final. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
 
@@ -44,7 +44,7 @@ Calcular el global desde sumas, sin promediar tasas de jugadores. Sin datos: cer
 
 ## Pruebas y Actions
 
-Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; A dos de interpolación; tú dos de payload Zod y uno de métricas/siembra. B3 ya aporta casos de mapas, daño, autoridad, ocupación, disputa, fracciones, rotación, escudo y fin: el total es 65 pruebas, incluidas conexiones HTTP/WebSocket reales. Faltan PostgreSQL, interpolación, métricas/siembra y E2E de navegador; no detenerse en diez si faltan reglas esenciales.
+Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; B dos de interpolación del cliente; tú dos de payload Zod y uno de métricas/siembra. B3 ya aporta casos de mapas, daño, autoridad, ocupación, disputa, fracciones, rotación, escudo y fin: el total es 72 pruebas, incluidas conexiones HTTP/WebSocket reales. Faltan PostgreSQL, interpolación, métricas/siembra y E2E de navegador; no detenerse en diez si faltan reglas esenciales.
 
 Implementa los tres E2E con servidor y PostgreSQL reales, sin mocks como sustituto del recorrido final:
 
@@ -52,7 +52,7 @@ Implementa los tres E2E con servidor y PostgreSQL reales, sin mocks como sustitu
 2. Lobby: dos contextos/cuentas, crear, entrar, Listo, inicio y sockets reales.
 3. Gameplay Canvas: controles de movimiento/disparo, cambio autoritativo de x/y reflejado en DOM y observado en el segundo cliente. Variante táctil para mover/apuntar simultáneamente; comprobar también la presentación del objetivo.
 
-No mover el DOM ni llamar funciones de simulación desde la página para aparentar input. Acuerda selectores estables con A. Las coordenadas del test salen de snapshots, separadas de la predicción visual.
+No mover el DOM ni llamar funciones de simulación desde la página para aparentar input. Acuerda selectores estables con B, que ahora programa el cliente. Las coordenadas del test salen de snapshots, separadas de la predicción visual.
 
 Playwright ya está configurado con desktop y mobile-landscape, pero faltan los spec. Añade PostgreSQL aislado a Actions, instalación de Chromium y npm run verify:release en cada PR. Usa TEST_DATABASE_URL y fija variables necesarias. Suite vacía, skipped o prueba que solo encuentra un Canvas no acredita los flujos. Publica evidencia de fallos y aprobación; no ocultes checks para integrar.
 

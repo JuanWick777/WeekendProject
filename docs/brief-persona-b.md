@@ -1,61 +1,32 @@
-# B — Servidor, salas y simulación
+# B — Cliente, servidor y simulación
 
-Este rol lo toma el coordinador de este chat. B0/B0.1/B1/B2 están integrados en main (PR #1–#3). B3 implementa mapa, movimiento, nodos, combate, reconexión y resultado; falta conectar PostgreSQL de C y el cliente de A. Mantienes shared y `server/src/auth`, rooms, net y game; coordinas app.js, runtime.js, index.js y config.js. C mantiene storage/telemetry y A client. La integración B2 está en [lobbies-network.md](lobbies-network.md).
+B asume ahora client y shared, además de auth/rooms/net/game. A diseña y revisa las referencias; C implementa storage/telemetry, pruebas globales, CI y despliegue. Coordinar index.js, app.js y dependencias con C.
 
-Referencias: [reglas v2](game-design.md), [contrato v2](contracts.md), [mapas](maps.md) y [tareas](tasks.md). El estado implementado y la integración actual se detallan en [game-server.md](game-server.md); los criterios de cierre requieren comprobar también PostgreSQL y cliente reales.
+## Implementado
 
-## B0.1 — Migración compartida implementada
+Bootstrap, autenticación HTTP inyectable, salas, WebSocket autenticado y simulación B3 están integrados por los PR #1–#4. Las pruebas usan conexiones HTTP/WebSocket reales y repositorios aislados; falta unir PostgreSQL.
 
-Actualizar constants.js al modo rotating_control: duración 150000, cinco intervalos de 30000, preaviso 5000, radio 64, escudo máximo 1, reaparición 3000 y recogidas cada 8000 ms. Retirar syncDurationMs, syncRadius, maxCarry y droppedPickupLifetimeMs. Mantener reglas de movimiento, bláster y red.
+El bloque actual adapta la arena a 768 × 640, 48 × 40 tiles de 16; plantilla cardinal-sketch v2 y protocolo 3. Implementa cuatro recogidas iniciales y una aleatoria a la vez con cadencia 15 s. Conserva atributos, combate, nodos, resultado y firmas de persistencia. Ver [mapas](maps.md) y [contrato](contracts.md).
 
-Elevar PROTOCOL_VERSION a 2, mantener nombres de mensajes/rutas e inputs compatibles y dar a A/C fixtures documentados de mapa, snapshot y MatchResult v2. Comprobar que health publica la versión correcta. Este cambio es la primera tarea de código después de la documentación.
+La [vista industrial de diseño](client-preview.md) incluye Canvas, drones, HUD, teclado/ratón, pads táctiles y cámara. Es local y solo se incluye en desarrollo; sirve para revisar presentación y física. No es el recorrido online y no otorga puntos ni guarda resultados.
 
-## B1 — HTTP implementado; integración PostgreSQL pendiente
+## Siguiente trabajo del cliente
 
-1. Consumir las interfaces users/sessions de C mediante inyección; no crear otra persistencia de producción. Se puede avanzar con repositorios de prueba mientras C entrega PostgreSQL.
-2. Registro con username normalizado, displayName y hash scrypt asíncrono de node:crypto; no guardar contraseña. Duplicado -> 409, credenciales incorrectas -> 401.
-3. Login, logout y me; sesiones aleatorias con hash persistido, cookie HttpOnly/SameSite/Secure según contrato y duración 24 h.
-4. Middleware para salas y validación de Origin en operaciones mutables/upgrade. Ningún cliente escoge su identidad.
-5. Integrar repositorios reales y probar dos cuentas. Las respuestas públicas no incluyen hashes ni tokens.
+1. API y pantallas funcionales de registro/login, crear/entrar sala, Listo y countdown. Incorporar el acabado de A cuando lo entregue.
+2. Consumir match:start/state/event/match:end; renderizar el mapa recibido y deduplicar eventos.
+3. Interpolar rivales/proyectiles y reconciliar al jugador local con lastProcessedSeq. Inputs a 20 Hz; no calcular autoridad en el cliente.
+4. Integrar HUD, muerte/respawn, resultados, revancha y errores. Mantener el mismo HUD PC/móvil y ocultar pads en PC.
+5. Exponer las coordenadas de snapshots en player-state para E2E; las coordenadas de preview/predicción permanecen separadas.
+6. Comprobar entrada simultánea con dos dedos, cancelación, cambio de foco, escala y orientación en móvil real.
 
-Terminado: registro/login crean sesión; me reconoce sesión válida, rechaza ausente/expirada; logout la invalida. Probar rutas con cookies reales y repositorios aislados, sin esperar al Canvas.
+## Integración con C y cierre B4
 
-## B2 — Salas/red implementadas; integración con PostgreSQL pendiente
+Conectar users/sessions con createAuthService y matches.saveMatch con createServerRuntime según [game-server.md](game-server.md). Comprobar dos cuentas con PostgreSQL, resultado idempotente y persistencia tras reinicio. No crear otra persistencia de producción ni consultar la base por tick.
 
-- Código de seis caracteres; crear, entrar, salir, Listo, transferir host y permisos de inicio/revancha.
-- Estados lobby/countdown/playing/finished; iniciar solo con 2–4 conectados y listos. Cancelar countdown si dejan de cumplirse las condiciones; no admitir nuevos participantes en playing.
-- Upgrade /ws con sesión y Origin válido; un socket vigente por usuario y pertenencia verificada.
-- welcome/lobby, ping/pong RTT y heartbeat; no duplicar jugadores al reconectar.
-- Validar Zod, tamaño, frecuencia y fase desde el principio; no posponer la autoridad hasta el cierre.
+Cerrar reconexión de 15 s, secuencias, expiración de sesión, abandono, limpieza y fallo de guardado sobre el cliente real. El servidor comunica RESULT_NOT_SAVED y conserva temporalmente el último resultado; todavía falta reintento automático de guardado.
 
-Terminado: dos cuentas en navegadores distintos comparten sala, Listo y cuenta regresiva reales. Usuario sin sesión no accede a HTTP protegido ni a WebSocket.
+## Verificación
 
-## B3a — Simulación implementada; plantilla y cliente por integrar
+72 pruebas actuales más lint/build aprobados. Hay casos de mapas, daño, autoridad, nodos/tiempos, escudos, sesiones, salas/red y encuadre. Faltan las pruebas de interpolación y los tres E2E de navegador con PostgreSQL/Canvas reales, coordinados con C. Diez casos es el mínimo de la rúbrica, no el objetivo final de cobertura.
 
-1. Convertir el boceto de A en plantilla y generar/validar variantes por semilla con fallback según maps.md.
-2. Tick fijo 30 Hz y movimiento normalizado con colisiones; reloj del servidor.
-3. Objetivo rotatorio, puntuación fraccionaria y estados empty/controlled/contested.
-4. Snapshots 15 Hz con lastProcessedSeq, objective y campos v2.
-5. Fin a 150 s y resultado coherente con puntos/desempates.
-
-Primer encuentro con A: dos jugadores llegan al nodo, uno puntúa, con dos se detiene, al salir uno continúa y al rotar deja de puntuar la zona anterior. Este es el primer recorrido a integrar, antes del acabado visual.
-
-## B3b — Combate implementado; guardado PostgreSQL por integrar
-
-- Bláster: intervalo 350 ms, velocidad 480, alcance 320, radio 3 y daño 30→20. Detectar primer impacto por segmento completo.
-- Una carga de escudo, recogida automática, absorción de un impacto, reaparición de recogida a 8 s.
-- Muerte, bajas, pérdida del escudo y respawn a 3 s sin perder puntos/control.
-- Resolver ticks en orden documentado; conservar invariantes de control, vida y duración.
-- Construir MatchResult una sola vez; llamar saveMatch de C fuera del tick. Mostrar y registrar fallos de guardado, sin fingir persistencia.
-
-Terminado: ronda completa online entre dos o más cuentas, con resultado guardado de manera idempotente y repetible en una revancha.
-
-## B4 — Desconexión y cierre
-
-Input caducado a 250 ms, secuencias antiguas ignoradas y socket sustituido inactivo. Reconexión del mismo jugador por 15 s, detenido/vulnerable y sin reiniciar puntaje. Plazo vencido o salida voluntaria -> abandono; resolver ganador restante o abortada. Cancelar timers, limpiar sockets/salas y no duplicar resultados. Estas reglas se incorporan con B2/B3; B4 comprueba el recorrido completo.
-
-## Pruebas y entregables
-
-Cinco casos funcionales base: dos de mapas (determinismo y transitabilidad/validez), dos de daño (fórmula y límites) y uno de autoridad (input no atraviesa paredes ni excede velocidad). Añadir casos de nodo vacío/único/disputado, fracciones, rotación y fin sin exceso de tiempo; escudo/respawn y sesiones deben tener verificaciones útiles. Las siete pruebas iniciales no sustituyen esta cobertura.
-
-Entregar a A login/lobby reales y ejemplos v2; a C interfaces estables y resultado definitivo; a ambos fallos de protocolo explícitos. Trabajar por ramas pequeñas con PR y revisión; B3 parte de main actualizado en feat/game-simulation. Las 65 pruebas actuales pasan junto con lint y build; no sustituyen los E2E con PostgreSQL y Canvas. No mezclar cambios ajenos ni otro motor/transporte.
+Trabajar en ramas por tarea desde main actualizado, con PR y checks. No mezclar cambios ajenos. El objetivo inmediato es login -> lobby -> ronda -> resultado -> persistencia; efectos y sonido se pulen después.

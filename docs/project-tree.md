@@ -12,13 +12,16 @@ GameWeekend/
   eslint.config.js, vitest.config.js
   playwright.config.js                 C: flujos todavía pendientes
   README.md
-  client/                              A
+  client/                              B programa; A diseña/revisa
     package.json, index.html, vite.config.js
     public/audio/
-    src/main.js, styles.css             Canvas provisional
+    src/main.js, styles.css             Shell industrial; preview solo en desarrollo
     src/net/api.js                     Solo health
-    src/game/, input/, ui/              Carpetas vacías
-    test/                              Interpolación pendiente
+    src/game/                           Renderer, palette, viewport
+    src/input/controls.js               Teclado/ratón y pads de puntero
+    src/preview/arena-preview.js         Escena local identificada, sin multijugador
+    src/ui/                             Pantallas online pendientes
+    test/viewport.test.js               Escala, cámara y coordenadas; interpolación pendiente
   server/
     package.json
     src/app.js, index.js, config.js      B: HTTP/arranque
@@ -38,17 +41,18 @@ GameWeekend/
     test/helpers/simulation-fixture.js   Mapas y entradas solo de prueba
   shared/                              B mantiene
     package.json
-    src/constants.js                   Reglas v2 de nodos y escudo
-    src/protocol.js                    Rutas/mensajes; protocolVersion 2
+    src/constants.js                   Mundo/escudos vigentes
+    src/collision.js, movement.js       Física compartida por servidor y preview
+    src/protocol.js                    Rutas/mensajes; protocolVersion 3
     src/schemas.js, index.js            Zod de entradas/exportaciones
     test/schemas.test.js                Contratos iniciales
-    fixtures/                          Ejemplo JSON v2 de partida y resultado
+    fixtures/                          Ejemplo JSON v3 de partida y resultado
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/
     game-design.md, maps.md, contracts.md, auth-integration.md, lobbies-network.md, game-server.md
     brief-persona-a.md, brief-persona-b.md, brief-persona-c.md
-    tasks.md, project-tree.md, github-workflow.md, evaluation.md
+    tasks.md, project-tree.md, github-workflow.md, evaluation.md, client-preview.md
     visual-references/                  A: referencias, boceto y paleta
   .github/workflows/ci.yml              Lint/test/build; C agregará PostgreSQL/E2E
 ~~~
@@ -58,7 +62,7 @@ GameWeekend/
 Los nombres siguientes orientan el reparto; pueden ajustarse dentro de cada carpeta sin cambiar el contrato público.
 
 ~~~text
-client/                                A
+client/                                B programa; A diseña/revisa
   src/net/                             API de auth/salas y conexión WebSocket
   src/game/                            loop, renderer, interpolation, effects
   src/input/                           keyboard-mouse y touch
@@ -75,6 +79,7 @@ server/src/
     objectives.js                       Nodos, ocupación, rotación y puntuación
     combat.js                           Proyectiles/daño; recogidas en match.js
     results.js                          Clasificación y MatchResult
+    shield-pickups.js                    Cuatro iniciales y un aleatorio
   storage/                             C: schema.sql, pool, users, sessions, matches
   telemetry/                           C: routes, seed y metrics
 server/test/                           B/C: integración y lógica de sus módulos

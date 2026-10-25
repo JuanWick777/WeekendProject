@@ -3,25 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10151f" />
+    <meta name="theme-color" content="#0e151c" />
     <title>CyberGrid — Breach &amp; Sync</title>
   </head>
-  <body>
+  <body data-controls="auto">
     <main id="app">
-      <header>
-        <p class="eyebrow">CyberGrid</p>
-        <h1>Breach &amp; Sync</h1>
-        <p>Base de desarrollo del equipo. Todavía no hay una partida implementada.</p>
+      <header class="brand-line">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">///</span> CYBERGRID <span class="brand-subtitle">BREACH &amp; SYNC</span></div>
+        <span id="design-label" class="design-label">CLIENTE ONLINE EN PREPARACIÓN</span>
       </header>
-      <section aria-label="Escena inicial">
-        <canvas id="game" aria-label="Canvas base, aún sin partida">
-          Tu navegador necesita soporte de Canvas 2D.
-        </canvas>
+      <p id="online-pending" class="pending-note">La simulación de servidor está preparada. Falta conectar el acceso con PostgreSQL y las pantallas del cliente.</p>
+      <section id="arena-layout" class="arena-layout" aria-label="Vista de diseño de la arena" hidden>
+        <div class="match-hud" aria-label="Indicadores de la ronda de ejemplo">
+          <div class="hud-cell"><span>PARTIDA</span><strong id="round-time">02:30</strong></div>
+          <div class="hud-cell objective-cell"><span>NODO ACTIVO</span><strong id="active-node">NÚCLEO</strong></div>
+          <div class="hud-cell"><span>ROTACIÓN</span><strong id="rotation-time" class="amber">00:30</strong></div>
+        </div>
+        <aside class="roster-area" aria-label="Personajes de referencia">
+          <div id="roster" class="roster"></div>
+          <div class="local-status"><span>CONTROLANDO</span><strong id="pilot-name"></strong><span class="shield-note">◈ Escudo: un impacto</span></div>
+        </aside>
+        <div class="game-frame"><canvas id="game" tabindex="0" aria-label="Arena de diseño: WASD o flechas para moverse; ratón para apuntar; clic para probar el proyectil">Tu navegador necesita soporte de Canvas 2D.</canvas></div>
+        <div class="touch-controls" aria-label="Controles táctiles">
+          <button id="move-pad" class="control-pad move-pad" type="button" aria-label="Arrastrar para moverse"><span class="pad-cross" aria-hidden="true"></span><span class="stick" aria-hidden="true"></span><span class="pad-label">MOVER</span></button>
+          <button id="aim-pad" class="control-pad aim-pad" type="button" aria-label="Arrastrar para apuntar y disparar"><span class="crosshair" aria-hidden="true">⌖</span><span class="stick" aria-hidden="true"></span><span class="pad-label">APUNTAR / DISPARAR</span></button>
+        </div>
+        <div class="arena-footer"><span class="desktop-hint">WASD / flechas · ratón + clic · selecciona un dron en el panel</span><span class="touch-hint">Movimiento y disparo simultáneos</span><span id="fps">— FPS</span></div>
       </section>
-      <footer>
-        <p id="connection-status" role="status">Comprobando el servidor…</p>
-        <p class="muted">Esta presentación es provisional; la dirección visual pertenece a A.</p>
-      </footer>
+      <details id="preview-tools" class="preview-tools" hidden>
+        <summary>Herramientas de diseño <span id="arena-spec"></span></summary>
+        <div class="tool-row">
+          <label>Encuadre <select id="camera-mode"><option value="map">Mapa completo</option><option value="follow">Seguir dron · 2×</option></select></label>
+          <label>Controles <select id="control-mode"><option value="auto">Automático</option><option value="pc">PC</option><option value="touch">Táctiles</option></select></label>
+          <label>Nodo <select id="node-preview"><option value="center">Núcleo</option><option value="north">Sector A</option><option value="east">Sector B</option><option value="south">Sector C</option><option value="west">Sector D</option></select></label>
+          <label class="check-label"><input id="show-grid" type="checkbox" /> Cuadrícula</label>
+          <label class="check-label"><input id="show-collisions" type="checkbox" /> Colisiones</label>
+          <button id="reset-preview" type="button">Restablecer posiciones</button>
+          <output id="preview-player-state" data-testid="preview-player-state"></output>
+        </div>
+        <p>Escena local para revisar arte, movimiento y paredes. Los disparos son visuales; no se calculan daño, puntos ni resultados. El reloj y el nodo se seleccionan para inspeccionar el HUD.</p>
+      </details>
+      <footer class="connection-line"><span id="connection-status" role="status">Comprobando servidor…</span><span>INDUSTRIAL TECH · DISEÑO DE A</span></footer>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

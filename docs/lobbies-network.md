@@ -1,6 +1,6 @@
 # B2 — Salas y WebSockets con autenticación inyectada
 
-Integrado en main mediante el PR #3: administrador de salas en memoria, rutas protegidas, conexiones WebSocket autenticadas, difusión de lobby, ping/pong, heartbeat, límites y reconexión. B2 se verificó con 41 pruebas; B3 eleva el total a 65, con lint y build aprobados. Las pruebas usan HTTP/WebSocket reales y repositorios de usuarios/sesiones aislados; **no acreditan PostgreSQL ni el cliente jugable**. Ver [simulación B3](game-server.md).
+Integrado en main mediante el PR #3: administrador de salas en memoria, rutas protegidas, conexiones WebSocket autenticadas, difusión de lobby, ping/pong, heartbeat, límites y reconexión. B2 se verificó con 41 pruebas; B3 eleva el total a 72, con lint y build aprobados. Las pruebas usan HTTP/WebSocket reales y repositorios de usuarios/sesiones aislados; **no acreditan PostgreSQL ni el cliente jugable**. Ver [simulación B3](game-server.md).
 
 ## Integración con C
 
@@ -24,7 +24,7 @@ const { server } = runtime;
 
 Los repositorios users/sessions/matches y su inicialización siguen pendientes de C. El arranque normal aún devuelve AUTH_NOT_READY sin ellos y rechaza upgrades con 503. No se habilita un repositorio de memoria como fallback de producción. Las salas activas son transitorias por diseño; las cuentas, sesiones y resultados finales necesitan persistencia.
 
-## Recorrido que A debe conectar
+## Recorrido que B debe conectar; A revisa diseño
 
 1. Registrar/iniciar sesión por HTTP con rutas relativas. El navegador guarda cg_session.
 2. Abrir un solo socket por usuario después del login; esperar welcome. El navegador adjunta la cookie y Origin automáticamente.
@@ -80,4 +80,4 @@ El patrón de upgrade autenticado y heartbeat usa las APIs de [ws](https://githu
 
 server/test/rooms.test.js cubre permisos/capacidad, fases, countdown, fallos de inicio, reconexión, abandono, revancha y limpieza. server/test/network.test.js comprueba dos cuentas, rutas HTTP, cookies/sockets, lobby, mensajes, Origin, expiración, logout, heartbeat e inputs en fase válida usando conexiones reales. Los tests previos de auth siguen pasando.
 
-B3 añade pruebas de mapas, daño, simulación y partida sobre HTTP/WebSocket real. Siguen pendientes integración PostgreSQL, cliente de A, interpolación y los tres E2E de navegador de C. El número total de pruebas no sustituye esas áreas de la rúbrica.
+B3 añade pruebas de mapas, daño, simulación y partida sobre HTTP/WebSocket real. Siguen pendientes integración PostgreSQL, cliente online de B, interpolación y los tres E2E de navegador de C. El número total de pruebas no sustituye esas áreas de la rúbrica.

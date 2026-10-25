@@ -1,4 +1,4 @@
-# CyberGrid — Diseño acordado v2
+# CyberGrid — Diseño acordado v3
 
 Este documento sustituye la modalidad de extracción del diseño v1. B3 ya implementa estas reglas en la simulación de servidor; falta conectar el cliente jugable y PostgreSQL. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`. Ver [estado e integración B3](game-server.md).
 
@@ -42,11 +42,11 @@ El arma es un bláster de **proyectiles de energía dirigidos**:
 
 El inventario contiene **como máximo una carga de escudo**. Se recoge automáticamente al tocar una recogida disponible. Absorbe por completo el siguiente impacto de un proyectil enemigo y se consume junto con ese proyectil. No requiere otro botón, no da invulnerabilidad temporal y no se acumula si ya se lleva una carga. Al morir se pierde; se reaparece con 100 de vida y sin escudo. No se deja botín.
 
-Las recogidas de escudo reaparecen a los **8 segundos**. A propone ubicaciones accesibles fuera de los nodos; B valida posiciones y resuelve recogidas simultáneas de forma determinista. El servidor decide impactos, vida, inventario, recogidas y puntos.
+Hay cuatro recogidas iniciales que aparecen una vez (R1/R3/R10/R12). A los **15 segundos** aparece una recogida aleatoria en R2/R4/R5/R8/R9/R11; tras recogerla se esperan otros **15 segundos** para generar la siguiente. Solo hay un aleatorio disponible a la vez; los iniciales pendientes permanecen. B valida posiciones fuera de nodos y resuelve recogidas simultáneas de forma determinista. El servidor decide impactos, vida, inventario, recogidas y puntos.
 
 ## Arena y controles
 
-**Una arena base**, de 24 columnas × 16 filas y casillas de 32 unidades: mundo de 768 × 512. A diseña el trazado; B implementa variaciones de obstáculos por semilla dentro de espacios permitidos. La guía completa y el entregable de A están en [maps.md](maps.md).
+**Una arena base**, de 48 columnas × 40 filas y casillas de 16 unidades: mundo de 768 × 640. A proporciona el diseño; B programa cliente, trazado y variaciones de obstáculos por semilla dentro de espacios permitidos. La guía completa y el entregable de A están en [maps.md](maps.md).
 
 Todos reciben el mismo mapa validado por el servidor. Se conserva durante toda la ronda. Jugadores colisionan con paredes/límites y no se bloquean entre sí. Las diagonales se normalizan.
 

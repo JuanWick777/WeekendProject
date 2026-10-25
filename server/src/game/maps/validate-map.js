@@ -42,9 +42,13 @@ export function validateMap(map, { protectedTiles = [] } = {}) {
   }
   for (const pickup of map.pickupSpawns) {
     if (pickup.type !== 'shield' || pickup.radius !== GAME_CONFIG.match.pickupRadius
+      || !['initial', 'random'].includes(pickup.spawnKind)
       || circleHitsMap(map, pickup.x, pickup.y, pickup.radius)
       || map.nodes.some((node) => Math.hypot(pickup.x - node.x, pickup.y - node.y) < node.radius + pickup.radius)) errors.push('Invalid pickup');
   }
+  if (new Set(map.pickupSpawns.map((point) => point.id)).size !== map.pickupSpawns.length
+    || map.pickupSpawns.filter((point) => point.spawnKind === 'initial').length !== 4
+    || map.pickupSpawns.filter((point) => point.spawnKind === 'random').length !== 6) errors.push('Invalid shield distribution');
   const start = map.spawnPoints[0];
   const visited = new Set();
   const queue = [[Math.floor(start.x / tileSize), Math.floor(start.y / tileSize)]];

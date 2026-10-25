@@ -5,18 +5,19 @@ import { movePlayer } from './movement.js';
 import { objectiveState } from './objectives.js';
 import { fireProjectile, advanceProjectiles } from './combat.js';
 import { buildResult } from './results.js';
+import { createShieldPickups } from './shield-pickups.js';
 
 export function createMatch({ matchId, roomCode, startedAtMs, players, map, rules: overrides = {} }) {
   const rules = { ...GAME_CONFIG.match, ...overrides };
   if (!validateMap(map).valid || players.length < 2 || players.length > 4 || new Set(players.map((p) => p.id)).size !== players.length) throw new Error('Invalid match setup');
   if (!Number.isInteger(rules.durationMs) || rules.durationMs <= 0 || rules.durationMs !== rules.nodeDurationMs * map.nodes.length) throw new Error('Invalid round duration');
+  if (!Number.isInteger(rules.shieldSpawnIntervalMs) || rules.shieldSpawnIntervalMs <= 0) throw new Error('Invalid shield interval');
   const events = [];
   let eventSequence = 0;
   let result = null;
   const state = {
     matchId, roomCode, startedAtMs, rules, map: structuredClone(map), tick: 0, elapsedUs: 0,
     projectiles: new Map(), nextProjectileId: 0,
-    pickups: map.pickupSpawns.map((pickup) => ({ ...pickup, availableAtUs: 0 })),
     players: new Map(players.map((player, index) => [player.id, {
       id: player.id, displayName: player.displayName, x: map.spawnPoints[index].x, y: map.spawnPoints[index].y,
       aimX: 1, aimY: 0, hp: GAME_CONFIG.player.maxHealth, shieldCharges: 0,
@@ -28,6 +29,8 @@ export function createMatch({ matchId, roomCode, startedAtMs, players, map, rule
       events.push({ eventId: matchId + ':e' + eventSequence++, tick: state.tick + 1, kind, actorId, targetId, x, y });
     },
   };
+
+  const shields = createShieldPickups(state.map, rules, state.emit);
 
   function respawnAt(timeUs) {
     for (const player of state.players.values()) {
@@ -61,16 +64,7 @@ export function createMatch({ matchId, roomCode, startedAtMs, players, map, rule
       activeInputs.set(player.id, input);
       movePlayer(player, input, dtSeconds, state.map);
     }
-    for (const pickup of state.pickups) {
-      if (pickup.availableAtUs > fromUs) continue;
-      const collector = [...state.players.values()].sort((a, b) => a.id.localeCompare(b.id)).find((player) =>
-        player.alive && !player.forfeited && player.shieldCharges === 0
-        && Math.hypot(player.x - pickup.x, player.y - pickup.y) <= pickup.radius + GAME_CONFIG.player.radius);
-      if (collector) {
-        collector.shieldCharges = 1; pickup.availableAtUs = toUs + rules.pickupRespawnMs * 1000;
-        state.emit('shield:pickup', collector.id, null, pickup.x, pickup.y);
-      }
-    }
+    shields.advance(toUs, state.players);
     for (const [id, input] of activeInputs) if (input.attack) fireProjectile(state, state.players.get(id), fromUs);
     advanceProjectiles(state, dtSeconds, toUs);
     const objective = objectiveState(state.map, state.players, fromUs, startedAtMs, rules);
@@ -92,7 +86,7 @@ export function createMatch({ matchId, roomCode, startedAtMs, players, map, rule
         if (player.input?.attack) times.push(player.nextShotUs);
         for (const time of times) if (time > fromUs) endUs = Math.min(endUs, time);
       }
-      for (const pickup of state.pickups) if (pickup.availableAtUs > fromUs) endUs = Math.min(endUs, pickup.availableAtUs);
+      if (shields.nextBoundaryUs() > fromUs) endUs = Math.min(endUs, shields.nextBoundaryUs());
       segment(fromUs, endUs);
       fromUs = endUs; state.elapsedUs = endUs;
     }
@@ -113,7 +107,7 @@ export function createMatch({ matchId, roomCode, startedAtMs, players, map, rule
         respawnRemainingMs: player.alive || player.forfeited ? 0 : Math.max(0, (player.respawnAtUs - state.elapsedUs) / 1000),
         lastProcessedSeq: player.lastProcessedSeq,
       })),
-      pickups: state.pickups.filter((pickup) => pickup.availableAtUs <= state.elapsedUs).map(({ id, type, x, y, radius }) => ({ id, type, x, y, radius })),
+      pickups: shields.snapshot(),
       projectiles: [...state.projectiles.values()].map(({ id, ownerId, x, y, dirX, dirY }) => ({ id, ownerId, x, y, dirX, dirY })),
     };
   }
@@ -165,7 +159,7 @@ export function createMatch({ matchId, roomCode, startedAtMs, players, map, rule
         config: {
           mode: rules.mode, durationMs: rules.durationMs, respawnMs: rules.respawnMs,
           nodeDurationMs: rules.nodeDurationMs, nodePreviewMs: rules.nodePreviewMs,
-          scorePerSecond: rules.scorePerSecond, maxShieldCharges: GAME_CONFIG.player.maxShieldCharges, pickupRespawnMs: rules.pickupRespawnMs,
+          scorePerSecond: rules.scorePerSecond, maxShieldCharges: GAME_CONFIG.player.maxShieldCharges, shieldSpawnIntervalMs: rules.shieldSpawnIntervalMs,
         }, state: snapshot(),
       };
     },
