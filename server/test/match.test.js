@@ -21,12 +21,12 @@ describe('movimiento, control y ciclo de partida', () => {
     expect(expired.getSnapshot().players[0].x).toBeCloseTo(104, 5);
   });
   it('no atraviesa paredes ni límites al mantener el movimiento', () => {
-    const map = flatMap(); map.tiles[4][10] = 1;
+    const map = flatMap(); map.tiles[64 / map.tileSize][160 / map.tileSize] = 1;
     const match = testMatch({ map }); const d = driver(match);
     d.step(3000, { a: { moveX: 1 } });
     expect(match.getSnapshot().players[0].x).toBeCloseTo(150, 2);
     d.step(2000, { a: { moveY: -1 } });
-    expect(match.getSnapshot().players[0].y).toBeCloseTo(26, 2);
+    expect(match.getSnapshot().players[0].y).toBeCloseTo(map.tileSize + GAME_CONFIG.player.radius, 2);
   });
   it('distingue vacío, único ocupante y disputa; ignora muertos y abandonados', () => {
     const map = flatMap(); const players = new Map([['a', playerState('a', 384, 320)], ['b', playerState('b', 704, 448)]]);

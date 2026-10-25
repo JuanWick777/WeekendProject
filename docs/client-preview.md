@@ -8,9 +8,9 @@ Con Node 24, ejecutar `npm ci` si faltan dependencias y `npm run dev`. Abrir htt
 
 - WASD/flechas: mover. Ratón: apuntar. Clic mantenido: disparar.
 - Seleccionar P1–P4 en el panel. Solo controlas uno a la vez; los otros quedan quietos, sin IA. Cambiar dron detiene la entrada anterior.
-- Herramientas: mapa completo/cámara 2×, controles PC/táctiles, semilla uint32, cuadrícula/colisiones, pausa y reiniciar ronda.
+- Herramientas: mapa completo/cámara 2×, controles PC/táctiles, semilla uint32 de escudos, cuadrícula/colisiones/Pasos revisados, pausa y reiniciar ronda.
 - **Ronda normal:** cuatro esquinas, reloj de 150 s, nodos cada 30 s, captura/disputa y resultado local al terminar.
-- **Práctica de combate:** coloca P1 en R1 (160,112), P2 en (224,112), P3 en (544,528) y P4 en R12 (608,528). P1/P4 recogen su escudo en el primer tick. Elegir P2 y disparar hacia P1 permite probar bloqueo, daño, muerte y respawn sin atravesar toda la arena. El mapa online conserva sus apariciones de esquina.
+- **Práctica de combate:** coloca P1 en R1 (280,230), P2 en (344,230), P3 en (936,890) y P4 en R12 (1000,890). P1/P4 recogen su escudo en el primer tick. Elegir P2 y disparar hacia P1 permite probar bloqueo, daño, muerte y respawn sin atravesar toda la arena. El mapa online conserva sus apariciones de esquina.
 - Cambiar de ventana pausa la práctica. Pulsar Continuar al volver. Reiniciar aplica la semilla escrita y restablece ronda, escudos y estadísticas.
 
 El HUD muestra vida, escudo, puntos, bajas/muertes, reaparición, tiempo y objetivo reales de la simulación local. En móvil aparecen dos pads; PC los oculta. Se mantiene `preview-player-state` para diagnóstico local, separado de las futuras coordenadas autoritativas online de `player-state`.
@@ -23,7 +23,9 @@ La práctica alimenta inputs a 20 Hz y usa el tick de 30 Hz del mismo motor que 
 
 ## Mapa y personajes
 
-Mundo 768 × 640, 48 × 40 tiles de 16. Plantilla cardinal-sketch v3, generador v1, protocolo 3. La estructura base conserva perímetro/bahías, pilares, L grandes, barras dobles laterales y cuatro tramos escalonados alrededor del núcleo. Hay 372 tiles fijos y entre 388–400 sólidos tras variantes, incluido el borde; semilla 42 usa 397. Los 12 grupos cambian coberturas pequeñas sin vaciar sectores. Ver [maps.md](maps.md).
+Mundo 1280 × 1120, 160 × 140 tiles de 8. Plantilla cardinal-sketch v4, generador v2, protocolo 4. Trazado fijo por defecto: perímetro con bahías/hombros diagonales, pilares, L y codos grandes, barras dobles laterales y cuatro arcos alrededor del núcleo. Cambiar semilla afecta los escudos, sin mover paredes. La variación procedural final se pospone hasta terminar las pantallas. Ver [maps.md](maps.md).
+
+El arte estático se compone una vez en arena-art.js: placas metálicas, rejillas, remaches, bahías y luces cian/ámbar. Las caras de pared se recortan contra la geometría sólida. Pasos revisados muestra 19 recorridos de ancho 48; las dos salidas de cada bahía se prueban además con ancho 64. Los huecos de hasta 16 unidades se cierran para no dibujar pasos menores que el cuerpo.
 
 Los cuatro drones se recrean en Canvas desde RedCG, YellowCG, PurpleCG y GreenCG: placas hexagonales y propulsores rojos; blindaje octagonal con franjas amarillas; anillos/pods violetas; marco romboidal y flechas verdes. Los sprites se dibujan una vez en caché y rotan hacia la mira. Las láminas JPEG con texto/fondo no se cargan como sprites. Se conservan originales sin edición.
 
@@ -37,8 +39,8 @@ Inventario máximo una carga. Inventario lleno no consume una recogida. El escud
 
 ## Verificación y siguiente bloque
 
-Node 24: lint, 76 pruebas y build aprobados. Incluye 64 semillas sin fallback, extremos abierto/cerrado/unión de variantes, daño, red HTTP/WebSocket, escudos y un ciclo local completo de bloqueo/daño/muerte/respawn; también igualdad del combate entre frames cortos y largos, cambio de dron, rotación y fin de ronda.
+Node 24: lint, 78 pruebas y build aprobados. Incluye diseño fijo entre semillas, 64 semillas procedurales opt-in sin fallback, recorridos con la física real y detección de pasillos estrechos, daño, red HTTP/WebSocket, escudos y un ciclo local completo de bloqueo/daño/muerte/respawn; también igualdad del combate entre frames cortos y largos, cambio de dron, rotación y fin de ronda.
 
-Inspección de navegador: escritorio, 844 × 390 y 390 × 844, recogida, primer impacto bloqueado sin perder HP, segundo impacto con 72 HP restantes, muerte/respawn, selección y movimiento/liberación de pad. Esto no sustituye una prueba física simultánea con dos dedos ni los E2E con PostgreSQL.
+Inspección del mapa v4 en navegador: escritorio, 844 × 390 y 390 × 844; salida de bahía, recogida de R1, encuadre completo/2×, capa de rutas y movimiento/liberación de pad sin errores de consola. Se conserva la comprobación de combate de la etapa anterior: primer impacto bloqueado, siguiente impacto deja 72 HP y muerte/respawn. Esto no sustituye una prueba física simultánea con dos dedos ni los E2E con PostgreSQL.
 
-Siguiente B: auth/lobby online, mapa/snapshots, interpolación/reconciliación, resultados/revancha y reconexión/guardado. C conecta repositorios. A revisa trazado/contraste y entrega pantallas pendientes. El balance se confirma jugando entre dos y cuatro personas.
+Siguiente B: auth/lobby online, mapa/snapshots, interpolación/reconciliación, resultados/revancha y reconexión/guardado. C conecta repositorios. A revisa trazado/contraste y completa autenticación/estados de pantallas. Los cinco menús nuevos solo se analizaron: ver [ui-notes.md](ui-notes.md). El balance se confirma jugando entre dos y cuatro personas.

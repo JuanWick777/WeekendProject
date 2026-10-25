@@ -1,6 +1,6 @@
 # Evaluación y entrega
 
-Checklist de requisitos, no afirmación de cumplimiento. Ya hay arranque, health, constantes v3, esquemas, auth HTTP, salas/WebSocket y simulación de partida con autenticación/guardado inyectados. Hasta B3 hay 72 pruebas aprobadas, incluyendo mapas, daño y recorridos HTTP/WebSocket de dos cuentas. Faltan PostgreSQL, cliente, interpolación y E2E de navegador; no se declara cumplida la entrega por el total de casos.
+Checklist de requisitos, no afirmación de cumplimiento. Ya hay arranque, health, constantes v4, esquemas, auth HTTP, salas/WebSocket y simulación de partida con autenticación/guardado inyectados. Hasta B3 hay 72 pruebas aprobadas, incluyendo mapas, daño y recorridos HTTP/WebSocket de dos cuentas. Faltan PostgreSQL, cliente, interpolación y E2E de navegador; no se declara cumplida la entrega por el total de casos.
 
 ## Obligatorio
 

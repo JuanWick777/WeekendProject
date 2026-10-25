@@ -2,13 +2,13 @@
 
 Tu responsabilidad es storage, telemetry, scripts, E2E, CI y despliegue. B mantiene cliente, autenticación, salas, red, simulación y shared; A diseño y revisión visual. Usa JavaScript ESM, PostgreSQL y pg. No necesitas esperar a que la partida esté terminada.
 
-Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v2, auth HTTP, salas/WebSocket y simulación B3 con autenticación/guardado inyectados. Entrega users/sessions y matches.saveMatch a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [game-server.md](game-server.md). El cliente y PostgreSQL todavía no están conectados al recorrido final. La entrega termina el domingo 25/10/2026 a las 23:59, Ciudad de México.
+Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](tasks.md) y [evaluation.md](evaluation.md). El código ya incorpora constantes v4, auth HTTP, salas/WebSocket y simulación B3 con autenticación/guardado inyectados. Entrega users/sessions y matches.saveMatch a B para conectarlos al runtime según [auth-integration.md](auth-integration.md) y [game-server.md](game-server.md). El cliente y PostgreSQL todavía no están conectados al recorrido final. La entrega termina el lunes 26/10/2026 a las 16:00, Ciudad de México.
 
 ## Qué cambió y qué guardar
 
 El modo es `rotating_control`: FFA 2–4, ronda de 150 s, cinco nodos de 30 s, único ocupante suma tiempo y dos o más disputan. No hay transporte de fragmentos ni sincronización. Una sola arena tiene variantes de cobertura por semilla, generadas y validadas por B. No implementes un generador propio.
 
-Conserva las estadísticas requeridas de victorias, bajas/muertes y supervivencia. Añade controlTimeMs, mode, templateId, templateVersion y generatorVersion según MatchResult. La puntuación es floor(controlTimeMs/1000); los puntos se conservan al morir. La semilla y las versiones permiten reproducir la geometría con la versión correspondiente del código.
+Conserva las estadísticas requeridas de victorias, bajas/muertes y supervivencia. Añade controlTimeMs, mode, templateId, templateVersion y generatorVersion según MatchResult. La puntuación es floor(controlTimeMs/1000); los puntos se conservan al morir. La semilla y las versiones permiten reproducir la geometría con la versión correspondiente del código. La arena vigente es cardinal-sketch v4, generador v2, protocolo 4, 1280 × 1120; el trazado de referencia queda fijo por ahora. MatchResult conserva su forma.
 
 ## Persistencia completa
 
@@ -44,7 +44,7 @@ Calcular el global desde sumas, sin promediar tasas de jugadores. Sin datos: cer
 
 ## Pruebas y Actions
 
-Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; B dos de interpolación del cliente; tú dos de payload Zod y uno de métricas/siembra. B3 ya aporta casos de mapas, daño, autoridad, ocupación, disputa, fracciones, rotación, escudo y fin: el total es 72 pruebas, incluidas conexiones HTTP/WebSocket reales. Faltan PostgreSQL, interpolación, métricas/siembra y E2E de navegador; no detenerse en diez si faltan reglas esenciales.
+Coordina al menos diez casos funcionales: B aporta dos de mapas, dos de daño y uno de autoridad; B dos de interpolación del cliente; tú dos de payload Zod y uno de métricas/siembra. B3 ya aporta casos de mapas, daño, autoridad, ocupación, disputa, fracciones, rotación, escudo y fin: el total actual es 78 pruebas, incluidas conexiones HTTP/WebSocket reales. Faltan PostgreSQL, interpolación, métricas/siembra y E2E de navegador; no detenerse en diez si faltan reglas esenciales.
 
 Implementa los tres E2E con servidor y PostgreSQL reales, sin mocks como sustituto del recorrido final:
 
@@ -72,4 +72,4 @@ Completar README con URL pública, repositorio, instalación, variables sin secr
 
 Trabaja en feat/storage, luego ramas cortas para telemetría/CI/despliegue con PR a main. B conecta routers en app.js en un cambio coordinado; avisa antes de cambiar dependencias, lockfile o interfaces compartidas. Mantén [github-workflow.md](github-workflow.md).
 
-Tu trabajo termina cuando cuentas/sesiones/resultados persisten, siembra y métricas son correctas y reproducibles, los tres E2E se ejecutan en cada PR y la URL pública permite demostrar una ronda completa con evidencia de los criterios. Primero entrega users/sessions a B y una URL mínima; no acumules toda la integración para el domingo.
+Tu trabajo termina cuando cuentas/sesiones/resultados persisten, siembra y métricas son correctas y reproducibles, los tres E2E se ejecutan en cada PR y la URL pública permite demostrar una ronda completa con evidencia de los criterios. Primero entrega users/sessions a B y una URL mínima; no acumules toda la integración para el lunes.

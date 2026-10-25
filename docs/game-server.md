@@ -4,7 +4,7 @@ B3 implementa la simulación de servidor sobre la base que integra los PR #1, #2
 
 ## Qué está funcionando
 
-- Generación determinista por semilla, validación de accesos/conectividad y fallback acotado.
+- Generación determinista: trazado de referencia fijo por defecto, procedural opt-in, validación de pasillos/accesos/conectividad y fallback acotado.
 - Movimiento autoritativo, colisiones, inputs a 20 Hz y simulación a 30 Hz; snapshots a 15 Hz.
 - Cinco nodos rotatorios, ocupación, disputa, fracciones de control y fin a 150 segundos.
 - Proyectiles de energía, primer impacto por segmento, caída de daño, escudo y respawn.
@@ -22,7 +22,7 @@ Las reglas públicas continúan en [contracts.md](contracts.md). El generador no
 5. Renderizar `objective` y sus plazos: no sumar control desde el render. A los 150 segundos llega `match:end`; mostrar sus estadísticas y la revancha del anfitrión.
 6. Manejar `RESULT_NOT_SAVED` como fallo de guardado de una ronda terminada. Recibir `match:end` por sí solo no confirma persistencia.
 
-La plantilla actual `cardinal-sketch`, versión 3, es **provisional** y traduce la disposición cardinal del boceto, con coberturas simplificadas. A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
+La plantilla actual `cardinal-sketch`, versión 4 y generador 2, adapta el mapa de A a 1280 × 1120. El trazado fijo recupera coberturas y arcos, con pasillos principales comprobados de 48 unidades. La variación queda pendiente; A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
 
 ## C/B: conectar PostgreSQL
 
@@ -59,6 +59,6 @@ Este fragmento muestra la unión; no presupone módulos de storage ya creados. C
 - `server/src/game/movement.js` y `collision.js`: movimiento y geometría.
 - `server/src/game/combat.js`, `objectives.js` y `results.js`: combate, nodos y clasificación.
 
-Con Node 24, `npm run verify` pasa lint, **76 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
+Con Node 24, `npm run verify` pasa lint, **78 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
 
 Siguen pendientes: repositorios y guardado PostgreSQL reales, cliente online de B, revisión del mapa, pruebas de interpolación, tres E2E de navegador, telemetría/siembra y mediciones en URL pública. B4 cierra la integración y los fallos de conexión/guardado sobre ese recorrido completo.

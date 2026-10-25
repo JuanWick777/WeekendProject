@@ -1,7 +1,7 @@
 import { GAME_CONFIG } from '../constants.js';
 import { circleHitsMap, firstWallHit } from '../collision.js';
 
-export function validateMap(map, { protectedTiles = [] } = {}) {
+export function validateMap(map, { protectedTiles = [], protectedRoutes = map.protectedRoutes ?? [] } = {}) {
   const errors = [];
   const { columns, rows, tileSize } = GAME_CONFIG.world;
   if (map.columns !== columns || map.rows !== rows || map.tileSize !== tileSize
@@ -22,6 +22,10 @@ export function validateMap(map, { protectedTiles = [] } = {}) {
     if ((row === 0 || col === 0 || row === rows - 1 || col === columns - 1) && map.tiles[row][col] !== 1) errors.push('Open border');
   }
   for (const [col, row] of protectedTiles) if (map.tiles[row]?.[col] !== 0) errors.push('Protected route blocked');
+  for (const route of protectedRoutes) for (let i = 1; i < route.points.length; i += 1) {
+    const [x, y] = route.points[i - 1]; const [tx, ty] = route.points[i];
+    if (firstWallHit(map, x, y, tx - x, ty - y, route.clearance - .01) !== null) errors.push('Narrow or blocked route: ' + route.id);
+  }
   for (const node of map.nodes) {
     if (map.nodes.some((other) => other !== node && Math.hypot(node.x - other.x, node.y - other.y) < node.radius + other.radius)) errors.push('Nodes overlap');
     if (circleHitsMap(map, node.x, node.y, node.radius)) errors.push('Node obstructed: ' + node.id);

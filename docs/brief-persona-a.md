@@ -11,7 +11,7 @@ Tu responsabilidad ahora es el diseño y las referencias en `docs/visual-referen
 - Referencias de recogida de escudo, disparo, impacto, muerte y respawn.
 - Revisión del mapa adaptado: accesos, lectura de paredes, rutas periféricas y coberturas.
 
-Puedes entregar imágenes y notas; B convierte esos diseños a código. Guarda referencias en maps, characters, ui y effects, señalando qué versión está vigente.
+Puedes entregar imágenes y notas; B convierte esos diseños a código. Guarda referencias en maps, characters, ui y effects, señalando qué versión está vigente. Los cinco menús nuevos ya se analizaron, sin implementarlos todavía: ver [ui-notes.md](ui-notes.md). Completar autenticación y estados indicados allí.
 
 ## Reglas que debe reflejar el arte
 
@@ -19,10 +19,10 @@ FFA 2–4; 150 s; centro -> norte/A -> este/B -> sur/C -> oeste/D, 30 s cada uno
 
 Escudo equipado: una carga que absorbe un impacto y no vence por tiempo. Cuatro recogidas iniciales aparecen una vez; posteriormente hay un aleatorio a la vez con intervalo 15 s según [contrato](contracts.md). No representar habilidades ni atributos distintos por personaje.
 
-Mundo adaptado: 768 × 640, 48 × 40 casillas de 16. El cliente dibuja las paredes reales del mapa recibido. Las imágenes con dimensiones anteriores son referencias históricas.
+Mundo adaptado: 1280 × 1120, 160 × 140 casillas de 8, trazado fijo v4. El cliente dibuja las paredes reales del mapa recibido. Las imágenes con dimensiones anteriores son referencias históricas.
 
 ## Cómo revisar
 
-Con B, abrir npm run dev y revisar el mapa completo y el seguimiento del dron. Usar las capas de cuadrícula/colisión para señalar diferencias entre pared dibujada y espacio transitable. Comprobar el HUD a tamaño móvil, contraste de balas y personajes, nodo activo e inactivos y orientación del arma.
+Con B, abrir npm run dev y revisar el mapa completo y el seguimiento del dron. Usar las capas de cuadrícula/colisión/Pasos revisados para señalar diferencias entre pared dibujada y espacio transitable. Comprobar el HUD a tamaño móvil, contraste de balas y personajes, nodo activo e inactivos y orientación del arma.
 
 Las cuatro láminas detalladas ya están recreadas en sprites Canvas con rotación continua y atributos idénticos. La práctica de combate permite revisar recogida/bloqueo/daño/respawn. La vista actual es local y está identificada; el recorrido online, interpolación y controles definitivos los implementa B. A aporta observaciones y prueba el diseño con B/C cuando se conecte la partida real.
