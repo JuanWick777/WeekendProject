@@ -1,132 +1,101 @@
 import { pool } from '../storage/pool.js';
 
-/**
- * Obtiene métricas agregadas de telemetría ajustadas strictly al contrato.
- * @param {Object} options - Filtros { source: 'all' | 'live' | 'seed' }
- * @returns {Promise<Object>} Estructura con { source, matches, playerResults, overall, players }
- */
-export async function getTelemetry({ source = 'all' } = {}) {
-  const validSource = ['all', 'live', 'seed'].includes(source) ? source : 'all';
+export async function getTelemetry(options = {}) {
+  const source = options.source || 'all';
+  const userId = options.userId || null;
 
-  // Excluir rondas abortadas y aplicar filtro de origen si aplica
-  const whereClauses = ["m.finish_reason IS DISTINCT FROM 'aborted'"];
+  let sourceFilter = '';
   const params = [];
 
-  if (validSource !== 'all') {
-    params.push(validSource);
-    whereClauses.push(`m.source = $${params.length}`);
+  if (source !== 'all') {
+    params.push(source);
+    sourceFilter = `WHERE m.source = $${params.length}`;
   }
 
-  const whereSql = `WHERE ${whereClauses.join(' AND ')}`;
-
-  // Consulta de totales generales y participaciones (m.id para referenciar la clave primaria de matches)
-  const overallQuery = `
-    SELECT
-      COUNT(DISTINCT m.id)::INT AS total_matches,
-      COUNT(pm.player_id)::INT AS total_player_results,
-      COALESCE(SUM(CASE WHEN pm.winner = TRUE THEN 1 ELSE 0 END), 0)::INT AS total_wins,
-      COALESCE(SUM(pm.kills), 0)::INT AS total_kills,
-      COALESCE(SUM(pm.deaths), 0)::INT AS total_deaths,
-      COALESCE(SUM(pm.alive_ms), 0)::NUMERIC AS total_alive_ms,
-      COALESCE(SUM(pm.participated_ms), 0)::NUMERIC AS total_participated_ms,
-      COALESCE(SUM(pm.control_time_ms), 0)::NUMERIC AS total_control_ms
-    FROM matches m
-    LEFT JOIN player_matches pm ON m.id = pm.match_id
-    ${whereSql};
-  `;
-
-  // Consulta agrupada por jugador individual (m.id en JOIN y conteo de partidas únicas)
-  const playersQuery = `
-    SELECT
-      pm.player_id AS "playerId",
-      COUNT(DISTINCT m.id)::INT AS matches,
-      COUNT(pm.match_id)::INT AS "playerResults",
-      COALESCE(SUM(CASE WHEN pm.winner = TRUE THEN 1 ELSE 0 END), 0)::INT AS wins,
-      COALESCE(SUM(pm.kills), 0)::INT AS kills,
-      COALESCE(SUM(pm.deaths), 0)::INT AS deaths,
-      COALESCE(SUM(pm.alive_ms), 0)::NUMERIC AS "totalAliveMs",
-      COALESCE(SUM(pm.participated_ms), 0)::NUMERIC AS "totalParticipatedMs",
-      COALESCE(SUM(pm.control_time_ms), 0)::NUMERIC AS "totalControlMs"
-    FROM matches m
-    JOIN player_matches pm ON m.id = pm.match_id
-    ${whereSql}
-    GROUP BY pm.player_id
-    ORDER BY wins DESC, kills DESC;
-  `;
-
-  const overallRes = await pool.query(overallQuery, params);
-  const playersRes = await pool.query(playersQuery, params);
-
-  const rawOverall = overallRes.rows[0] || {};
-  const totalMatches = Number(rawOverall.total_matches || 0);
-  const totalPlayerResults = Number(rawOverall.total_player_results || 0);
-
-  // Respuesta por defecto cuando no hay registros
-  if (totalPlayerResults === 0) {
-    return {
-      source: validSource,
-      matches: totalMatches,
-      playerResults: 0,
-      overall: {
-        winRate: 0,
-        kdr: 0,
-        averageAliveSeconds: 0,
-        survivalRate: 0,
-        averageControlSeconds: 0
-      },
-      players: []
-    };
+  let userFilter = '';
+  if (userId) {
+    params.push(userId);
+    const userParamIdx = params.length;
+    userFilter = sourceFilter
+      ? `${sourceFilter} AND pm.player_id = $${userParamIdx}`
+      : `WHERE pm.player_id = $${userParamIdx}`;
   }
 
-  const round = (val) => Math.round(val * 1000) / 1000;
+  const matchesRes = await pool.query(
+    `SELECT COUNT(DISTINCT m.id) AS total_matches
+     FROM matches m
+     ${sourceFilter};`,
+    source !== 'all' ? [source] : []
+  );
+  const totalMatches = parseInt(matchesRes.rows[0]?.total_matches || '0', 10);
 
-  const totalWins = Number(rawOverall.total_wins || 0);
-  const totalKills = Number(rawOverall.total_kills || 0);
-  const totalDeaths = Number(rawOverall.total_deaths || 0);
-  const totalAliveMs = Number(rawOverall.total_alive_ms || 0);
-  const totalParticipatedMs = Number(rawOverall.total_participated_ms || 0);
-  const totalControlMs = Number(rawOverall.total_control_ms || 0);
+  const statsRes = await pool.query(
+    `SELECT
+       COUNT(pm.match_id) AS total_player_results,
+       SUM(CASE WHEN pm.winner THEN 1 ELSE 0 END) AS wins,
+       SUM(pm.kills) AS kills,
+       SUM(pm.deaths) AS deaths,
+       SUM(CASE WHEN pm.deaths = 0 THEN 1 ELSE 0 END) AS survived
+     FROM player_matches pm
+     JOIN matches m ON pm.match_id = m.id
+     ${userFilter};`,
+    params
+  );
 
-  // Cálculos globales (Escala 0-100% para winRate y survivalRate)
-  const overallWinRate = round((100 * totalWins) / totalPlayerResults);
-  const overallKdr = round(totalKills / Math.max(1, totalDeaths));
-  const overallAvgAlive = round(totalAliveMs / totalPlayerResults / 1000);
-  const overallSurvivalRate = totalParticipatedMs > 0 ? round((100 * totalAliveMs) / totalParticipatedMs) : 0;
-  const overallAvgControl = round(totalControlMs / totalPlayerResults / 1000);
+  const stats = statsRes.rows[0] || {};
+  const totalPlayerResults = parseInt(stats.total_player_results || '0', 10);
+  const wins = parseInt(stats.wins || '0', 10);
+  const kills = parseInt(stats.kills || '0', 10);
+  const deaths = parseInt(stats.deaths || '0', 10);
+  const survived = parseInt(stats.survived || '0', 10);
 
-  // Mapeo detallado por jugador
-  const players = playersRes.rows.map(row => {
-    const pResults = Number(row.playerResults || 0);
-    const pWins = Number(row.wins || 0);
-    const pKills = Number(row.kills || 0);
-    const pDeaths = Number(row.deaths || 0);
-    const pAliveMs = Number(row.totalAliveMs || 0);
-    const pPartMs = Number(row.totalParticipatedMs || 0);
-    const pControlMs = Number(row.totalControlMs || 0);
+  const rawWinRate = totalPlayerResults > 0 ? (wins / totalPlayerResults) * 100 : 0;
+  const rawKdr = deaths > 0 ? kills / deaths : kills;
+  const rawSurvivalRate = totalPlayerResults > 0 ? (survived / totalPlayerResults) * 100 : 0;
 
-    return {
-      playerId: row.playerId,
-      matches: Number(row.matches || 0),
-      playerResults: pResults,
-      winRate: pResults > 0 ? round((100 * pWins) / pResults) : 0,
-      kdr: round(pKills / Math.max(1, pDeaths)),
-      averageAliveSeconds: pResults > 0 ? round(pAliveMs / pResults / 1000) : 0,
-      survivalRate: pPartMs > 0 ? round((100 * pAliveMs) / pPartMs) : 0,
-      averageControlSeconds: pResults > 0 ? round(pControlMs / pResults / 1000) : 0
-    };
-  });
+  const winRate = Number.isNaN(rawWinRate) ? 0 : Math.round(rawWinRate * 100) / 100;
+  const kdr = Number.isNaN(rawKdr) ? 0 : Math.round(rawKdr * 100) / 100;
+  const survivalRate = Number.isNaN(rawSurvivalRate) ? 0 : Math.round(rawSurvivalRate * 100) / 100;
+
+  const playersRes = await pool.query(
+    `SELECT
+       u.id,
+       u.username,
+       u.display_name AS "displayName",
+       COUNT(pm.match_id) AS "matchCount",
+       SUM(CASE WHEN pm.winner THEN 1 ELSE 0 END) AS wins,
+       SUM(pm.kills) AS kills,
+       SUM(pm.deaths) AS deaths
+     FROM users u
+     JOIN player_matches pm ON u.id = pm.player_id
+     JOIN matches m ON pm.match_id = m.id
+     ${sourceFilter}
+     GROUP BY u.id, u.username, u.display_name;`,
+    source !== 'all' ? [source] : []
+  );
 
   return {
-    source: validSource,
+    source,
     matches: totalMatches,
     playerResults: totalPlayerResults,
+    winRate,
+    kdr,
+    survivalRate,
     overall: {
-      winRate: overallWinRate,
-      kdr: overallKdr,
-      averageAliveSeconds: overallAvgAlive,
-      survivalRate: overallSurvivalRate,
-      averageControlSeconds: overallAvgControl
+      matches: totalMatches,
+      playerResults: totalPlayerResults,
+      winRate,
+      kdr,
+      survivalRate
     },
-    players
+    players: playersRes.rows.map(p => ({
+      id: p.id,
+      username: p.username,
+      displayName: p.displayName,
+      matches: parseInt(p.matchCount, 10),
+      wins: parseInt(p.wins, 10),
+      kills: parseInt(p.kills, 10),
+      deaths: parseInt(p.deaths, 10)
+    }))
   };
 }

@@ -32,7 +32,7 @@ export async function processSeedBatch({ seed, matches = 5, batchId }) {
 
     if (batchRes.rowCount === 0) {
       await client.query('COMMIT');
-      return { status: 'success', insertedMatches: 0, batchId: effectiveBatchId };
+      return { status: 'success', insertedMatches: 0, alreadyExists: true, batchId: effectiveBatchId };
     }
 
     const prng = createPRNG(seed);
@@ -109,7 +109,7 @@ export async function processSeedBatch({ seed, matches = 5, batchId }) {
     }
 
     await client.query('COMMIT');
-    return { status: 'success', insertedMatches: totalInserted, batchId: effectiveBatchId };
+    return { status: 'success', insertedMatches: totalInserted, alreadyExists: false, batchId: effectiveBatchId };
 
   } catch (error) {
     await client.query('ROLLBACK');
