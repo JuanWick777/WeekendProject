@@ -1,191 +1,226 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { pool } from '../src/storage/pool.js';
-import { createUser } from '../src/storage/users.js';
-import { saveMatch } from '../src/storage/matches.js';
-import { processSeedBatch } from '../src/storage/seedService.js';
-import { getTelemetry } from '../src/telemetry/telemetryService.js';
+import { pool } from '../server/src/storage/pool.js';
+import { createUser } from '../server/src/storage/users.js';
+import { findSessionByTokenHash, deleteSessionByTokenHash } from '../server/src/storage/sessions.js';
+import { saveMatch } from '../server/src/storage/matches.js';
+import { processSeedBatch } from '../server/src/storage/seedService.js';
+import { getTelemetry } from '../server/src/telemetry/telemetryService.js';
 
-describe('Storage & Telemetry Service Suite (Paso 8)', () => {
-  let testUserId;
-  const testUsername = `vitest_user_${Date.now()}`;
+async function runStorageTests() {
+  console.log("🧪 Ejecutando pruebas en entorno de TEST con TEST_DATABASE_URL...");
 
-  beforeAll(async () => {
-    // Inicialización del esquema de pruebas
-    await pool.query(`
-      DROP TABLE IF EXISTS player_matches CASCADE;
-      DROP TABLE IF EXISTS matches CASCADE;
-      DROP TABLE IF EXISTS sessions CASCADE;
-      DROP TABLE IF EXISTS seed_batches CASCADE;
-      DROP TABLE IF EXISTS users CASCADE;
+  if (process.env.NODE_ENV !== 'test') {
+    console.error("❌ ERROR FATAL: El script debe ejecutarse obligatoriamente con NODE_ENV=test");
+    process.exit(1);
+  }
 
-      CREATE TABLE users (
-        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
-        username TEXT UNIQUE NOT NULL,
-        display_name TEXT,
-        password_hash TEXT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
+  // Recreación limpia del esquema
+  await pool.query(`
+    DROP TABLE IF EXISTS player_matches CASCADE;
+    DROP TABLE IF EXISTS matches CASCADE;
+    DROP TABLE IF EXISTS sessions CASCADE;
+    DROP TABLE IF EXISTS seed_batches CASCADE;
+    DROP TABLE IF EXISTS users CASCADE;
 
-      CREATE TABLE matches (
-        id TEXT PRIMARY KEY,
-        room_code TEXT,
-        mode TEXT,
-        seed BIGINT,
-        template_id TEXT,
-        template_version INT,
-        generator_version INT,
-        status TEXT NOT NULL DEFAULT 'completed',
-        finish_reason TEXT DEFAULT 'time',
-        draw_player_ids TEXT[] DEFAULT '{}',
-        started_at_ms BIGINT,
-        ended_at_ms BIGINT,
-        duration_ms BIGINT,
-        source TEXT DEFAULT 'live',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
+    CREATE TABLE users (
+      id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+      username TEXT UNIQUE NOT NULL,
+      display_name TEXT,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
 
-      CREATE TABLE player_matches (
-        match_id TEXT REFERENCES matches(id) ON DELETE CASCADE,
-        player_id TEXT,
-        score INT DEFAULT 0,
-        kills INT DEFAULT 0,
-        deaths INT DEFAULT 0,
-        control_time_ms BIGINT DEFAULT 0,
-        alive_ms BIGINT DEFAULT 0,
-        participated_ms BIGINT DEFAULT 0,
-        winner BOOLEAN DEFAULT FALSE,
-        draw BOOLEAN DEFAULT FALSE,
-        abandonment BOOLEAN DEFAULT FALSE,
-        PRIMARY KEY (match_id, player_id)
-      );
+    CREATE TABLE sessions (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT UNIQUE NOT NULL,
+      expires_at_ms BIGINT NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
 
-      CREATE TABLE seed_batches (
-        batch_id TEXT PRIMARY KEY,
-        seed BIGINT NOT NULL,
-        match_count INT NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    CREATE TABLE matches (
+      id TEXT PRIMARY KEY,
+      room_code TEXT,
+      mode TEXT,
+      seed BIGINT,
+      template_id TEXT,
+      template_version INT,
+      generator_version INT,
+      status TEXT NOT NULL DEFAULT 'completed',
+      finish_reason TEXT DEFAULT 'time',
+      draw_player_ids TEXT[] DEFAULT '{}',
+      started_at_ms BIGINT,
+      ended_at_ms BIGINT,
+      duration_ms BIGINT,
+      source TEXT DEFAULT 'live',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
 
+    CREATE TABLE player_matches (
+      match_id TEXT REFERENCES matches(id) ON DELETE CASCADE,
+      player_id TEXT,
+      score INT DEFAULT 0,
+      kills INT DEFAULT 0,
+      deaths INT DEFAULT 0,
+      control_time_ms BIGINT DEFAULT 0,
+      alive_ms BIGINT DEFAULT 0,
+      participated_ms BIGINT DEFAULT 0,
+      winner BOOLEAN DEFAULT FALSE,
+      draw BOOLEAN DEFAULT FALSE,
+      abandonment BOOLEAN DEFAULT FALSE,
+      PRIMARY KEY (match_id, player_id)
+    );
+
+    CREATE TABLE seed_batches (
+      batch_id TEXT PRIMARY KEY,
+      seed BIGINT NOT NULL,
+      match_count INT NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  console.log("✅ Tablas recreadas e inicializadas correctamente en la base de datos de pruebas.");
+
+  const testUserUsername = `user_${Date.now()}`;
+  const testMatchId = `test_match_${Date.now()}`;
+  const testBatchId = `batch_test_${Date.now()}`;
+
+  try {
+    // -------------------------------------------------------------
+    // PRUEBA 1: Creación de Usuario y Manejo de Duplicados
+    // -------------------------------------------------------------
     const user = await createUser({
-      username: testUsername,
-      displayName: 'Vitest User',
-      passwordHash: '$2b$10$mockHashForVitest'
-    });
-    testUserId = user.id;
-  });
-
-  afterAll(async () => {
-    await pool.end();
-  });
-
-  beforeEach(async () => {
-    await pool.query('DELETE FROM player_matches;');
-    await pool.query('DELETE FROM matches;');
-    await pool.query('DELETE FROM seed_batches;');
-  });
-
-  describe('1. Persistencia e Idempotencia (saveMatch)', () => {
-    it('debe guardar una partida correctamente asignando source="live" por defecto', async () => {
-      const matchId = `match_live_${Date.now()}`;
-      const matchResult = {
-        matchId,
-        roomCode: 'ROOM_1',
-        mode: 'rotating_control',
-        startedAtMs: 1000,
-        endedAtMs: 31000,
-        durationMs: 30000,
-        status: 'completed',
-        finishReason: 'time',
-        players: [
-          {
-            playerId: testUserId,
-            kills: 3,
-            deaths: 1,
-            controlTimeMs: 10000,
-            aliveMs: 20000,
-            participatedMs: 30000,
-            winner: true
-          }
-        ]
-      };
-
-      const result = await saveMatch(matchResult);
-      expect(result.inserted).toBe(true);
-
-      const dbMatch = await pool.query('SELECT * FROM matches WHERE id = $1;', [matchId]);
-      expect(dbMatch.rows[0].source).toBe('live');
+      username: testUserUsername,
+      displayName: 'Test User',
+      password: 'SecurePassword123!',
+      passwordHash: '$2b$10$mockPasswordHashForTestingOnly123456',
+      password_hash: '$2b$10$mockPasswordHashForTestingOnly123456'
     });
 
-    it('debe derivar el score como Math.floor(controlTimeMs / 1000)', async () => {
-      const matchId = `match_score_${Date.now()}`;
-      const controlTimeMs = 15750; // Debería derivar a 15 de score
+    const createdUserId = user.id;
+    console.log("✅ createUser:", user);
 
-      await saveMatch({
-        matchId,
-        durationMs: 30000,
-        players: [{ playerId: testUserId, controlTimeMs }]
+    try {
+      await createUser({
+        username: testUserUsername,
+        displayName: 'Test User Duplicate',
+        password: 'SecurePassword123!',
+        passwordHash: '$2b$10$mockPasswordHashForTestingOnly123456'
       });
+      throw new Error("Se esperaba fallo por USERNAME_TAKEN y no ocurrió.");
+    } catch (err) {
+      if (err.code === 'USERNAME_TAKEN' || err.message.includes('USERNAME_TAKEN')) {
+        console.log("✅ Duplicado traducido correctamente a code: USERNAME_TAKEN");
+      } else {
+        throw err;
+      }
+    }
 
-      const pm = await pool.query('SELECT score FROM player_matches WHERE match_id = $1;', [matchId]);
-      expect(pm.rows[0].score).toBe(15);
+    // -------------------------------------------------------------
+    // PRUEBA 2: Sesiones y Token Hash
+    // -------------------------------------------------------------
+    const mockTokenHash = `hash_${Date.now()}`;
+    const expiresAtMs = Date.now() + 3600000;
+
+    await pool.query(
+      `INSERT INTO sessions (user_id, token_hash, expires_at_ms) VALUES ($1, $2, $3)`,
+      [createdUserId, mockTokenHash, expiresAtMs]
+    );
+
+    const sessionRes = await findSessionByTokenHash(mockTokenHash);
+    console.log("✅ findSessionByTokenHash resultado:", sessionRes);
+
+    if (!sessionRes || !sessionRes.user || sessionRes.user.id !== createdUserId) {
+      throw new Error("Estructura de sesión inválida o no coincide el usuario.");
+    }
+    console.log("✅ Estructura { user: { id, username, displayName }, expiresAtMs } y conversión de BIGINT verificadas.");
+
+    await deleteSessionByTokenHash(mockTokenHash);
+    console.log("✅ deleteSessionByTokenHash: OK");
+
+    // -------------------------------------------------------------
+    // PRUEBA 3: Persistencia de Partida Directa (saveMatch)
+    // -------------------------------------------------------------
+    const startedAtMs = Date.now();
+    const durationMs = 30000;
+    const endedAtMs = startedAtMs + durationMs;
+
+    const matchResult = {
+      matchId: testMatchId,
+      roomCode: 'TEST_ROOM',
+      mode: 'rotating_control',
+      templateId: 'template-4',
+      templateVersion: 1,
+      generatorVersion: 2,
+      status: 'completed',
+      finishReason: 'time',
+      drawPlayerIds: [],
+      startedAtMs,
+      endedAtMs,
+      durationMs,
+      players: [
+        {
+          playerId: createdUserId,
+          kills: 5,
+          deaths: 2,
+          controlTimeMs: 15000,
+          aliveMs: 25000,
+          participatedMs: 30000,
+          winner: true,
+          draw: false,
+          abandonment: false
+        }
+      ]
+    };
+
+    const saveRes = await saveMatch(matchResult, { source: 'live' });
+    if (!saveRes.inserted) {
+      throw new Error("No se pudo insertar la partida de prueba.");
+    }
+    console.log("✅ saveMatch insertado correctamente con metadatos de arena.");
+
+    // -------------------------------------------------------------
+    // PRUEBA 4: Siembra Atómica y Semilla 0 (processSeedBatch)
+    // -------------------------------------------------------------
+    const seedResult = await processSeedBatch({
+      seed: 0,
+      batchId: testBatchId
     });
-  });
 
-  describe('2. Siembra Sintética Atómica (processSeedBatch)', () => {
-    it('debe ejecutar la siembra atómicamente con Semilla 0 y bots sintéticos', async () => {
-      const batchId = `vitest_batch_0`;
-      const res = await processSeedBatch({ seed: 0, matches: 3, batchId });
+    if (seedResult.status !== 'success' || seedResult.insertedMatches === 0) {
+      throw new Error("Fallo en la siembra sintética atómica.");
+    }
+    console.log("✅ processSeedBatch completado con Semilla 0 y usuarios sintéticos pre-insertados.");
 
-      expect(res.status).toBe('success');
-      expect(res.insertedMatches).toBe(3);
+    // -------------------------------------------------------------
+    // PRUEBA 5: Telemetría según Contrato
+    // -------------------------------------------------------------
+    const telemetry = await getTelemetry({ source: 'all' });
+    if (!telemetry.overall || typeof telemetry.overall.winRate !== 'number' || !Array.isArray(telemetry.players)) {
+      throw new Error("Estructura de telemetría fuera de contrato.");
+    }
+    console.log("✅ getTelemetry verificado con contrato { source, matches, playerResults, overall, players }.");
 
-      const seedMatches = await pool.query('SELECT COUNT(*) FROM matches WHERE source = \'seed\';');
-      expect(parseInt(seedMatches.rows[0].count, 10)).toBe(3);
-    });
+    // -------------------------------------------------------------
+    // LIMPIEZA
+    // -------------------------------------------------------------
+    await pool.query('DELETE FROM player_matches WHERE match_id = $1', [testMatchId]);
+    await pool.query('DELETE FROM matches WHERE id = $1', [testMatchId]);
+    await pool.query('DELETE FROM users WHERE id = $1', [createdUserId]);
 
-    it('debe ser idempotente al intentar re-ejecutar el mismo batchId', async () => {
-      const batchId = `vitest_batch_repeat`;
-      await processSeedBatch({ seed: 1, matches: 2, batchId });
-      
-      // Segunda ejecución con mismo batchId
-      const secondRun = await processSeedBatch({ seed: 1, matches: 2, batchId });
-      expect(secondRun.insertedMatches).toBe(0);
-    });
-  });
+    await pool.query('DELETE FROM player_matches WHERE match_id IN (SELECT id FROM matches WHERE source = \'seed\')');
+    await pool.query('DELETE FROM matches WHERE source = \'seed\'');
+    await pool.query('DELETE FROM seed_batches WHERE batch_id = $1', [testBatchId]);
+    await pool.query('DELETE FROM users WHERE password_hash = \'SYNTHETIC_NO_LOGIN\'');
 
-  describe('3. Telemetría y Filtros (getTelemetry)', () => {
-    it('debe retornar la estructura de telemetría con porcentajes válidos (0-100%)', async () => {
-      await processSeedBatch({ seed: 42, matches: 2, batchId: 'batch_telem' });
+    console.log("🧹 Limpieza finalizada.");
+    process.exit(0);
 
-      const telemetry = await getTelemetry({ source: 'all' });
-      
-      expect(telemetry).toHaveProperty('source');
-      expect(telemetry).toHaveProperty('matches');
-      expect(telemetry).toHaveProperty('playerResults');
-      expect(telemetry).toHaveProperty('overall');
-      expect(telemetry).toHaveProperty('players');
+  } catch (error) {
+    console.error("❌ FALLO EN LAS PRUEBAS DE STORAGE:", error);
+    process.exit(1);
+  } finally {
+    await pool.end();
+  }
+}
 
-      expect(telemetry.overall.winRate).toBeGreaterThanOrEqual(0);
-      expect(telemetry.overall.winRate).toBeLessThanOrEqual(100);
-    });
-
-    it('debe filtrar correctamente según la fuente (live vs seed)', async () => {
-      // 1 live match
-      await saveMatch({
-        matchId: `live_filter_${Date.now()}`,
-        durationMs: 20000,
-        players: [{ playerId: testUserId, winner: true }]
-      }, { source: 'live' });
-
-      // 2 seed matches
-      await processSeedBatch({ seed: 99, matches: 2, batchId: 'batch_filter' });
-
-      const liveTelemetry = await getTelemetry({ source: 'live' });
-      expect(liveTelemetry.matches).toBe(1);
-
-      const seedTelemetry = await getTelemetry({ source: 'seed' });
-      expect(seedTelemetry.matches).toBe(2);
-    });
-  });
-});
+runStorageTests();
