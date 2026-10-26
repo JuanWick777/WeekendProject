@@ -11,6 +11,6 @@ Para revisar el mapa sin PostgreSQL: `npm run dev:client` y abrir http://127.0.0
 - Práctica de combate: P1 en R1 (360,180), P2 (424,180), P3 (1036,860) y P4 en R12 (1100,860). Disparar con P2 hacia P1 comprueba escudo, daño y respawn.
 - Reiniciar restaura ronda, recogidas y estadísticas; la práctica se pausa al cambiar de ventana.
 
-Mapa 1448 × 1088, dibujo original 1448 × 1086 sin estirar; plantilla a-industrial v5, generador v3, protocolo 5. El terreno base continúa fijo. A2/A3 no cambian la geometría ni los atributos.
+Mapa 1448 × 1088, dibujo original 1448 × 1086 sin estirar; plantilla a-industrial v5, generador v4, protocolo 5. La práctica abre la referencia original de A. En Herramientas de diseño, elegir Mapa → Variaciones por semilla y Reiniciar ronda después de cambiar la semilla permite revisar el mismo generador procedural que usan las rondas online. Cambiar el selector de mapa reinicia automáticamente. Las paredes permanecen fijas durante cada ronda. Ver [generación](maps.md).
 
 La práctica conserva el panel de revisión de B; el HUD y los efectos nuevos se revisan en la partida online. En online no se pausa el servidor al abrir el menú o cambiar de pestaña. Ver [A2](a2-visuals.md), [integración](a23-integration.md) y [E2E](../tests/e2e/README.md).

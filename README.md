@@ -8,7 +8,7 @@ A1 conserva el mapa industrial y los 32 PNG originales de A con geometría compa
 
 El cliente de A, el puente de B y los repositorios PostgreSQL de C están integrados. El servidor conecta usuarios/sesiones y guardado de resultados, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. El helper de pruebas de C está incluido desde el PR #7. Ver [puente PostgreSQL](docs/postgres-bridge.md).
 
-La integración pasa lint, 118 pruebas en 18 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. La API de evaluación permite sembrar lotes y consultar estadísticas sin sesión, con validación y límites. El usuario revisó el juego en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [API de evaluación](docs/evaluation-api.md) y [pruebas E2E](tests/e2e/README.md).
+La integración pasa lint, 121 pruebas en 18 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. La API de evaluación permite sembrar lotes y consultar estadísticas sin sesión, con validación y límites. El usuario revisó el juego en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [API de evaluación](docs/evaluation-api.md) y [pruebas E2E](tests/e2e/README.md).
 
 ## Arrancar
 
@@ -54,7 +54,7 @@ La [práctica local](docs/client-preview.md) continúa en desarrollo en `/?pract
 
 ## Pendiente de entrega
 
-Verificar Supabase real, cerrar el requisito procedural y desplegar por HTTPS. Las tres variantes de paredes optativas no sustituyen por sí mismas la validación final de ese requisito. Medir latencia y endpoints en la URL pública; repetir controles y balance en los dispositivos de evaluación.
+El mapa procedural está activo en las rondas: combina cinco módulos de A por semilla, conserva las 75 paredes fijas y valida rutas antes de comenzar. La práctica conserva una referencia original para comparar. Ver [mapas y evidencia](docs/maps.md). Verificar Supabase real y desplegar por HTTPS. Medir latencia y endpoints en la URL pública; repetir controles y balance en los dispositivos de evaluación.
 
 Repositorio: https://github.com/JuanWick777/WeekendProject (privado; dar acceso al evaluador).
 URL pública: PENDIENTE.

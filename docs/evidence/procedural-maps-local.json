@@ -1,0 +1,1038 @@
+{
+  "date": "2026-10-26",
+  "scope": "Local deterministic generation, not public latency or playtesting",
+  "generatorVersion": 4,
+  "templateId": "a-industrial",
+  "templateVersion": 5,
+  "seeds": 64,
+  "uniqueGeometry": 61,
+  "minWalls": 143,
+  "maxWalls": 154,
+  "fallbacks": 0,
+  "samples": [
+    {
+      "seed": 0,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "80824139cd8ae70348a80a3bf7a64ca60fc82636f5ac9242dec2a9af2b6d3b2f",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 1,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "255cbdf55b5016aebc3156597408c7b8e8f78e63180ab96c197aac7160438ef7",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 2,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "31ba0c7dc659241af3565bc30329b3fd02b7d0dd64b2a34979e8f7e07e9ec429",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "v3"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 3,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "9db97762ff7c174f96ccc25e1b74a6cf970bf28a8eb7242d0b5c4c8b47150184",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 4,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "ac75207de458a60a3cb35c696bbf39507da6686ef76939e97199fd9700ee8af5",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 5,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "e064e2aebd55ab02314a12e1932964badc966fd2e0641ccf8193412ac96532c0",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 6,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "6d13ed81878011bd6b6e3327a01357d6299b73aa6767f9d8b2b1dff368d07b3d",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 7,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "7d51d65e76b9f8bce37113f195d427759b307d58f43cf0af5f9c03687c0763ac",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 8,
+      "walls": 143,
+      "fixedWalls": 75,
+      "geometryHash": "7beff64095feb58d29f7a5c7c6bcf7731574e9262f0e4693e587e5ae0e672e8e",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 9,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "08d5093f2a53d4fd7ac3ee85d2de61ddd3ad00c170ad25a0cdc5bcbae499350f",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v3"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 10,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "69d19c09d298f972c828e8c658149c4c8c5f0b74d97f13ff032202ed42471539",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 11,
+      "walls": 151,
+      "fixedWalls": 75,
+      "geometryHash": "d20b024af6dedcbbd52766f8cbbdb909a588a8ba3c6554e995141ec1c1da09a1",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "v2",
+        "south-inner": "v3"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 12,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "5e77f25f7a6dacd5e87a38e68896f075ecac4357708832d740b1706407be1e4c",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 13,
+      "walls": 147,
+      "fixedWalls": 75,
+      "geometryHash": "9e0c26ebe9cbeec9155114ac46367b9113faa953d2eeeb1e960a398669633e3f",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 14,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "9f2a74d25b8e67cf847b9b3e1ef9e5ec965298ea453142357677cf2f7974e3e6",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 15,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "8f98bb10944e18f1ae3e4050731521777892aee50e8b18fb008b2dc1f190032b",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 16,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "c2df446cd76c8fc5382d0260733503b1e9620334817ecef19db99d0a24beceba",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 17,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "96229b4e810ac5f1da39a7a75534b9c5fe278a4b55dc97ee2381309f9114c45f",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 18,
+      "walls": 151,
+      "fixedWalls": 75,
+      "geometryHash": "91a76f783ce75576bf1d5f3b6a1081ba0d75349e643149d53625baa43b739325",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 19,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "6fc0350961e7f031588548ef81b724268a64a281d5fcb05feea7f7128135b9d8",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 20,
+      "walls": 145,
+      "fixedWalls": 75,
+      "geometryHash": "1c96603949e60534c88c2855910dab39fa3d605ea25bcae7f73928890cd2b1b5",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 21,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "9da382d0ccc5d2805e8095b58cad48d414cda4c7ffdf83503625f957a5c433bc",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": null,
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 22,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "df8a82cac6f59a57c661ebe412d5d5eae1c0f19e5d75b1a0b286ab84574a3926",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": null,
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 23,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "ce31f193353b2934c08ae1519e5d5227450021462fef28cf926feede5a6fd7df",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 24,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "453f329bc858017b107e579ecf2f21e0ddb695a8f47d657eb0f5d69e8e878c68",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 25,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "6d12380d1d5461034dc1d713c326a343f9b9af4fcb0a510784a8c5eddadaa7c5",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "edge-pillars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 26,
+      "walls": 154,
+      "fixedWalls": 75,
+      "geometryHash": "080334be31f9ff42e892a1ef6161d5fb158d5d58349754fe2f1612a9c4915173",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 27,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "78af0b98ab2896292c39ac80be9b68142f871b5a93d9f64f67f286c671ceb0b5",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 28,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "39176ce005ee83e8b17c3a3c7ad79d26e4821c0cad58e904e49614f1bc56c03f",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 29,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "f38e583f86dba829db7f2ba8f97bfb1661f52dba88d245eca7d602458c8347b2",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 30,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "9f5d2240f70d9b6e72fdc24c01baa46296a1657a763807f146a8869d8b202872",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 31,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "b75e68d3a97f99092bb9c1cd1e15e1d37e60cf62b913eba1be477ac1dae0a8e1",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 32,
+      "walls": 146,
+      "fixedWalls": 75,
+      "geometryHash": "5778c0bb6ea7a045deb734cea12e581d7deddc4dd972b84651d517109160de86",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 33,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "610639e31c75da3572b7b59f9d0027f092b0bee8a98318a192c43f668f16106a",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 34,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "5eb30e68c85e1af22ca107fd7176896a0b1a25f7df5cc21888306274319b456a",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 35,
+      "walls": 145,
+      "fixedWalls": 75,
+      "geometryHash": "701dcaf19bccf5a8bf5c2ec3885d25132eb4aec6d69e51d8451fe811f7d43db0",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 36,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "b8b608905b4d2caa78dbe5fa92b800db8d12fd09ded97852a2d72947456ef929",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": null,
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 37,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "ea46c71fe985bbf2d4c11d5a25fe26fb626f09d89ed41efdba2985f41bcba019",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 38,
+      "walls": 146,
+      "fixedWalls": 75,
+      "geometryHash": "7c617c2b97fa771200b5834d1e5c53de3d8e188445fbc602e2eae3321d946f4e",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 39,
+      "walls": 154,
+      "fixedWalls": 75,
+      "geometryHash": "756a9ef6229aeae7faa84689182311dab535bfff7116f4ea78a0d75f5ec7959b",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 40,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "21dad46627322d47bcb65418e61f3edcbe2dec359b76795ead4dacafc1dda30c",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 41,
+      "walls": 147,
+      "fixedWalls": 75,
+      "geometryHash": "5c65c0d135f2c5ef9fba54c898e8efaa00964d3c3c37ec6917d5ddb9cb924e2b",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "v2",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 42,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "60e6920981a68203f7a6fbbe2edd8e97a5a4d34800872193e0ea53eaa4d73be8",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 43,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "96229b4e810ac5f1da39a7a75534b9c5fe278a4b55dc97ee2381309f9114c45f",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 44,
+      "walls": 144,
+      "fixedWalls": 75,
+      "geometryHash": "f1debaa90fa230e8b51760814791a5da0fa36920fe84549942c363e1c2acc949",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 45,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "3aa0de13e3d6f6def60f80e636bec3bdf57e3f757008cb724db9535cc3c76275",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 46,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "b6c21479e357a633ee3e3c84aff7a6b4d57e618c6ca4b64873cb45f2ee4b1ac7",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 47,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "b2a0c81c6a6322ac742cd1754c4a388f71e29e85fb72402246602414ad607c08",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 48,
+      "walls": 145,
+      "fixedWalls": 75,
+      "geometryHash": "05c16329f2cdbcde839ae93e2ae5981bf0169384f6388b273bb9cbe7ea1512ef",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 49,
+      "walls": 147,
+      "fixedWalls": 75,
+      "geometryHash": "10735e0d2e09bef0c1d373266e19bc17c2ad157273ed19d236885f6d77af00fe",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 50,
+      "walls": 154,
+      "fixedWalls": 75,
+      "geometryHash": "73042cb9848e0cdfe10d854f6c64033fb278d8310615998f2fda20045ce6f01d",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": null,
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 51,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "0502c9e28720983bb61411076097be28d9b6d76763c483f0751aab248058e317",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 52,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "bd2cea7be97751d5354ad5797fa59e562a52df159b99966c955162a40c06212d",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "v2"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 53,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "be0aea527fc158131c220e3e5118adf06e260ac2bb1ae5e0b94e31ca00fbccdf",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v3",
+        "middle": "base",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 54,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "1e450d25776cb18b3f1239d10fb059b454f839bf8298d728ac14fc22b46ecc38",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 55,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "39176ce005ee83e8b17c3a3c7ad79d26e4821c0cad58e904e49614f1bc56c03f",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 56,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "6efb7ff2beaa640de4da7d97f5629a0eec69d9407b5b893f9f97de83e26603e4",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 57,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "4a65df6e128e1733d9874983267ae9f2da23346cf0eeca41ce137924557db71d",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 58,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "86ad72224faec88e03426c3d3b021863e06125477683fe8a057f2ef7f940c8a0",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "v2",
+        "south-outer": "base",
+        "south-inner": "v3"
+      },
+      "removedGroup": "side-lower",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 59,
+      "walls": 149,
+      "fixedWalls": 75,
+      "geometryHash": "82c2f41c0decd1a42832f1a53beb8c776bb8dc3208ed08eb0431cac3687ac149",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v2",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "base"
+      },
+      "removedGroup": "core-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 60,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "de5303f2e4a58a2267d54efbe3a8e274e36928ba150965c9fa0a25c9194641a4",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "v2"
+      },
+      "removedGroup": "node-bars",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 61,
+      "walls": 150,
+      "fixedWalls": 75,
+      "geometryHash": "39176ce005ee83e8b17c3a3c7ad79d26e4821c0cad58e904e49614f1bc56c03f",
+      "modules": {
+        "north-outer": "v2",
+        "north-inner": "v3",
+        "middle": "v2",
+        "south-outer": "v3",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 62,
+      "walls": 148,
+      "fixedWalls": 75,
+      "geometryHash": "c80b4094fb7ed0c3cb690d8ddc20818a56d7e83cbea119f430698a2266d107de",
+      "modules": {
+        "north-outer": "v3",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "v2",
+        "south-inner": "base"
+      },
+      "removedGroup": "side-upper",
+      "attempts": 1,
+      "fallback": false
+    },
+    {
+      "seed": 63,
+      "walls": 152,
+      "fixedWalls": 75,
+      "geometryHash": "0c6d1eaf7be112bfed2f0a0dee2aa8f4c6d9493cc97342d2ceec5ecddb8875ce",
+      "modules": {
+        "north-outer": "base",
+        "north-inner": "base",
+        "middle": "base",
+        "south-outer": "base",
+        "south-inner": "v2"
+      },
+      "removedGroup": null,
+      "attempts": 1,
+      "fallback": false
+    }
+  ]
+}

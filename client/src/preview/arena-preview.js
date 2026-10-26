@@ -18,6 +18,8 @@ export async function startArenaPreview() {
   let session; let renderer; let effects = []; let zoom = window.matchMedia('(pointer: coarse)').matches ? 2 : 1;
   let running = true; let paused = false; let lastTime = null; let frameId; let frameCount = 0; let measuredAt = 0; let hudAt = 0;
   $('preview-tools').hidden = false;
+  $('arena-layout').hidden = false;
+  $('online-pending').hidden = true;
   $('design-label').textContent = 'SIMULACIÓN LOCAL · SIN MULTIJUGADOR';
   function updateSelection() {
     for (const card of roster.children) card.setAttribute('aria-pressed', String(Number(card.dataset.index) === session.selected));
@@ -51,12 +53,12 @@ export async function startArenaPreview() {
   function reset() {
     const field = $('map-seed'); if (!field.reportValidity()) return;
     const selected = session?.selected ?? 0;
-    session = createPracticeSession({ seed: Number(field.value), mode: $('practice-mode').value });
+    session = createPracticeSession({ seed: Number(field.value), mode: $('practice-mode').value, layout: $('map-layout').value });
     session.select(selected); renderer = createRenderer(canvas, session.map);
     effects = []; controls.clear(); lastTime = null; paused = false;
     const { map } = session;
     $('show-routes').closest('label').hidden = !map.protectedRoutes?.length;
-    $('arena-spec').textContent = `${map.columns * map.tileSize} × ${map.rows * map.tileSize} · trazado fijo · v${map.templateVersion}`;
+    $('arena-spec').textContent = `${map.columns * map.tileSize} × ${map.rows * map.tileSize} · ${map.layout === 'reference' ? 'referencia de A' : 'semilla ' + map.seed} · generador v${map.generatorVersion}`;
     updateSelection(); updateHud(); canvas.focus();
   }
   PILOTS.forEach((pilot, index) => {
@@ -75,6 +77,7 @@ export async function startArenaPreview() {
   $('camera-mode').addEventListener('change', (event) => { zoom = event.target.value === 'map' ? 1 : 2; }, options);
   $('control-mode').addEventListener('change', (event) => { document.body.dataset.controls = event.target.value; controls.clear(); session.clear(); }, options);
   $('practice-mode').addEventListener('change', reset, options);
+  $('map-layout').addEventListener('change', reset, options);
   for (const id of ['reset-preview', 'result-restart']) $(id).addEventListener('click', reset, options);
   $('pause-preview').addEventListener('click', () => { paused = !paused; controls.clear(); session.clear(); lastTime = null; updateHud(); }, options);
   function suspend() { paused = true; controls.clear(); session.clear(); lastTime = null; updateHud(); }

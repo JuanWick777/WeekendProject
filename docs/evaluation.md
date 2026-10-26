@@ -1,6 +1,6 @@
 # Evaluación y entrega
 
-Checklist de requisitos, no afirmación de cumplimiento público. El cliente, simulación, autenticación y guardado PostgreSQL están integrados. La suite contiene 118 pruebas y tres E2E, y las rutas de evaluación están implementadas con validación y límites. Ver [API y mediciones locales](evaluation-api.md). Faltan procedural conforme a la rúbrica, Supabase remoto, despliegue HTTPS y evidencia de rendimiento público; el total de pruebas locales no sustituye esas verificaciones.
+Checklist de requisitos, no afirmación de cumplimiento público. El cliente, simulación, autenticación y guardado PostgreSQL están integrados. La suite contiene 121 pruebas y tres E2E, y las rutas de evaluación están implementadas con validación y límites. Ver [API y mediciones locales](evaluation-api.md). La generación por módulos de A está activa y validada en pruebas. Faltan Supabase remoto, despliegue HTTPS y evidencia de rendimiento público; el total de pruebas locales no sustituye esas verificaciones.
 
 ## Obligatorio
 
@@ -22,8 +22,8 @@ Checklist de requisitos, no afirmación de cumplimiento público. El cliente, si
 
 Estos puntos son decisiones de diseño para cumplir el proyecto; no son nuevas exigencias del profesor:
 
-- [ ] Una arena base con variantes de cobertura por semilla; mapa reproducible y transitable, con fallback probado.
-- [ ] Todos los clientes ven el mismo mapa; rotar el objetivo no cambia paredes.
+- [x] Una arena base con variantes de cobertura por semilla; mapa reproducible y transitable, con fallback probado.
+- [x] Todos los clientes ven el mismo mapa; rotar el objetivo no cambia paredes.
 - [ ] Cinco nodos, uno activo por 30 s, ronda de 150 s y aviso de 5 s.
 - [ ] Único ocupante vivo puntúa; vacío/disputado no. Las fracciones se conservan y el control total no supera la duración.
 - [ ] Proyectiles dirigidos, escudo 0/1, muerte y respawn autoritativos.

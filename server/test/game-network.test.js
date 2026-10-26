@@ -4,6 +4,7 @@ import { createAuthService } from '../src/auth/auth-service.js';
 import { createServerRuntime } from '../src/runtime.js';
 import { createTestAuthRepositories } from './helpers/auth-repositories.js';
 import { createTestSocket } from './helpers/socket-client.js';
+import { generateMap, GENERATOR_VERSION } from '@cybergrid/shared/maps';
 
 const origin = 'http://127.0.0.1:5173';
 let runtime;
@@ -45,6 +46,8 @@ async function setup({ saveMatch, gameOptions } = {}) {
   const first = await a.client.waitFor((message) => message.type === 'match:start');
   const second = await b.client.waitFor((message) => message.type === 'match:start');
   expect(first.payload.map).toEqual(second.payload.map);
+  expect(first.payload.map).toMatchObject({layout:'procedural',generatorVersion:GENERATOR_VERSION});
+  expect(first.payload.map).toEqual(generateMap(first.payload.map.seed));
   return { a, b, code, start: first.payload };
 }
 

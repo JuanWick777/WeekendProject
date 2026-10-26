@@ -4,7 +4,7 @@ B3 implementa la simulación de servidor sobre la base que integra los PR #1, #2
 
 ## Qué está funcionando
 
-- Generación determinista: trazado de referencia fijo por defecto, procedural opt-in, validación de pasillos/accesos/conectividad y fallback acotado.
+- Generación determinista: cobertura modular de A por semilla en rondas normales, referencia original disponible en práctica, validación de pasillos/accesos/conectividad y fallback acotado.
 - Movimiento autoritativo, colisiones, inputs a 20 Hz y simulación a 30 Hz; snapshots a 15 Hz.
 - Cinco nodos rotatorios, ocupación, disputa, fracciones de control y fin a 150 segundos.
 - Proyectiles de energía, primer impacto por segmento, caída de daño, escudo y respawn.
@@ -70,4 +70,4 @@ server/src/postgres-services.js conecta los repositorios reales de C con authSer
 
 El administrador emite match:persistence para que resultados distinga guardado confirmado y fallido; ver contracts.md. La cola WebSocket saliente admite 256 KiB para el mapa de A1, conservando los límites de entrada.
 
-La integración A1+A2+A3, puente B y repositorios C incluye 107 pruebas, build, lint y tres E2E con PostgreSQL real. Los módulos y el helper de C se incorporaron desde main después del PR #7; CI ejecuta también los E2E. El texto anterior describe el estado previo a esta integración; el cliente online e interpolación ya están implementados. Ver [puente PostgreSQL](postgres-bridge.md). Siguen pendientes la verificación de Supabase remota, endpoints de evaluación, despliegue y mediciones públicas.
+La integración A1+A2+A3, puente B y repositorios C incluye 121 pruebas, build, lint y tres E2E con PostgreSQL real. Los módulos y el helper de C se incorporaron desde main después del PR #7; CI ejecuta también los E2E. El texto anterior describe el estado previo a esta integración; el cliente online e interpolación ya están implementados. Ver [puente PostgreSQL](postgres-bridge.md). La API de evaluación ya está conectada a PostgreSQL. Siguen pendientes la verificación de Supabase remota, despliegue y mediciones públicas.

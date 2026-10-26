@@ -86,7 +86,7 @@ Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos ca
 }
 ~~~
 
-El servidor envía el mapa resuelto. seed es uint32; versiones enteras positivas. En segments-v1, wallPaths y el borde de outline son la autoridad física; tiles es ocupación auxiliar, no colisión. Las sombras no bloquean. El cliente usa la misma geometría compartida y no reconstruye física desde una imagen. Los originales conservan sus coordenadas y etiquetas authorId. El orden de activación es el orden canónico de nodes, no el número de la etiqueta decorativa. Las rondas normales usan reference/base. La selección opt-in procedural elige una de las tres variantes de A y todavía no acredita generación procedural completa. Ver [maps.md](maps.md).
+El servidor envía el mapa resuelto. seed es uint32; versiones enteras positivas. En segments-v1, wallPaths y el borde de outline son la autoridad física; tiles es ocupación auxiliar, no colisión. Las sombras no bloquean. El cliente usa la misma geometría compartida y no reconstruye física desde una imagen. Los originales conservan sus coordenadas y etiquetas authorId. El orden de activación es el orden canónico de nodes, no el número de la etiqueta decorativa. Las rondas normales usan procedural con generador v4: cinco módulos independientes de cobertura de A y eliminación acotada de un grupo removible. generation registra attempts y fallback, más modules y removedGroup en las combinaciones procedurales; el fallback y la referencia conservan variantId=base. Solo cambia al comenzar una nueva ronda. Ver [maps.md](maps.md).
 
 El servidor reenvía `match:start` con mapa y snapshot actual al reconectar a una ronda. No regenera terreno por una rotación ni al entrar otro socket.
 
