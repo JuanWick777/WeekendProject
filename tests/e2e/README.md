@@ -1,6 +1,6 @@
 # Recorridos E2E con servidor y PostgreSQL reales
 
-Requieren Node 24, los módulos de C, el puente de B y el build de A3. No usan repositorios de memoria ni resultados inventados.
+Requieren Node 24, PostgreSQL y el build del cliente. Los módulos de C y el puente de B ya están integrados. No usan repositorios de memoria ni resultados inventados.
 
 ## Ejecutar en Windows con Edge instalado
 
@@ -30,3 +30,9 @@ No configurar NODE_ENV=production en esta ejecución. Playwright transmite NODE_
 Se guardan capturas de las pantallas en test-results; un fallo conserva screenshot y trace. Los contextos comprueban errores de JavaScript. La base prueba source=live, is_synthetic=false y participantes reales.
 
 El recorrido móvil automatizado usa emulación de Edge/Chromium y CDP multitouch. No sustituye un teléfono físico, red pública ni pruebas con cuatro usuarios en redes diferentes.
+
+## CI
+
+El workflow ejecuta npm ci, lint, inicialización del esquema oficial y 107 pruebas, build de producción, instalación de Chromium con sus dependencias y npm run test:e2e. Usa el servicio PostgreSQL 16 del runner y esquemas aislados; no depende de Supabase. Los fallos conservan test-results como artefacto de Actions.
+
+La creación de sala espera el encabezado del lobby y un código válido en #room-code antes de leerlo. El formulario anterior también tiene un campo llamado Código de sala: esperar la transición evita leer ese campo vacío durante la petición HTTP.

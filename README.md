@@ -6,11 +6,11 @@ Juego web multijugador de control de nodos rotatorios con disparos de energía. 
 
 A1 conserva el mapa industrial y los 32 PNG originales de A con geometría compartida. A2 añade HUD, efectos y presentación del juego online. A3 incorpora menú, registro/login, salas, lobby, ayuda y resultados con datos reales, más controles PC/móvil, interpolación, predicción y recuperación de la ronda.
 
-El puente de servidor de B está implementado en la rama de integración: conecta los repositorios de C con autenticación y guardado, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. Para arrancar desde el repositorio aún se debe incorporar la rama de C con su helper de pruebas registrado y sus checks aprobados. Ver [puente PostgreSQL](docs/postgres-bridge.md).
+El cliente de A, el puente de B y los repositorios PostgreSQL de C están integrados. El servidor conecta usuarios/sesiones y guardado de resultados, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. El helper de pruebas de C está incluido desde el PR #7. Ver [puente PostgreSQL](docs/postgres-bridge.md).
 
-La rama A+B pasa lint, 91 pruebas y build. La copia integrada con los módulos de C pasa 107 pruebas y tres recorridos E2E, incluidas sus 16 pruebas de almacenamiento; usa el helper pendiente de registrar por C. Se comprobó además que una sesión real sobrevive al reinicio del servidor. El usuario revisó el flujo en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [integración A2/A3](docs/a23-integration.md).
+La integración pasa lint, 107 pruebas en 17 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. Se comprobó además que una sesión real sobrevive al reinicio del servidor. El usuario revisó el flujo en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [pruebas E2E](tests/e2e/README.md).
 
-## Arrancar después de integrar C
+## Arrancar
 
 1. Usar Node 24 LTS e instalar desde la raíz: `npm ci`.
 2. Copiar `.env.example` a `.env`. C configura `DATABASE_URL` y una `TEST_DATABASE_URL` diferente para pruebas. No subir credenciales.

@@ -1,35 +1,38 @@
 # Tareas y orden de integración — protocolo 5
 
-Entrega lunes 26/10/2026 16:00, Ciudad de México; objetivo de entrega 15:30. A aporta su prototipo original (PR #9), revisa y publica A1; B coordina cliente/servidor/integración y C mantiene datos, calidad y despliegue.
+Entrega lunes 26/10/2026 a las 16:00, Ciudad de México; objetivo de entrega 15:30.
 
-| Bloque | Responsable | Estado o siguiente resultado |
+| Bloque | Responsable | Estado |
 | --- | --- | --- |
-| Bootstrap, contrato inicial, auth, salas, WS y simulación B3 | B | Integrados en main, PR #1–#4; PostgreSQL pendiente |
-| Adaptación de arena y escudos | B | Implementados: arena fija 1448 × 1088, plantilla v5, protocolo 5, geometría original de A, colisión continua y escudos 15 s |
-| Vista industrial de diseño | B; A revisa | Canvas local, cuatro diseños detallados, combate/escudos/respawn canónicos, HUD y controles |
-| Arte y pantallas | A | Menú, crear/unirse, lobby, ayuda y resultados recibidos y solo analizados; falta autenticación/estados |
-| Repositorios C1a/C1b | C; B integra | PR #7 abierto: corregir contrato de sesión/expiración, aislamiento de DB, duplicados y tiempos; después saveMatch e integración |
-| Cliente online | B | Conectar auth/lobby, mapa/snapshots, interpolación y reconciliación |
-| Controles y recorrido completo | B; A revisa | PC/móvil, resultados/revancha, errores y coordenadas autoritativas para E2E |
-| B4 | B | Cerrar reconexión, abandono, limpieza y fallos de guardado con cliente/DB reales |
-| C2 | C | Siembra 100/1000, métricas y rendimiento |
-| C3 | C coordina | PostgreSQL aislado, interpolación de B y tres E2E reales por PR |
-| C4 | C coordina | URL HTTPS, auditoría pública, evidencia y entrega |
+| Diseño original, mapa y personajes | A; B adapta | A1 integrado, geometría y 32 PNG originales conservados |
+| HUD, efectos y pantallas | A; B conecta | A2/A3 integrados, datos reales de servidor |
+| Cliente online, salas y simulación | B | Implementados, PC y móvil revisados por el usuario |
+| Usuarios, sesiones, resultados y métricas SQL | C | PR #7 integrado con su helper y checks aprobados |
+| Puente PostgreSQL | B | Arranque, autenticación, guardado y confirmación de persistencia integrados |
+| Pruebas y CI | B/C | 107 pruebas y tres E2E reales; workflow incluye PostgreSQL y Chromium |
+| Siembra y telemetría por HTTP | B/C | Funciones de C disponibles; falta montar y verificar endpoints |
+| Procedural | B; A revisa | Arena base y tres variantes opt-in; falta cerrar el requisito de evaluación |
+| Supabase y despliegue HTTPS | C coordina | Verificación remota y URL pública pendientes |
+| Evidencia final y entrega | Equipo | Mediciones públicas, auditoría y dos URL pendientes |
 
 ## Orden inmediato
 
-Aplicar/revisar/publicar A1 (maps.md y a1-integration.md), conservando el trabajo de A. Después A2 adapta HUD/efectos y A3 conecta pantallas funcionales. Las nuevas referencias de menús solo se analizan en [ui-notes.md](ui-notes.md); no se implementan en este bloque. A revisa capturas mientras B conecta el cliente al servidor. C entrega users/sessions primero y después guardado; B coordina index.js para esa unión. No hace falta esperar a que A termine cada pantalla para comenzar sus funciones.
+1. Cerrar el PR #10 con la integración A+B+C y sus checks completos.
+2. Montar POST /api/test/seed y GET /api/test/telemetry sobre las funciones de C, validar entradas y medir respuestas.
+3. Resolver el requisito procedural conservando el diseño de A y comprobar que todos reciben el mismo mapa.
+4. Verificar Supabase, desplegar por HTTPS y probar dos usuarios desde redes diferentes.
+5. Medir RTT/HTTP en la URL pública, actualizar evaluation.md y entregar URL y repositorio.
 
-La vista de diseño está identificada como local y solo se incluye en desarrollo. Calcula puntos/resultados locales con el motor compartido; no acredita multijugador ni guardado. El renderizador se reutilizará con el mapa/snapshots de servidor. Ver [client-preview.md](client-preview.md).
+## Verificación
 
-## Aceptación
+La suite integrada contiene 107 pruebas en 17 archivos, incluidas 16 de almacenamiento. Los tres E2E cubren autenticación, lobby, entrada real por teclado y pads simultáneos, reconexión, abandono, fin natural y revancha. El usuario revisó además el flujo en PC y teléfono real por Wi-Fi local. Estas verificaciones no acreditan todavía latencia pública ni Supabase.
 
-78 pruebas actuales, lint y build aprobados. Hay cobertura de mapas, daño, inputs Zod, tiempo/objetivos, escudos, encuadre y HTTP/WebSocket. Pendientes interpolación, PostgreSQL, telemetría/siembra y tres E2E de navegador, incluidos controles reales y observación desde otro cliente. La inspección de tamaños móviles no sustituye una prueba física de dos dedos.
-
-Conservar las firmas de repositorios de contracts.md. Protocolo 4 amplía el mundo y añade layout/guías visuales/rutas al mapa. Mantiene spawnKind, shieldSpawnIntervalMs y la forma de MatchResult. No consultar DB por tick ni introducir persistencia alternativa.
+El protocolo 5 utiliza la arena 1448 × 1088, plantilla a-industrial v5 y generador v3. El servidor decide movimiento, colisiones, daño, puntos y recogidas. El cliente presenta snapshots y predicción; la base no se consulta por tick.
 
 ## Git y propiedad
 
-Ramas por tarea y PR a main, checks y revisión. A mantiene referencias; B client, shared y auth/rooms/net/game; C storage/telemetry/scripts/E2E/CI/despliegue. Coordinar index.js, app.js y dependencias. Una instalación y lockfile en la raíz.
+Los commits originales de A y C se conservan mediante merges. B mantiene cliente/shared y servidor de juego; C mantiene storage/telemetry, pruebas globales y despliegue. Coordinar cambios en app.js, index.js, dependencias y CI.
 
-No ampliar a otra arena, equipos, clases o habilidades. Priorizar el domingo la ronda online completa y el despliegue; reservar el lunes por la mañana para pruebas públicas, móviles y entrega. La extensión del plazo no amplía el alcance. Efectos y sonido se pulen después del recorrido login -> lobby -> ronda -> resultado -> persistencia.
+Los documentos a1-integration.md y a23-integration.md describen los paquetes de adaptación originales; este archivo y README.md reflejan el estado actual. La práctica DEV /?practice=1 sigue disponible, con panel de diseño y sin guardado.
+
+El alcance sigue siendo una arena, 2–4 jugadores todos contra todos y cinco nodos rotatorios. Los detalles visuales menores se revisan después de cerrar requisitos, despliegue y evidencia.

@@ -22,7 +22,10 @@ async function pair(browser,host,{mobile=false}={}) {
   const guest=await context.newPage();const errors=[];host.on('pageerror',e=>errors.push(e.message));guest.on('pageerror',e=>errors.push(e.message));await register(host,'Alicia');await register(guest,'Beto');
   await host.getByLabel('Nombre de la sala').fill('Red de pruebas');
   await host.getByRole('button',{name:'CREAR SALA',exact:true}).click();
-  const code=await host.getByLabel('Código de sala',{exact:true}).inputValue();expect(code).toMatch(/^[A-Z0-9]{6}$/);
+  await expect(host.getByRole('heading',{name:'LOBBY DE PARTIDA',exact:true})).toBeVisible();
+  const codeField=host.locator('#room-code');
+  await expect(codeField).toHaveValue(/^[A-Z0-9]{6}$/);
+  const code=await codeField.inputValue();
   await guest.getByLabel('Código de sala',{exact:true}).fill(code.toLowerCase());
   await guest.getByRole('button',{name:'UNIRSE',exact:true}).click();
   await expect(host.locator('.lobby-player').filter({hasText:'Beto'})).toContainText('NO LISTO');

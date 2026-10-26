@@ -1,6 +1,6 @@
 # Puente PostgreSQL de B
 
-El puente enlaza el cliente A1/A2/A3 con los repositorios de C. Conserva el mapa, los PNG y las reglas compartidas. La rama de B contiene la integración; el arranque completo requiere incorporar la rama de C y su helper de pruebas pendiente de publicar.
+El puente enlaza el cliente A1/A2/A3 con los repositorios de C. Conserva el mapa, los PNG y las reglas compartidas. La integración incluye los módulos y el helper de C publicados en el PR #7.
 
 ## Arranque y base de datos
 
@@ -23,7 +23,7 @@ El arranque normal siempre exige los módulos reales de C. `saved` se emite úni
 
 El mensaje es aditivo al protocolo 5 y no cambia MatchResult. La cola de salida WebSocket admite 256 KiB para el mapa original de A; el límite de entrada del cliente permanece en 4096 bytes.
 
-## Configuración después de integrar C
+## Configuración
 
 Usar Node 24. Conservar una base de desarrollo y otra distinta de pruebas; copiar `.env.example` a `.env` solo si aún no existe y completar sus valores localmente.
 
@@ -43,12 +43,11 @@ Producción utiliza un mismo origen HTTPS para cliente, API y WebSocket, `NODE_E
 
 ## Verificación de esta entrega
 
-- Rama A+B: lint, 91 pruebas y build aprobados. Las pruebas de red verifican pending/saved/failed/unavailable, guardado único y recuperación del estado después de reconectar.
-- Copia integrada con los módulos de C en f083ef6 y el helper del paquete original: lint, 107 pruebas y build aprobados sobre PostgreSQL 18 local aislado. Los archivos de C se usaron allí para validar; no se copiaron a la rama de B.
+- Proyecto integrado A+B+C: lint, 107 pruebas en 17 archivos y build aprobados sobre PostgreSQL 18 local aislado. Las pruebas de red verifican pending/saved/failed/unavailable, guardado único y recuperación del estado después de reconectar.
 - Prueba del proceso real: configuración o esquema ausente impide escuchar; registro sobre PostgreSQL, reinicio y recuperación de la misma sesión comprobados.
-- Edge: tres E2E aprobados en 35.4 s con cuentas, HTTP, WebSocket y resultados PostgreSQL reales; incluyen dos pads simultáneos, recuperación de ronda, empate y revancha. El servidor E2E acorta únicamente sus rondas a 15 s.
+- Edge: tres E2E aprobados en 35.0 s sobre el proyecto integrado, con cuentas, HTTP, WebSocket y resultados PostgreSQL reales; incluyen dos pads simultáneos, recuperación de ronda, empate y revancha. El servidor E2E acorta únicamente sus rondas a 15 s.
 - El usuario comprobó previamente el flujo completo en PC y teléfono real dentro de la red local.
 
-El helper `server/test/helpers/pg-latency.js` debe ser publicado por C antes de aprobar su CI e integrar su rama. La base temporal de esta validación es distinta de la usada por las vistas de revisión.
+El helper `server/test/helpers/pg-latency.js` está registrado desde el commit 80f33f7 de C. La base temporal de validación es distinta de la usada por las vistas de revisión. El workflow de CI inicializa PostgreSQL 16, ejecuta la suite, compila y corre los tres E2E con Chromium; conserva capturas y trazas si falla.
 
-Siguientes bloques: montar los endpoints de siembra/telemetría, habilitar E2E en el CI integrado, resolver el requisito procedural, verificar Supabase, desplegar por HTTPS y medir la URL pública. No forman parte de este puente.
+Siguientes bloques: montar los endpoints de siembra/telemetría, resolver el requisito procedural, verificar Supabase, desplegar por HTTPS y medir la URL pública. No forman parte de este puente.
