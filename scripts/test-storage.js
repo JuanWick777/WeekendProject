@@ -1,15 +1,9 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { pool } from '../server/src/storage/pool.js';
 import { createUser } from '../server/src/storage/users.js';
 import { findSessionByTokenHash, deleteSessionByTokenHash } from '../server/src/storage/sessions.js';
 import { saveMatch } from '../server/src/storage/matches.js';
 import { processSeedBatch } from '../server/src/storage/seedService.js';
 import { getTelemetry } from '../server/src/telemetry/telemetryService.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 async function runStorageTests() {
   console.log("🧪 Ejecutando pruebas en entorno de TEST con TEST_DATABASE_URL...");
@@ -19,7 +13,7 @@ async function runStorageTests() {
     process.exit(1);
   }
 
-  // Recreación limpia del esquema con valores por defecto para UUIDs
+  // Recreación limpia del esquema
   await pool.query(`
     DROP TABLE IF EXISTS player_matches CASCADE;
     DROP TABLE IF EXISTS matches CASCADE;
@@ -89,7 +83,6 @@ async function runStorageTests() {
   const testUserUsername = `user_${Date.now()}`;
   const testMatchId = `test_match_${Date.now()}`;
   const testBatchId = `batch_test_${Date.now()}`;
-  let createdUserId = null;
 
   try {
     // -------------------------------------------------------------
@@ -103,7 +96,7 @@ async function runStorageTests() {
       password_hash: '$2b$10$mockPasswordHashForTestingOnly123456'
     });
 
-    createdUserId = user.id;
+    const createdUserId = user.id;
     console.log("✅ createUser:", user);
 
     try {
@@ -213,7 +206,7 @@ async function runStorageTests() {
     await pool.query('DELETE FROM player_matches WHERE match_id = $1', [testMatchId]);
     await pool.query('DELETE FROM matches WHERE id = $1', [testMatchId]);
     await pool.query('DELETE FROM users WHERE id = $1', [createdUserId]);
-    
+
     await pool.query('DELETE FROM player_matches WHERE match_id IN (SELECT id FROM matches WHERE source = \'seed\')');
     await pool.query('DELETE FROM matches WHERE source = \'seed\'');
     await pool.query('DELETE FROM seed_batches WHERE batch_id = $1', [testBatchId]);
