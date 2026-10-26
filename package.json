@@ -20,14 +20,15 @@
     "build": "npm run build --workspace @cybergrid/client",
     "start": "node --env-file-if-exists=.env server/src/index.js",
     "lint": "eslint .",
-    "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run",
-    "test:watch": "vitest",
+    "test": "cross-env NODE_ENV=test node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "cross-env NODE_ENV=test node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs",
     "test:e2e": "playwright test",
     "verify": "npm run lint && npm test && npm run build",
     "verify:release": "npm run verify && npm run test:e2e",
-    "db:init": "node --env-file=.env scripts/db-init.js",
-    "test:storage": "cross-env NODE_ENV=test node --env-file=.env scripts/test-storage.js",
-    "verify:tests": "cross-env NODE_ENV=test vitest run"
+    "db:init": "node --env-file-if-exists=.env scripts/db-init.js",
+    "test:storage": "cross-env NODE_ENV=test node --env-file-if-exists=.env scripts/test-storage.js",
+    "verify:tests": "npm test"
+    
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
