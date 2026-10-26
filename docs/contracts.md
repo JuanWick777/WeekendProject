@@ -180,6 +180,8 @@ Datos de prueba reproducibles, con source=seed y participantes sintéticos ident
 
 Ambos endpoints test estarán habilitados en evaluación sin sesión, con validación, tamaño y frecuencia acotados. No exigir un secreto desconocido por el evaluador.
 
+Implementación: [API de evaluación](evaluation-api.md). JSON máximo 2 KB, seis siembras y sesenta consultas por minuto e IP, con límites independientes. Como máximo dos siembras activas por proceso; sobrecarga responde 503 SEED_BUSY y cuotas agotadas 429 EVALUATION_RATE_LIMITED, ambos con Retry-After. Las respuestas exitosas no se cachean y Server-Timing mide backend, separado del tiempo HTTP completo.
+
 Telemetry data:
 
 ~~~text

@@ -1,0 +1,166 @@
+{
+  "conditions": {
+    "node": "v24.22.1",
+    "postgres": "18 local",
+    "network": "localhost",
+    "requests": "sequential",
+    "authentication": "none",
+    "database": "isolated schema"
+  },
+  "seed": [
+    {
+      "requested": 100,
+      "batchId": "measure-small",
+      "insertedMatches": 100,
+      "alreadyExists": false,
+      "httpMs": 80.69,
+      "serverTiming": "seed;dur=69.92"
+    },
+    {
+      "requested": 1000,
+      "batchId": "measure-large-a",
+      "insertedMatches": 1000,
+      "alreadyExists": false,
+      "httpMs": 142.44,
+      "serverTiming": "seed;dur=140.62"
+    },
+    {
+      "requested": 1000,
+      "batchId": "measure-large-b",
+      "insertedMatches": 1000,
+      "alreadyExists": false,
+      "httpMs": 139.58,
+      "serverTiming": "seed;dur=137.95"
+    },
+    {
+      "requested": 1000,
+      "batchId": "measure-large-c",
+      "insertedMatches": 1000,
+      "alreadyExists": false,
+      "httpMs": 131.13,
+      "serverTiming": "seed;dur=129.27"
+    },
+    {
+      "requested": 1000,
+      "batchId": "measure-large-a",
+      "insertedMatches": 0,
+      "alreadyExists": true,
+      "httpMs": 37.79,
+      "serverTiming": "seed;dur=36.19"
+    }
+  ],
+  "telemetry": [
+    {
+      "source": "all",
+      "phase": "cold-empty",
+      "httpMs": 34.66,
+      "serverTiming": "telemetry;dur=30.93"
+    },
+    {
+      "source": "live",
+      "phase": "warm",
+      "matches": 0,
+      "httpMs": 4.52,
+      "serverTiming": "telemetry;dur=3.34"
+    },
+    {
+      "source": "live",
+      "phase": "warm",
+      "matches": 0,
+      "httpMs": 2.2,
+      "serverTiming": "telemetry;dur=1.05"
+    },
+    {
+      "source": "live",
+      "phase": "warm",
+      "matches": 0,
+      "httpMs": 1.55,
+      "serverTiming": "telemetry;dur=0.61"
+    },
+    {
+      "source": "live",
+      "phase": "warm",
+      "matches": 0,
+      "httpMs": 1.11,
+      "serverTiming": "telemetry;dur=0.47"
+    },
+    {
+      "source": "live",
+      "phase": "warm",
+      "matches": 0,
+      "httpMs": 1.24,
+      "serverTiming": "telemetry;dur=0.56"
+    },
+    {
+      "source": "seed",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 14.62,
+      "serverTiming": "telemetry;dur=13.65"
+    },
+    {
+      "source": "seed",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 14.35,
+      "serverTiming": "telemetry;dur=13.49"
+    },
+    {
+      "source": "seed",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.69,
+      "serverTiming": "telemetry;dur=12.83"
+    },
+    {
+      "source": "seed",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.5,
+      "serverTiming": "telemetry;dur=12.63"
+    },
+    {
+      "source": "seed",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.2,
+      "serverTiming": "telemetry;dur=12.49"
+    },
+    {
+      "source": "all",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.59,
+      "serverTiming": "telemetry;dur=12.75"
+    },
+    {
+      "source": "all",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.85,
+      "serverTiming": "telemetry;dur=12.88"
+    },
+    {
+      "source": "all",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 14.37,
+      "serverTiming": "telemetry;dur=13.46"
+    },
+    {
+      "source": "all",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 14.6,
+      "serverTiming": "telemetry;dur=13.72"
+    },
+    {
+      "source": "all",
+      "phase": "warm",
+      "matches": 3100,
+      "httpMs": 13.63,
+      "serverTiming": "telemetry;dur=12.82"
+    }
+  ],
+  "publicPerformanceVerified": false
+}

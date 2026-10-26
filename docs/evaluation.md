@@ -1,6 +1,6 @@
 # Evaluación y entrega
 
-Checklist de requisitos, no afirmación de cumplimiento. Ya hay arranque, health, constantes v4, esquemas, auth HTTP, salas/WebSocket y simulación de partida con autenticación/guardado inyectados. Hasta B3 hay 72 pruebas aprobadas, incluyendo mapas, daño y recorridos HTTP/WebSocket de dos cuentas. Faltan PostgreSQL, cliente, interpolación y E2E de navegador; no se declara cumplida la entrega por el total de casos.
+Checklist de requisitos, no afirmación de cumplimiento público. El cliente, simulación, autenticación y guardado PostgreSQL están integrados. La suite contiene 118 pruebas y tres E2E, y las rutas de evaluación están implementadas con validación y límites. Ver [API y mediciones locales](evaluation-api.md). Faltan procedural conforme a la rúbrica, Supabase remoto, despliegue HTTPS y evidencia de rendimiento público; el total de pruebas locales no sustituye esas verificaciones.
 
 ## Obligatorio
 

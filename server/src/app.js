@@ -8,6 +8,7 @@ import { AuthError } from './auth/auth-error.js';
 import { createAuthRouter } from './auth/routes.js';
 import { RoomError } from './rooms/room-error.js';
 import { createRoomRouter } from './rooms/routes.js';
+import { createEvaluationRouter } from './evaluation/routes.js';
 
 const defaultClientDist = fileURLToPath(new URL('../../client/dist/', import.meta.url));
 
@@ -23,9 +24,14 @@ export function createApp({
   onSessionInvalidated,
   simulationReady = false,
   databaseReady = false,
+  evaluationService = null,
+  evaluationRateLimit,
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.use('/api/test', express.json({ limit: '2kb' }), createEvaluationRouter({
+    evaluationService, rateLimit: evaluationRateLimit,
+  }));
   app.use(express.json({ limit: '128kb' }));
 
   app.get(API_ROUTES.HEALTH, (_request, response) => {
@@ -81,15 +87,18 @@ export function createApp({
     }
     const invalidJson = error.type === 'entity.parse.failed';
     const tooLarge = error.type === 'entity.too.large';
-    response.status(invalidJson ? 400 : tooLarge ? 413 : 500).json({
+    const unsupportedEncoding = error.type === 'charset.unsupported' || error.type === 'encoding.unsupported';
+    response.status(invalidJson ? 400 : tooLarge ? 413 : unsupportedEncoding ? 415 : 500).json({
       ok: false,
       error: {
-        code: invalidJson ? 'INVALID_JSON' : tooLarge ? 'PAYLOAD_TOO_LARGE' : 'INTERNAL_ERROR',
+        code: invalidJson ? 'INVALID_JSON' : tooLarge ? 'PAYLOAD_TOO_LARGE' : unsupportedEncoding ? 'UNSUPPORTED_JSON_ENCODING' : 'INTERNAL_ERROR',
         message: invalidJson
           ? 'El cuerpo debe ser JSON válido.'
           : tooLarge
             ? 'El cuerpo supera el tamaño permitido.'
-            : 'No se pudo completar la petición.',
+            : unsupportedEncoding
+              ? 'Usa una codificación JSON compatible, como UTF-8.'
+              : 'No se pudo completar la petición.',
       },
     });
   });

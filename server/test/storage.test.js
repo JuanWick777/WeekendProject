@@ -7,6 +7,8 @@ import { readFile } from 'node:fs/promises';
 import { generateMap } from '@cybergrid/shared/maps';
 import { createMatch } from '@cybergrid/shared/simulation';
 import { createAuthService } from '../src/auth/auth-service.js';
+import { loadPostgresServices } from '../src/postgres-services.js';
+import { createServerRuntime } from '../src/runtime.js';
 
 const schema = 'cg_test_' + randomUUID().replaceAll('-', '');
 process.env.TEST_DATABASE_SCHEMA = schema;
@@ -18,7 +20,29 @@ const { processSeedBatch } = await import('../src/storage/seedService.js');
 const { getTelemetry } = await import('../src/telemetry/telemetryService.js');
 
 describe('PostgreSQL: contrato real de almacenamiento', { timeout: 30000 }, () => {
-  let a, b;
+  let a, b, httpRuntime, httpUrl;
+  async function openHttp() {
+    const services = await loadPostgresServices();
+    httpRuntime = createServerRuntime({
+      ...services, nodeEnv: 'test', enableGame: false,
+      evaluationRateLimit: { seed: { maxRequests: 1000 }, telemetry: { maxRequests: 1000 } },
+    });
+    await new Promise((resolve, reject) => {
+      httpRuntime.server.once('error', reject);
+      httpRuntime.server.listen(0, '127.0.0.1', resolve);
+    });
+    httpUrl = 'http://127.0.0.1:' + httpRuntime.server.address().port;
+  }
+  async function httpSeed(input) {
+    const response = await fetch(httpUrl + '/api/test/seed', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input),
+    });
+    return { response, body: await response.json() };
+  }
+  async function httpTelemetry(source = 'all') {
+    const response = await fetch(httpUrl + '/api/test/telemetry?source=' + source);
+    return { response, body: await response.json() };
+  }
   function simulation() {
     return createMatch({
       matchId:randomUUID(),roomCode:'ABC123',startedAtMs:1700000000000,map:generateMap(42),
@@ -40,6 +64,7 @@ describe('PostgreSQL: contrato real de almacenamiento', { timeout: 30000 }, () =
   beforeAll(async () => {
     await pool.query('CREATE SCHEMA "' + schema + '"');
     await pool.query(await readFile(new URL('../src/storage/schema.sql',import.meta.url),'utf8'));
+    await openHttp();
   },30000);
   beforeEach(async () => {
     const tables=['player_results','matches','sessions','seed_batches','users'];
@@ -48,9 +73,63 @@ describe('PostgreSQL: contrato real de almacenamiento', { timeout: 30000 }, () =
     b=await users.createUser({ username:'player_b',displayName:'B',passwordHash:'test-hash' });
   },30000);
   afterAll(async () => {
-    try { await pool.query('DROP SCHEMA IF EXISTS "' + schema + '" CASCADE'); }
+    try { await httpRuntime?.close(); await pool.query('DROP SCHEMA IF EXISTS "' + schema + '" CASCADE'); }
     finally { await pool.end(); }
   },30000);
+  it('HTTP público devuelve ceros de PostgreSQL sin sesión ni caché', async () => {
+    const { response, body } = await httpTelemetry();
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('cache-control'), 'no-store');
+    assert.match(response.headers.get('server-timing'), /telemetry;dur=\d/);
+    assert.equal(response.headers.get('set-cookie'), null);
+    assert.equal(body.ok, true);
+    assert.equal(body.data.matches, 0);
+    assert.equal(body.data.playerResults, 0);
+    assert.deepEqual(body.data.players, []);
+    assert.ok(Object.values(body.data.overall).every(n => n === 0 && Number.isFinite(n)));
+  });
+  it('HTTP siembra 100/1000, repite lotes sin duplicar y separa datos humanos', async () => {
+    await saveMatch(fixture());
+    const first = await httpSeed({ seed: 42, matches: 100, batchId: 'http-small' });
+    assert.equal(first.response.status, 200);
+    assert.deepEqual(first.body, { ok: true, data: { batchId: 'http-small', insertedMatches: 100, alreadyExists: false } });
+    assert.equal(first.response.headers.get('set-cookie'), null);
+    const duplicate = await httpSeed({ seed: 0xffffffff, matches: 1000, batchId: 'http-small' });
+    assert.equal(duplicate.response.status, 200);
+    assert.deepEqual(duplicate.body.data, { batchId: 'http-small', insertedMatches: 0, alreadyExists: true });
+    const large = await httpSeed({ seed: 0, matches: 1000, batchId: 'http-large' });
+    assert.equal(large.response.status, 200);
+    assert.equal(large.body.data.insertedMatches, 1000);
+    assert.equal((await httpTelemetry('seed')).body.data.matches, 1100);
+    const live = (await httpTelemetry('live')).body.data;
+    assert.equal(live.matches, 1);
+    assert.equal(live.overall.winRate, 50);
+    assert.equal(live.overall.kdr, 1);
+    assert.equal(live.overall.survivalRate, 50);
+    assert.equal((await httpTelemetry()).body.data.matches, 1101);
+    assert.equal((await pool.query("SELECT COUNT(*) AS n FROM matches WHERE (source='live' AND is_synthetic) OR (source='seed' AND NOT is_synthetic)")).rows[0].n, '0');
+  });
+  it('HTTP rechaza entradas inválidas antes de escribir registros', async () => {
+    for (const input of [
+      { seed: 0, matches: 99, batchId: 'invalid-http' },
+      { seed: 2 ** 32, matches: 100, batchId: 'invalid-http' },
+      { seed: 42, matches: 100, batchId: 'invalid-http', source: 'live' },
+    ]) assert.equal((await httpSeed(input)).response.status, 400);
+    assert.equal((await pool.query('SELECT COUNT(*) AS n FROM matches')).rows[0].n, '0');
+    assert.equal((await pool.query('SELECT COUNT(*) AS n FROM seed_batches')).rows[0].n, '0');
+  });
+  it('HTTP conserva la idempotencia de PostgreSQL al reiniciar la API y ante duplicados simultáneos', async () => {
+    const input = { seed: 42, matches: 100, batchId: 'http-restart' };
+    const parallel = await Promise.all([httpSeed(input), httpSeed(input)]);
+    assert.ok(parallel.every(r => r.response.status === 200));
+    assert.equal(parallel.reduce((sum, r) => sum + r.body.data.insertedMatches, 0), 100);
+    await httpRuntime.close();
+    await openHttp();
+    const duplicate = await httpSeed(input);
+    assert.equal(duplicate.response.status, 200);
+    assert.deepEqual(duplicate.body.data, { batchId: 'http-restart', insertedMatches: 0, alreadyExists: true });
+    assert.equal((await httpTelemetry('seed')).body.data.matches, 100);
+  });
   it('utiliza los tipos del esquema oficial',async () => {
     const { rows }=await pool.query(
       'SELECT table_name,column_name,udt_name,numeric_scale FROM information_schema.columns WHERE table_schema=$1',[schema],

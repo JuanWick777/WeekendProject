@@ -8,7 +8,7 @@ A1 conserva el mapa industrial y los 32 PNG originales de A con geometría compa
 
 El cliente de A, el puente de B y los repositorios PostgreSQL de C están integrados. El servidor conecta usuarios/sesiones y guardado de resultados, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. El helper de pruebas de C está incluido desde el PR #7. Ver [puente PostgreSQL](docs/postgres-bridge.md).
 
-La integración pasa lint, 107 pruebas en 17 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. Se comprobó además que una sesión real sobrevive al reinicio del servidor. El usuario revisó el flujo en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [pruebas E2E](tests/e2e/README.md).
+La integración pasa lint, 118 pruebas en 18 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. La API de evaluación permite sembrar lotes y consultar estadísticas sin sesión, con validación y límites. El usuario revisó el juego en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [API de evaluación](docs/evaluation-api.md) y [pruebas E2E](tests/e2e/README.md).
 
 ## Arrancar
 
@@ -50,10 +50,11 @@ La [práctica local](docs/client-preview.md) continúa en desarrollo en `/?pract
 - [Pruebas E2E](tests/e2e/README.md)
 - [GitHub y ramas](docs/github-workflow.md)
 - [Preparación de entrega](docs/evaluation.md)
+- [API de siembra y telemetría](docs/evaluation-api.md)
 
 ## Pendiente de entrega
 
-Integrar las ramas, verificar Supabase real, montar y comprobar los endpoints de siembra/telemetría de C, cerrar el requisito procedural y desplegar por HTTPS. Las tres variantes de paredes optativas no sustituyen por sí mismas la validación final de ese requisito. Medir latencia y endpoints en la URL pública; revisar balance y controles en teléfono físico.
+Verificar Supabase real, cerrar el requisito procedural y desplegar por HTTPS. Las tres variantes de paredes optativas no sustituyen por sí mismas la validación final de ese requisito. Medir latencia y endpoints en la URL pública; repetir controles y balance en los dispositivos de evaluación.
 
 Repositorio: https://github.com/JuanWick777/WeekendProject (privado; dar acceso al evaluador).
 URL pública: PENDIENTE.

@@ -52,3 +52,7 @@ export const seedSchema = z.strictObject({
   matches: z.number().int().min(100).max(1_000),
   batchId: z.string().min(3).max(64).regex(/^[a-zA-Z0-9_-]+$/),
 });
+
+export const telemetryQuerySchema = z.strictObject({
+  source: z.enum(['all', 'live', 'seed']).default('all'),
+});

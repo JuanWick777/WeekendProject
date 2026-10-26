@@ -4,7 +4,7 @@ El puente enlaza el cliente A1/A2/A3 con los repositorios de C. Conserva el mapa
 
 ## Arranque y base de datos
 
-`server/src/postgres-services.js` importa `storage/pool.js`, comprueba las tablas users, sessions, matches y player_results y conecta `createAuthService({ users, sessions })` con `saveMatch`. `index.js` espera esta preparación antes de escuchar. Una conexión, esquema o repositorio ausente termina con código 1 y un mensaje sin credenciales ni errores SQL privados.
+`server/src/postgres-services.js` importa `storage/pool.js`, comprueba las tablas users, sessions, matches, player_results y seed_batches y conecta autenticación, guardado y evaluación con los servicios de C. `index.js` espera esta preparación antes de escuchar. Una conexión, esquema o repositorio ausente termina con código 1 y un mensaje sin credenciales ni errores SQL privados.
 
 La comprobación no crea tablas ni aplica migraciones. Ese paso corresponde a `npm run db:init` de C. El cierre del proceso espera al runtime y cierra después el pool, con un límite de cinco segundos. Los usuarios, las sesiones y los resultados viven en PostgreSQL; las salas y rondas activas permanecen en memoria.
 
