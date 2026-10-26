@@ -35,4 +35,6 @@ El recorrido móvil automatizado usa emulación de Edge/Chromium y CDP multitouc
 
 El workflow ejecuta npm ci, lint, inicialización del esquema oficial y 107 pruebas, build de producción, instalación de Chromium con sus dependencias y npm run test:e2e. Usa el servicio PostgreSQL 16 del runner y esquemas aislados; no depende de Supabase. Los fallos conservan test-results como artefacto de Actions.
 
+Se ejecuta una vez por actualización de PR y al hacer push a main. Ubuntu 24.04 usa el archivo oficial de Ubuntu para evitar la descarga lenta observada en el mirror de Azure; se instala únicamente Chromium Headless Shell con sus dependencias. La instalación tiene un límite de cinco minutos y el job completo de quince.
+
 La creación de sala espera el encabezado del lobby y un código válido en #room-code antes de leerlo. El formulario anterior también tiene un campo llamado Código de sala: esperar la transición evita leer ese campo vacío durante la petición HTTP.
