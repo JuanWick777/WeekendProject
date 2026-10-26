@@ -1,9 +1,40 @@
-# E2E pendientes — C3
+# Recorridos E2E con servidor y PostgreSQL reales
 
-Crear auth.spec.js, lobby.spec.js y gameplay.spec.js. Usar el servidor real y dos contextos independientes, con base PostgreSQL de pruebas.
+Requieren Node 24, PostgreSQL y el build del cliente. Los módulos de C y el puente de B ya están integrados. No usan repositorios de memoria ni resultados inventados.
 
-La partida usa el contrato v2 de nodos rotatorios de docs/contracts.md. gameplay envía controles reales, comprueba x/y autoritativas en DOM y observa el cambio desde el segundo cliente; incluir variante táctil y presentación del objetivo. No depender de los antiguos carry/syncProgress ni confundir el fixture de diseño con juego online.
+## Ejecutar en Windows con Edge instalado
 
-Playwright ya tiene proyectos desktop y mobile-landscape y arranca el build con el servidor en 127.0.0.1:3100. Al añadir los flujos, instalar Chromium con npx playwright install chromium. En Actions usar la instalación con dependencias del runner.
+Desde la raíz del repositorio integrado:
 
-No se proporciona un spec vacío ni una prueba de que existe un canvas como sustituto de los tres flujos de la rúbrica. npm run test:e2e fallará sin tests: es esperado hasta C3. npm run verify valida solamente el bootstrap; verify:release añade E2E.
+```powershell
+npm.cmd ci
+# Configurar TEST_DATABASE_URL en .env; usar una base de pruebas distinta.
+npm.cmd run verify
+$env:E2E_BROWSER_CHANNEL = 'msedge'
+npm.cmd run test:e2e
+Remove-Item Env:E2E_BROWSER_CHANNEL
+```
+
+Para Chromium: `npx.cmd playwright install chromium` y ejecutar sin E2E_BROWSER_CHANNEL. En Linux/Actions: `npx playwright install --with-deps chromium`.
+
+El servidor E2E usa localhost:4176 por defecto (E2E_PORT permite otro). Crea un esquema cg_test_<uuid> en TEST_DATABASE_URL, carga el esquema oficial y lo elimina al terminar. La cuenta necesita permiso de crear/eliminar ese esquema. No modifica ni trunca las tablas normales de desarrollo. Cualquier E2E interrumpido forzosamente puede dejar un esquema de pruebas que C deba revisar.
+
+No configurar NODE_ENV=production en esta ejecución. Playwright transmite NODE_ENV=test a su servidor. El pool de C exige TEST_DATABASE_URL explícita. El tiempo de ronda es 15 s, nodo 3 s y cuenta regresiva 300 ms solo en tests; no cambia las reglas de producción.
+
+## Tres recorridos
+
+1. Registro, escape de nombre, privacidad de respuesta, cierre e inicio de sesión y contraseña incorrecta.
+2. Dos contextos/cuentas, lobby real, teclado autoritativo, móvil 390×844 y dos pads simultáneos, recarga/recuperación de matchId, abandono y resultado consultado directamente en PostgreSQL.
+3. Fin natural, cinco nodos, empate, persistencia, revancha que reinicia listo y genera otro matchId.
+
+Se guardan capturas de las pantallas en test-results; un fallo conserva screenshot y trace. Los contextos comprueban errores de JavaScript. La base prueba source=live, is_synthetic=false y participantes reales.
+
+El recorrido móvil automatizado usa emulación de Edge/Chromium y CDP multitouch. No sustituye un teléfono físico, red pública ni pruebas con cuatro usuarios en redes diferentes.
+
+## CI
+
+El workflow ejecuta npm ci, lint, inicialización del esquema oficial y 107 pruebas, build de producción, instalación de Chromium con sus dependencias y npm run test:e2e. Usa el servicio PostgreSQL 16 del runner y esquemas aislados; no depende de Supabase. Los fallos conservan test-results como artefacto de Actions.
+
+Se ejecuta una vez por actualización de PR y al hacer push a main. Ubuntu 24.04 usa el archivo oficial de Ubuntu para evitar la descarga lenta observada en el mirror de Azure; se instala únicamente Chromium Headless Shell con sus dependencias. La instalación tiene un límite de cinco minutos y el job completo de quince.
+
+La creación de sala espera el encabezado del lobby y un código válido en #room-code antes de leerlo. El formulario anterior también tiene un campo llamado Código de sala: esperar la transición evita leer ese campo vacío durante la petición HTTP.

@@ -1,50 +1,48 @@
-# Mapa — arena fija de referencia v4
+# Mapa de A — integración v5
 
-A proporciona la dirección visual y B programa geometría, generador y renderizador. Una arena contiene cinco nodos y cuatro apariciones. Las [referencias](visual-references/README.md) orientan el diseño; prevalecen las reglas acordadas. Ver también la [práctica local](client-preview.md).
+La arena usa el trabajo de A de PR #9. La fuente original permanece en `client/prototypes/a-canvas/`. No se rediseñan sus segmentos, posiciones, suelo, luces ni plataformas.
 
-## Dimensiones vigentes
+## Coordenadas y física
 
-Mundo **1280 × 1120**, cuadrícula **160 × 140**, casillas de **8**. Origen arriba a la izquierda, x derecha e y abajo. El jugador conserva radio 10, velocidad 160 y los mismos atributos; cada nodo conserva radio 64. El área adicional permite reproducir las coberturas de A dejando pasos útiles. Las dimensiones anteriores de las láminas y del prototipo v3 son históricas.
+Plano de autoría **1448 × 1086**, sin estirar. Mundo **1448 × 1088**, cuadrícula **181 × 136** de 8; las dos unidades inferiores solo completan la cuadrícula. Jugador: radio 10, velocidad 160. Nodos: radio funcional 64, aunque el marcador decorativo de A sea menor.
 
-| Nodo | Centro x,y |
-| --- | --- |
-| center / núcleo | 640,560 |
-| north / sector A | 640,180 |
-| east / sector B | 1060,560 |
-| south / sector C | 640,940 |
-| west / sector D | 220,560 |
+| Función | ID de A | Centro aproximado x,y |
+| --- | --- | --- |
+| center | N3 | 719.454, 536.815 |
+| north / A | N1 | 730.158, 167.040 |
+| east / B | N4 | 1138.850, 534.869 |
+| south / C | N5 | 729.185, 891.020 |
+| west / D | N2 | 295.192, 542.653 |
 
-Apariciones: NW 100,150; SE 1180,970; NE 1180,150; SW 100,970. Las primeras dos quedan en esquinas opuestas. Cada bahía tiene salida horizontal y vertical comprobadas con al menos 64 unidades de ancho libre. Al reaparecer, el servidor escoge un candidato libre alejado de rivales.
+Apariciones conservadas exactamente. Orden de plazas: S1, S4, S2, S3, para que dos participantes comiencen en esquinas opuestas. El orden interno de nodos sigue centro → norte → este → sur → oeste, 30 s cada uno; no lo decide el dibujo.
 
-## Trazado y apariencia
+La autoridad física para este mapa es `collisionModel: 'segments-v1'`: rectángulos orientados sobre los segmentos originales, metal de 22 unidades y extensión de 4 en sus extremos; borde de suelo de 18. Las sombras no bloquean. Las balas usan colisión continua con esos mismos rectángulos, y los cuerpos conservan el círculo de radio 10. El índice espacial solo acelera consultas; no aproxima los contornos.
 
-La fuente ejecutable es `shared/src/maps/arena-template.js`: `cardinal-sketch` versión 4, generador versión 2 y protocolo 4. El servidor reexporta esa fuente. El trazado recupera bahías, hombros diagonales y escalones del perímetro, pilares, L, codos grandes, barras laterales y cuatro arcos separados alrededor del núcleo.
+`tiles` es una capa gruesa de ocupación para herramientas; no sustituye a las paredes vectoriales. Las arenas de calibración de pruebas usan explícitamente `collisionModel: 'tiles'`. La capa Colisiones dibuja los colliders reales. No se conserva la promesa anterior de todos los corredores de ancho 48/64: se comprueban rutas transitables con la hitbox real, sin mover el diseño de A. `protectedRoutes` queda vacío en esta plantilla; el control de Pasos revisados se oculta hasta contar con guías revisadas.
 
-Se dibuja sobre un plano de autoría de 1024 × 896, escalado por 1,25 al mundo vigente. Los trazos de paredes generan las casillas sólidas y sus guías visuales. La cuadrícula resuelta es la autoridad física. `client/src/game/arena-art.js` compone placas de suelo, rejillas, bahías y paredes metálicas con luces cian/ámbar; caras y luces se recortan contra casillas sólidas. El exterior es vacío sólido, sin suelo invisible. Las imágenes de A no se cargan como fondo plano.
+## Fuentes y mantenimiento
 
-Las ranuras acotadas de una o dos casillas (hasta 16 unidades, menores que el cuerpo de 20) se cierran para no sugerir pasos impracticables. No se promete ancho 48 en cada hueco ornamental: se comprueban específicamente los corredores principales y la conectividad de todos los objetivos.
+- `shared/src/maps/a-design.json`: nodos, spawns, escudos, contorno y tres variantes de A, sin estado del editor.
+- `shared/src/maps/arena-template.js`: adapta nombres y reglas a los contratos del juego.
+- `client/src/game/arena-art.js`: funciones originales de dibujo importadas sin cambios.
+- `client/src/game/drone-sprites.js`: carga los 32 PNG originales de A, ocho orientaciones por apariencia. La dirección del disparo continúa siendo libre.
+- `node scripts/import-a-design.js`: vuelve a importar JSON y dibujo después de un cambio intencional en el prototipo. Revisar diff y versiones antes de publicar.
 
-## Validación y variación
+Plantilla `a-industrial` v5, generador v3 y protocolo 5. Cliente y servidor usan el mismo paquete shared. No cambia la forma de MatchResult ni las firmas de C; se guardan los metadatos que devuelve generateMap, sin hardcodear versiones.
 
-`generateMap(seed)` usa **layout: reference** por defecto en cliente y servidor. Distintas semillas conservan exactamente las paredes; la semilla sigue determinando el flujo de escudos. Rotar el nodo no cambia el terreno. La variación procedural final se pospone hasta terminar las pantallas, como acordó el equipo.
+## Terreno y variantes
 
-Permanece un prototipo explícito `generateMap(seed, { layout: 'procedural' })`, con cuatro grupos de pequeños remates de codos; no está habilitado en la práctica ni en las rondas normales. Prueba hasta 16 combinaciones; si ninguna vale, usa la primera variante validada y registra MAP_FALLBACK. Esto todavía no representa todas las variantes rojas/amarillas de la lámina.
+`generateMap(seed)` conserva siempre los **154 segmentos base**. Cambiar semilla modifica el flujo de escudos; rotar un nodo no modifica paredes.
 
-Hay **19 rutas protegidas**, con radio de holgura 24 (ancho completo 48), por bahías, sectores norte/sur, codos, periferia y cruce este/oeste del núcleo. El validador rechaza paredes que invadan estos recorridos incluso si existe otra ruta. Las pruebas recorren sus segmentos con el movimiento real del jugador y comprueban las dos salidas de cada bahía con radio 32.
+Solo mediante `layout: 'procedural'` se selecciona de forma determinista una de las tres variantes dibujadas por A (154/151/150 segmentos). Se validan y existe fallback base. Esta selección de tres mapas prefabricados **todavía no acredita el requisito final de generación procedural**. La variación final y su evidencia quedan pendientes; no está habilitada en rondas normales.
 
-También se comprueban dimensiones, bordes, círculos de nodos libres, separación, dos accesos cardinales por nodo, apariciones, escudos y conectividad con radio 10. Los puntos sobre límites de casilla deben conectar mediante un segmento libre a un centro alcanzable. La muestra de 64 semillas procedurales conserva rutas, produce variación y no necesita fallback.
+Se verifican dimensiones, bordes, geometría finita, nodos libres y dos accesos, apariciones, distribución de escudos y conectividad. La búsqueda comprueba los tramos completos entre casillas; las pruebas caminan hasta cada objetivo con movePlayer. También se cubren diagonales, esquinas, balas rápidas e invalidación de caché al editar una prueba.
 
-## Escudos
+## Escudos y balance
 
-| Tipo | Ubicaciones x,y |
-| --- | --- |
-| Inicial, una vez | R1 280,230; R3 1000,230; R10 280,890; R12 1000,890 |
-| Aleatorio | R2 640,370; R4 330,480; R5 950,480; R8 330,640; R9 950,640; R11 640,750 |
+Iniciales, una vez: R1 (360,180), R3 (1100,180), R10 (360,860), R12 (1100,860).
+Aleatorios: R2 (460,380), R4 (720,320), R5 (1000,380), R8 (440,660), R9 (1020,660), R11 (720,720).
 
-El servidor activa el primer aleatorio a los 15 s y espera 15 s tras recogerlo para activar otro. Los iniciales pendientes permanecen; solo un aleatorio está disponible a la vez. Ninguna recogida invade un nodo o pared. El escudo equipado absorbe un impacto y no vence por tiempo.
+Primer aleatorio a los 15 s; siguiente 15 s después de recogerlo; solo un aleatorio en el suelo y sin repetir ubicación inmediatamente. Los iniciales pendientes permanecen. Una carga bloquea un impacto y no vence con el tiempo.
 
-## Revisión y versiones
-
-A revisa mapa completo, seguimiento 2× y capas de cuadrícula/colisiones/Pasos revisados. B aumenta templateVersion al cambiar geometría y generatorVersion al cambiar el algoritmo. El cliente online recibirá el mapa resuelto; C guarda semilla/versiones sin mantener otro generador. MatchResult conserva su forma.
-
-Antes de cerrar el balance: jugar con dos y cuatro personas, revisar tiempos de viaje del mundo ampliado, ventajas de aparición, líneas de tiro y entrada simultánea en móvil real. La validación automática y la práctica individual no demuestran equilibrio multijugador. La siembra de telemetría produce resultados sintéticos, no partidas online.
+Antes de cerrar balance, jugar entre dos y cuatro personas y comprobar viajes, líneas de tiro y controles simultáneos en un móvil real. Las pruebas automáticas no prueban diversión ni igualdad de ventajas.

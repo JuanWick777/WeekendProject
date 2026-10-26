@@ -1,79 +1,59 @@
 # CyberGrid — Breach & Sync
 
-Videojuego web multijugador de **control de nodos rotatorios**, con disparos de energía. Arena de 2–4 jugadores, todos contra todos, y rondas de 150 segundos. Proyecto escolar de tres personas; entrega: lunes 26 de octubre de 2026, 16:00, Ciudad de México.
+Juego web multijugador de control de nodos rotatorios con disparos de energía. De 2 a 4 jugadores, todos contra todos: una ronda dura 150 segundos y activa cinco nodos, uno cada 30 segundos. Solo un ocupante vivo puntúa; una zona disputada detiene la puntuación.
 
-Cinco nodos se activan de uno en uno cada 30 segundos. Un único ocupante vivo acumula puntos; dos o más disputan la zona y detienen la puntuación. Una arena base diseñada por A usa ahora el trazado fijo de referencia; B genera y valida su geometría. La variación procedural final queda para después de las pantallas.
+## Estado de esta integración
 
-## Estado real de esta base
+A1 conserva el mapa industrial y los 32 PNG originales de A con geometría compartida. A2 añade HUD, efectos y presentación del juego online. A3 incorpora menú, registro/login, salas, lobby, ayuda y resultados con datos reales, más controles PC/móvil, interpolación, predicción y recuperación de la ronda.
 
-Hay workspaces npm, un cliente Vite con Canvas provisional, un servidor Express con GET /api/health, reglas compartidas, esquemas Zod, pruebas de contrato y configuración inicial de CI.
+El cliente de A, el puente de B y los repositorios PostgreSQL de C están integrados. El servidor conecta usuarios/sesiones y guardado de resultados, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. El helper de pruebas de C está incluido desde el PR #7. Ver [puente PostgreSQL](docs/postgres-bridge.md).
 
-**B0.1, B1, B2 y B3 integrados en main mediante los PR #1–#4:** mapa por semilla, movimiento, nodos, combate, escudo, respawn, reconexión y resultados de servidor. Ver [simulación B3 y conexión de A/C](docs/game-server.md). Los cambios nuevos llegan a main mediante su PR.
+La integración pasa lint, 107 pruebas en 17 archivos y build. Los tres recorridos E2E usan PostgreSQL real; CI los ejecuta con Chromium después de compilar. Se comprobó además que una sesión real sobrevive al reinicio del servidor. El usuario revisó el flujo en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [pruebas E2E](tests/e2e/README.md).
 
-**B asume también la programación del cliente; A diseña y revisa. Todavía falta conectar PostgreSQL y el cliente online.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. Ya hay una [vista industrial interactiva de diseño](docs/client-preview.md) solo en desarrollo: mapa fijo 1280 × 1120 con coberturas v4, pasillos protegidos y acabado metálico, cuatro drones detallados, HUD, teclado/táctil y práctica de combate/escudo/respawn con el motor compartido. Está identificada como local; también faltan los endpoints de evaluación.
+## Arrancar
 
-Repositorio privado del equipo: https://github.com/JuanWick777/WeekendProject. Todavía no se ha desplegado el juego. Un CI de bootstrap en verde no sustituye los tres E2E y la cobertura funcional de la entrega.
+1. Usar Node 24 LTS e instalar desde la raíz: `npm ci`.
+2. Copiar `.env.example` a `.env`. C configura `DATABASE_URL` y una `TEST_DATABASE_URL` diferente para pruebas. No subir credenciales.
+3. Ejecutar `npm run db:init`, que pertenece a la rama de C, sobre la base de desarrollo.
+4. Ejecutar `npm run dev`.
+5. Abrir http://127.0.0.1:5173 en dos perfiles o navegadores con cuentas distintas. El servidor escucha en el puerto 3000.
 
-Verificación de arena/práctica con Node 24.22.1: lint aprobado, 78 pruebas aprobadas y build aprobado. Ya se cubren mapas, daño y simulación sobre conexiones reales; faltan PostgreSQL, interpolación del cliente, E2E de navegador y mediciones públicas.
-
-## Empezar
-
-1. Usar Node 24 LTS; .nvmrc indica la versión mayor acordada.
-2. Desde esta raíz, ejecutar npm ci; el lockfile ya está incluido.
-3. Copiar .env.example a .env y configurar las credenciales con C cuando se integre la base de datos.
-4. Ejecutar npm run dev.
-5. Abrir http://127.0.0.1:5173. El servidor HTTP escucha en http://127.0.0.1:3000.
-
-El bootstrap arranca sin base de datos. La aplicación completa necesitará PostgreSQL. No subir .env a Git ni poner credenciales en el cliente.
-
-## Documentos que debe leer cada persona
-
-- [A: diseño y revisión visual](docs/brief-persona-a.md)
-- [Vista de diseño y adaptación de arena/escudos](docs/client-preview.md)
-- [Revisión de nuevos menús, todavía sin implementar](docs/ui-notes.md)
-- [B: tu orden de trabajo y criterios de aceptación](docs/brief-persona-b.md)
-- [C: datos, pruebas y despliegue](docs/brief-persona-c.md)
-- [Reglas del juego](docs/game-design.md)
-- [Mapas: una arena base, variantes y entregable de A](docs/maps.md)
-- [Contrato técnico y funciones de persistencia](docs/contracts.md)
-- [Autenticación implementada y conexión con C](docs/auth-integration.md)
-- [Salas y WebSockets: conexión de A/C](docs/lobbies-network.md)
-- [Simulación B3: mensajes, mapa y guardado para A/C](docs/game-server.md)
-- [Tareas y dependencias](docs/tasks.md)
-- [Árbol y propiedad de archivos](docs/project-tree.md)
-- [GitHub: ramas, pull requests e integración](docs/github-workflow.md)
-- [Preparación de la entrega](docs/evaluation.md)
+Para producción: `npm run build`, configurar `NODE_ENV=production`, `APP_ORIGIN` con el origen público HTTPS y ejecutar `npm start`. Cliente, API y WebSocket usan el mismo origen. La URL pública y su proveedor siguen pendientes.
 
 ## Comandos
 
 | Comando | Función |
 | --- | --- |
-| npm run dev | Cliente Vite y servidor Node con recarga |
-| npm run dev:client | Solo cliente |
-| npm run dev:server | Solo servidor |
-| npm test | Pruebas unitarias/integración existentes |
-| npm run lint | Análisis estático |
-| npm run build | Build de producción del cliente |
-| npm start | Servidor HTTP que también sirve el cliente construido |
-| npm run verify | Lint, pruebas existentes y build |
-| npm run test:e2e | Playwright; C debe añadir los tres flujos antes de ejecutarlo |
-| npm run verify:release | Verificación base y E2E; será obligatoria al cerrar C3 |
+| npm run dev | Cliente Vite y servidor con recarga |
+| npm run dev:client | Cliente; permite revisar menú/ayuda y práctica DEV |
+| npm run dev:server | Servidor |
+| npm run build | Cliente de producción |
+| npm start | Servidor y cliente construido |
+| npm run verify | Lint, pruebas y build |
+| npm run test:e2e | Tres recorridos reales; requiere C, puente B y base de pruebas |
+| npm run verify:release | Verificación base y E2E |
 
-El comando db:init se agregará en C1, junto con el esquema PostgreSQL. No existe aún. verify:release no puede pasar hasta que existan los E2E; no se admite convertir una suite vacía en un resultado aprobado.
+La [práctica local](docs/client-preview.md) continúa en desarrollo en `/?practice=1`. La entrada normal es el cliente online. La práctica no se incluye en producción.
 
-## Trabajo en equipo
+## Documentación
 
-- A diseña y mantiene referencias. B programa client/, shared/ y servidor de juego. C mantiene storage, telemetry, pruebas globales, scripts y despliegue.
-- Se usa JavaScript ESM; no introducir otro motor ni otro transporte de red.
-- Crear ramas cortas por tarea y PR hacia main. Siguientes ramas: feat/design-references, feat/client-online y feat/storage.
-- Coordinar cambios en shared/ y en dependencias. Instalar desde la raíz: no generar lockfiles por paquete.
-- Los archivos .gitkeep conservan las carpetas todavía vacías al clonar. Se pueden quitar al implementar cada carpeta.
-- Diseños y datos de prueba son fixtures identificados; el multijugador final siempre usa el servidor real.
+- [Reglas del juego](docs/game-design.md)
+- [Mapas y referencias de A](docs/maps.md)
+- [A1: mapa y personajes](docs/a1-integration.md)
+- [A2: HUD y efectos](docs/a2-visuals.md)
+- [A2/A3: pantallas, red e integración](docs/a23-integration.md)
+- [Puente de autenticación y resultados con PostgreSQL](docs/postgres-bridge.md)
+- [Contrato técnico](docs/contracts.md)
+- [Servidor de juego](docs/game-server.md)
+- [Autenticación](docs/auth-integration.md)
+- [Salas y WebSocket](docs/lobbies-network.md)
+- [Pruebas E2E](tests/e2e/README.md)
+- [GitHub y ramas](docs/github-workflow.md)
+- [Preparación de entrega](docs/evaluation.md)
 
-Siguiente integración: conectar users/sessions y matches.saveMatch de C al runtime y comprobar dos cuentas con PostgreSQL. B conecta el Canvas a match:start/state/event/match:end siguiendo [B3](docs/game-server.md); el [fixture v4](shared/fixtures/README.md) sigue disponible para presentación aislada.
+## Pendiente de entrega
 
-## Entrega
+Integrar las ramas, verificar Supabase real, montar y comprobar los endpoints de siembra/telemetría de C, cerrar el requisito procedural y desplegar por HTTPS. Las tres variantes de paredes optativas no sustituyen por sí mismas la validación final de ese requisito. Medir latencia y endpoints en la URL pública; revisar balance y controles en teléfono físico.
 
-- URL pública: PENDIENTE.
-- Repositorio: https://github.com/JuanWick777/WeekendProject (privado; dar acceso al evaluador).
-- Resultado de auditoría: ver docs/evaluation.md.
+Repositorio: https://github.com/JuanWick777/WeekendProject (privado; dar acceso al evaluador).
+URL pública: PENDIENTE.

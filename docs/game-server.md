@@ -22,7 +22,7 @@ Las reglas públicas continúan en [contracts.md](contracts.md). El generador no
 5. Renderizar `objective` y sus plazos: no sumar control desde el render. A los 150 segundos llega `match:end`; mostrar sus estadísticas y la revancha del anfitrión.
 6. Manejar `RESULT_NOT_SAVED` como fallo de guardado de una ronda terminada. Recibir `match:end` por sí solo no confirma persistencia.
 
-La plantilla actual `cardinal-sketch`, versión 4 y generador 2, adapta el mapa de A a 1280 × 1120. El trazado fijo recupera coberturas y arcos, con pasillos principales comprobados de 48 unidades. La variación queda pendiente; A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
+La plantilla a-industrial v5, generador 3 y protocolo 5, integra las coordenadas originales de A en mundo 1448 × 1088. Las caras metálicas tienen colisión continua; los recorridos se verifican con radio real 10, sin prometer el antiguo ancho 48. Ver maps.md y a1-integration.md. El recorrido de navegador online sigue pendiente.
 
 ## C/B: conectar PostgreSQL
 
@@ -62,3 +62,12 @@ Este fragmento muestra la unión; no presupone módulos de storage ya creados. C
 Con Node 24, `npm run verify` pasa lint, **78 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
 
 Siguen pendientes: repositorios y guardado PostgreSQL reales, cliente online de B, revisión del mapa, pruebas de interpolación, tres E2E de navegador, telemetría/siembra y mediciones en URL pública. B4 cierra la integración y los fallos de conexión/guardado sobre ese recorrido completo.
+
+
+## Puente PostgreSQL y cliente A3
+
+server/src/postgres-services.js conecta los repositorios reales de C con authService y saveMatch. index.js comprueba la base y cuatro tablas antes de escuchar, y cierra runtime y pool al apagar. No introduce una base alternativa. /api/health añade database=ready tras la comprobación inicial (no consulta SQL por petición).
+
+El administrador emite match:persistence para que resultados distinga guardado confirmado y fallido; ver contracts.md. La cola WebSocket saliente admite 256 KiB para el mapa de A1, conservando los límites de entrada.
+
+La integración A1+A2+A3, puente B y repositorios C incluye 107 pruebas, build, lint y tres E2E con PostgreSQL real. Los módulos y el helper de C se incorporaron desde main después del PR #7; CI ejecuta también los E2E. El texto anterior describe el estado previo a esta integración; el cliente online e interpolación ya están implementados. Ver [puente PostgreSQL](postgres-bridge.md). Siguen pendientes la verificación de Supabase remota, endpoints de evaluación, despliegue y mediciones públicas.

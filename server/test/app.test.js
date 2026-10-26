@@ -1,3 +1,4 @@
+import { PROTOCOL_VERSION } from '@cybergrid/shared/protocol';
 import { createServer } from 'node:http';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
@@ -25,7 +26,7 @@ describe('frontera HTTP del bootstrap', () => {
     const response = await fetch(baseUrl + '/api/health');
     expect(response.status).toBe(200);
     expect((await response.json()).data).toMatchObject({
-      protocolVersion: 4, authentication: 'pending', websocket: 'pending', database: 'pending',
+      protocolVersion: PROTOCOL_VERSION, authentication: 'pending', websocket: 'pending', database: 'pending',
     });
   });
 

@@ -1,4 +1,4 @@
-export const PROTOCOL_VERSION = 4;
+export const PROTOCOL_VERSION = 5;
 
 export const ROOM_STATES = Object.freeze({
   LOBBY: 'lobby',
@@ -19,6 +19,7 @@ export const SERVER_MESSAGES = Object.freeze({
   STATE: 'state',
   EVENT: 'event',
   MATCH_END: 'match:end',
+  MATCH_PERSISTENCE: 'match:persistence',
   PONG: 'pong',
   ERROR: 'error',
 });

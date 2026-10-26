@@ -34,7 +34,7 @@ export function attachSocketServer(server, {
   function send(record, type, payload) {
     const ws = record.ws;
     if (ws.readyState !== WebSocket.OPEN) return;
-    if (ws.bufferedAmount > 65_536) { ws.terminate(); return; }
+    if (ws.bufferedAmount > 262_144) { ws.terminate(); return; }
     ws.send(JSON.stringify({ type, payload }), (error) => { if (error) ws.terminate(); });
   }
 

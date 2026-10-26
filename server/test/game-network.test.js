@@ -93,18 +93,57 @@ describe('partida autoritativa por WebSocket real', () => {
     await vi.waitFor(() => expect(saveMatch).toHaveBeenCalledTimes(1));
     expect(result).toMatchObject({ matchId: start.matchId, finishReason: 'forfeit', winnerId: a.user.id });
     expect(result.players.find((p) => p.playerId === b.user.id).forfeited).toBe(true);
+    const saved = await a.client.waitFor((message) => message.type === 'match:persistence' && message.payload.status === 'saved');
+    expect(saved.payload.matchId).toBe(start.matchId);
     expect(runtime.games.getStatus(code).persistence).toBe('saved');
+    a.client.ws.terminate();
+    const replacement = await connect(a.cookie);
+    expect((await replacement.waitFor((message) => message.type === 'match:end')).payload.matchId).toBe(start.matchId);
+    expect((await replacement.waitFor((message) => message.type === 'match:persistence')).payload)
+      .toEqual({ matchId: start.matchId, status: 'saved' });
+  });
+
+  it('mantiene el guardado pendiente hasta que se confirma y publica saved una sola vez', async () => {
+    let finishSave;
+    const saving = new Promise((resolve) => { finishSave = resolve; });
+    const saveMatch = vi.fn(() => saving);
+    try {
+      const { a, b, code, start } = await setup({ saveMatch });
+      await api(`/api/rooms/${code}/leave`, b.cookie, 'POST');
+      expect((await a.client.waitFor((message) => message.type === 'match:persistence')).payload)
+        .toEqual({ matchId: start.matchId, status: 'pending' });
+      expect(runtime.games.getStatus(code).persistence).toBe('pending');
+      expect(a.client.messages.filter((message) => message.type === 'match:persistence' && message.payload.status === 'saved')).toHaveLength(0);
+      finishSave();
+      expect((await a.client.waitFor((message) => message.type === 'match:persistence' && message.payload.status === 'saved')).payload.matchId).toBe(start.matchId);
+      expect(saveMatch).toHaveBeenCalledTimes(1);
+      expect(a.client.messages.filter((message) => message.type === 'match:persistence' && message.payload.status === 'saved')).toHaveLength(1);
+    } finally { finishSave(); }
   });
 
   it('informa un fallo de guardado sin publicar un éxito ni duplicar el resultado', async () => {
     const saveMatch = vi.fn(async () => { throw new Error('DATABASE_PRIVATE_DETAIL'); });
-    const { a, b, code } = await setup({ saveMatch });
+    const { a, b, code, start } = await setup({ saveMatch });
     await api(`/api/rooms/${code}/leave`, b.cookie, 'POST');
     await a.client.waitFor((message) => message.type === 'match:end');
     const failure = await a.client.waitFor((message) => message.type === 'error' && message.payload.code === 'RESULT_NOT_SAVED');
     expect(JSON.stringify(failure)).not.toContain('DATABASE_PRIVATE_DETAIL');
+    expect((await a.client.waitFor((message) => message.type === 'match:persistence' && message.payload.status === 'failed')).payload.matchId).toBe(start.matchId);
+    expect(a.client.messages.filter((message) => message.type === 'match:persistence' && message.payload.status === 'saved')).toHaveLength(0);
     expect(runtime.games.getStatus(code).persistence).toBe('failed');
     expect(saveMatch).toHaveBeenCalledTimes(1);
+    a.client.ws.terminate();
+    const replacement = await connect(a.cookie);
+    expect((await replacement.waitFor((message) => message.type === 'match:persistence')).payload)
+      .toEqual({ matchId: start.matchId, status: 'failed' });
+  });
+
+  it('comunica unavailable cuando el runtime de prueba no tiene repositorio de resultados', async () => {
+    const { a, b, code, start } = await setup();
+    await api(`/api/rooms/${code}/leave`, b.cookie, 'POST');
+    expect((await a.client.waitFor((message) => message.type === 'match:persistence')).payload)
+      .toEqual({ matchId: start.matchId, status: 'unavailable' });
+    expect((await a.client.waitFor((message) => message.type === 'error')).payload.code).toBe('RESULT_NOT_SAVED');
   });
 
   it('no sigue moviendo ni disparando tras desconectarse', async () => {

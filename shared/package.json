@@ -14,7 +14,8 @@
     "./maps": "./src/maps/index.js",
     "./maps/*": "./src/maps/*.js",
     "./simulation": "./src/game/index.js",
-    "./simulation/*": "./src/game/*.js"
+    "./simulation/*": "./src/game/*.js",
+    "./wall-geometry": "./src/wall-geometry.js"
   },
   "dependencies": {
     "zod": "^4.0.0"

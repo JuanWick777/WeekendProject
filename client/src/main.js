@@ -1,21 +1,13 @@
-import { getHealth } from './net/api.js';
 import './styles.css';
+import './ui/game.css';
 
-async function updateServerStatus() {
-  const status = document.querySelector('#connection-status');
-  try {
-    const health = await getHealth();
-    status.textContent = health.data.authentication === 'ready' ? 'HTTP disponible · autenticación conectada' : 'HTTP disponible · conexión de cuentas pendiente';
-  } catch {
-    status.textContent = 'Servidor HTTP no disponible';
-  }
+const root = document.getElementById('app');
+let close;
+if (import.meta.env.DEV && new URLSearchParams(location.search).get('practice') === '1') {
+  const { startPractice } = await import('./preview/boot.js');
+  close = await startPractice(root);
+} else {
+  const { startApp } = await import('./app.js');
+  close = await startApp(root);
 }
-
-void updateServerStatus();
-if (import.meta.env.DEV) {
-  const { startArenaPreview } = await import('./preview/arena-preview.js');
-  document.querySelector('#online-pending').hidden = true;
-  document.querySelector('#arena-layout').hidden = false;
-  const close = startArenaPreview();
-  if (import.meta.hot) import.meta.hot.dispose(close);
-}
+if (import.meta.hot) import.meta.hot.dispose(() => close?.());

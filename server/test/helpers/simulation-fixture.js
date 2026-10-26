@@ -13,6 +13,7 @@ export function flatMap() {
   map.spawnPoints = [{id:'nw',x:64,y:64},{id:'se',x:704,y:576},{id:'ne',x:704,y:64},{id:'sw',x:64,y:576}];
   map.pickupSpawns[0].x=160; map.pickupSpawns[0].y=112;
   map.pickupSpawns = map.pickupSpawns.map((p,index) => index ? { ...p, x: 800+index*32, y: 160 } : p);
+  map.collisionModel = 'tiles';
   delete map.wallPaths; delete map.outline; delete map.protectedRoutes;
   return map;
 }

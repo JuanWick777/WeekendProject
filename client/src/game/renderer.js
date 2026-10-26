@@ -1,9 +1,10 @@
+import { wallGeometry } from '@cybergrid/shared/wall-geometry';
 import { PALETTE as P, PILOTS, NODE_NAMES } from './palette.js';
 import { drawSkin } from './drone-sprites.js';
 import { createArenaArt } from './arena-art.js';
 import { createViewport } from './viewport.js';
 
-export function drawDrone(context, player, index, local = false, labels = true) {
+export function drawDrone(context, player, index, local = false, labels = true, flash = false) {
   const pilot = PILOTS[index % PILOTS.length]; const { x, y } = player;
   context.save(); context.translate(x, y);
   if (local) {
@@ -16,7 +17,7 @@ export function drawDrone(context, player, index, local = false, labels = true) 
     context.fillStyle = glow; context.strokeStyle = '#78eeffcc'; context.lineWidth = 1.1;
     context.beginPath(); context.arc(0, 0, 22, 0, Math.PI * 2); context.fill(); context.stroke();
   }
-  context.restore(); drawSkin(context, player, index);
+  context.restore(); context.save(); if (flash) { context.shadowColor='#fff'; context.shadowBlur=12; } drawSkin(context, player, index); context.restore();
   if (!labels) return;
   context.save(); context.textAlign = 'center'; context.font = 'bold 9px system-ui';
   context.fillStyle = pilot.color; context.shadowColor = '#000'; context.shadowBlur = 3;
@@ -26,14 +27,22 @@ export function drawDrone(context, player, index, local = false, labels = true) 
   context.restore();
 }
 
-function drawPickup(c, point, time) {
-  c.save(); c.translate(point.x, point.y);
-  c.fillStyle = '#0b141e'; c.strokeStyle = '#65818e'; c.lineWidth = 1;
-  c.beginPath(); c.ellipse(0, 5, 12, 5, 0, 0, Math.PI * 2); c.fill(); c.stroke();
-  c.strokeStyle = P.cyan + '99'; c.beginPath(); c.ellipse(0, 4, 15, 7, 0, 0, Math.PI * 2); c.stroke();
-  c.translate(0, Math.sin(time / 400) * 1.5 - 2);
-  c.shadowColor = P.cyan; c.shadowBlur = 7; c.fillStyle = '#5debff33'; c.strokeStyle = P.cyan; c.lineWidth = 1.5;
-  c.beginPath(); c.moveTo(0, -10); c.lineTo(8, -7); c.lineTo(6, 1); c.lineTo(0, 6); c.lineTo(-6, 1); c.lineTo(-8, -7); c.closePath(); c.fill(); c.stroke(); c.restore();
+function drawPickup(c,item,time){
+ // Cápsula metálica compacta, cian y plateada; mismo objeto para pickups iniciales y aleatorios.
+ c.save();c.translate(item.x,item.y+Math.sin(time/400));c.scale(.6,.6);
+ c.shadowBlur=11;c.shadowColor='#30ceff';
+ c.fillStyle='#142c3a';c.strokeStyle='#73899a';c.lineWidth=3;
+ c.beginPath();for(let j=0;j<8;j++){const a=Math.PI/8+j*Math.PI/4;const x=Math.cos(a)*18,y=Math.sin(a)*18;
+  if(j===0)c.moveTo(x,y);else c.lineTo(x,y);}
+ c.closePath();c.fill();c.stroke();c.shadowBlur=0;
+ c.strokeStyle='#a4c9dc';c.lineWidth=2;c.beginPath();c.arc(0,0,12,0,Math.PI*2);c.stroke();
+ // Los 4 indicadores cian característicos de la cápsula.
+ c.fillStyle='#36cfff';for(let i=0;i<4;i++){c.save();c.rotate(i*Math.PI/2);c.fillRect(-5,-20,10,5);c.restore();}
+ // Pictograma sencillo de escudo en el centro.
+ c.fillStyle='#087aba';c.strokeStyle='#78edff';c.lineWidth=2;c.beginPath();c.moveTo(0,-9);
+ c.lineTo(8,-6);c.lineTo(7,2);c.quadraticCurveTo(6,7,0,10);c.quadraticCurveTo(-6,7,-7,2);
+ c.lineTo(-8,-6);c.closePath();c.fill();c.stroke();
+ c.font='bold 15px system-ui';c.textAlign='center';c.fillStyle='#244453';c.fillText(item.id,0,40);c.restore();
 }
 
 export function createRenderer(canvas, map) {
@@ -41,7 +50,7 @@ export function createRenderer(canvas, map) {
   let viewport = createViewport(1, 1, background.width, background.height);
   return {
     get viewport() { return viewport; },
-    draw(state, { localId, time = 0, zoom = 1, grid = false, collisions = false, routes = false, projectiles = state.projectiles, effects = [] } = {}) {
+    draw(state, { localId, time = 0, zoom = 1, grid = false, collisions = false, routes = false, projectiles = state.projectiles, effects = [], nodeDurationMs = 30000 } = {}) {
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(1, rect.width); const height = Math.max(1, rect.height); const ratio = Math.min(window.devicePixelRatio || 1, 2);
       const pixelWidth = Math.round(width * ratio); const pixelHeight = Math.round(height * ratio);
@@ -54,36 +63,46 @@ export function createRenderer(canvas, map) {
       for (const node of map.nodes) {
         const active = state.objective.activeNodeId === node.id;
         const next = state.objective.nextNodeId === node.id;
-        const color = active ? state.objective.status === 'contested' ? P.amber : P.cyan : next ? P.amber : '#72899b';
+        if (!active && !next) continue; // A's original dormant marker is already in the background.
+        const color = active ? state.objective.status === 'contested' ? P.amber : P.cyan : P.amber;
         context.save(); context.translate(node.x, node.y);
         const gradient = context.createRadialGradient(0, 0, 8, 0, 0, node.radius);
-        gradient.addColorStop(0, active ? color + '22' : '#607b8c0a'); gradient.addColorStop(1, active ? color + '0d' : '#607b8c05');
+        gradient.addColorStop(0, color + '22'); gradient.addColorStop(1, color + '0d');
         context.fillStyle = gradient; context.beginPath(); context.arc(0, 0, node.radius, 0, Math.PI * 2); context.fill();
-        context.strokeStyle = color + (active || next ? 'dd' : '55'); context.lineWidth = active ? 1.8 : 1;
+        context.strokeStyle = color + 'dd'; context.lineWidth = active ? 1.8 : 1;
         context.setLineDash(active ? [] : [5, 5]); context.stroke(); context.setLineDash([]);
-        if (active) { context.shadowColor = color; context.shadowBlur = 8; }
-        context.beginPath(); context.arc(0, 0, 23, 0, Math.PI * 2); context.stroke();
-        context.shadowBlur = 0; context.textAlign = 'center'; context.font = 'bold 10px system-ui'; context.fillStyle = color;
-        context.fillText(NODE_NAMES[node.id], 0, -node.radius + 17);
-        context.fillText(active ? 'ACTIVO' : next ? 'PRÓXIMO' : 'NODO', 0, 4);
+        context.textAlign = 'center'; context.font = 'bold 10px system-ui'; context.fillStyle = color;
+        context.fillText((active ? 'ACTIVO · ' : 'PRÓXIMO · ') + NODE_NAMES[node.id], 0, node.radius + 17);
         if (active) {
-          const fraction = Math.max(0, Math.min(1, (state.objective.changesAtMs - state.serverTimeMs) / 30000));
-          context.strokeStyle = color; context.lineWidth = 3; context.beginPath(); context.arc(0, 0, node.radius + 5, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); context.stroke();
+          const fraction = Math.max(0, Math.min(1, (state.objective.changesAtMs - state.serverTimeMs) / nodeDurationMs));
+          context.lineWidth = 3; context.beginPath(); context.arc(0, 0, node.radius + 5, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); context.stroke();
         }
         context.restore();
       }
       for (const pickup of state.pickups) drawPickup(context, pickup, time);
       for (const projectile of projectiles) {
         const color = PILOTS[state.players.findIndex((p) => p.id === projectile.ownerId) % PILOTS.length]?.color ?? P.cyan;
-        context.save(); context.strokeStyle = color; context.shadowColor = color; context.shadowBlur = 5; context.lineWidth = 2;
-        context.beginPath(); context.moveTo(projectile.x - projectile.dirX * 9, projectile.y - projectile.dirY * 9); context.lineTo(projectile.x, projectile.y); context.stroke(); context.restore();
+        context.save(); context.strokeStyle = color; context.shadowColor = color; context.shadowBlur = 5; context.lineWidth = 4;
+        context.beginPath(); context.moveTo(projectile.x - projectile.dirX * 9, projectile.y - projectile.dirY * 9); context.lineTo(projectile.x, projectile.y); context.stroke(); context.fillStyle='#d9ffff';context.beginPath();context.arc(projectile.x,projectile.y,2,0,Math.PI*2);context.fill();context.restore();
       }
-      state.players.forEach((player, index) => { if (player.alive && !player.forfeited) drawDrone(context, player, index, player.id === localId); });
+      state.players.forEach((player, index) => { if (player.alive && !player.forfeited) drawDrone(context, player, index, player.id === localId, true, effects.some((e)=>e.kind==='hit'&&e.targetId===player.id&&time-e.bornAt<120)); });
       for (const effect of effects) {
         const age = Math.max(0, Math.min(1, (time - effect.bornAt) / 800));
+        if (effect.kind === 'shot') {
+          if (age < .14) { context.save();context.globalAlpha=1-age/.14;context.fillStyle='#e8ffff';context.shadowColor=P.cyan;context.shadowBlur=12;context.beginPath();context.arc(effect.x,effect.y,5,0,Math.PI*2);context.fill();context.restore(); }
+          continue;
+        }
         const shield = effect.kind.startsWith('shield:');
         const color = shield ? P.cyan : effect.kind === 'respawn' ? '#a4f348' : '#ffb020';
         context.save(); context.translate(effect.x, effect.y); context.globalAlpha = 1 - age;
+        if (effect.kind==='respawn') {
+          context.fillStyle='#42ddf5';for(let i=0;i<5;i++)context.fillRect(-16+i*8,-38*(1-age),2,38*(1-age));
+          context.beginPath();context.ellipse(0,3,22*(1-age*.4),8*(1-age*.4),0,0,Math.PI*2);context.strokeStyle='#79eeff';context.stroke();
+        }
+        if (effect.kind==='hit'||effect.kind==='death'||effect.kind==='shield:block') {
+          context.strokeStyle=color;context.lineWidth=1.6;
+          for(let i=0;i<8;i++){const angle=i*Math.PI/4;const radius=6+age*32;context.beginPath();context.moveTo(Math.cos(angle)*radius,Math.sin(angle)*radius);context.lineTo(Math.cos(angle)*(radius+5),Math.sin(angle)*(radius+5));context.stroke();}
+        }
         context.strokeStyle = color; context.lineWidth = 2 * (1 - age) + .5;
         context.beginPath(); context.arc(0, 0, 7 + age * (effect.kind === 'death' ? 45 : 28), 0, Math.PI * 2); context.stroke();
         context.fillStyle = color; context.font = 'bold 8px system-ui'; context.textAlign = 'center';
@@ -105,7 +124,15 @@ export function createRenderer(canvas, map) {
       }
       if (collisions) {
         context.strokeStyle = '#ff7788'; context.lineWidth = 0.6;
-        map.tiles.forEach((row, y) => row.forEach((tile, x) => { if (tile) context.strokeRect(x * map.tileSize, y * map.tileSize, map.tileSize, map.tileSize); }));
+        if (map.collisionModel === 'segments-v1') {
+          for (const wall of wallGeometry(map).rectangles) {
+            context.beginPath();
+            wall.points.forEach(([x,y], index) => index ? context.lineTo(x,y) : context.moveTo(x,y));
+            context.closePath(); context.stroke();
+          }
+        } else {
+          map.tiles.forEach((row, y) => row.forEach((tile, x) => { if (tile) context.strokeRect(x * map.tileSize, y * map.tileSize, map.tileSize, map.tileSize); }));
+        }
         for (const player of state.players) { context.beginPath(); context.arc(player.x, player.y, 10, 0, Math.PI * 2); context.stroke(); }
       }
     },

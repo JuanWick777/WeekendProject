@@ -1,18 +1,7 @@
-# Fixture v4 para A y C
+# Fixture v5 para A y C
 
-[rotating-control.json](rotating-control.json) contiene `fixture: true`, un payload `matchStart` y otro `matchEnd`, según docs/contracts.md. Se puede usar en una escena local identificada como fixture para desarrollar mapa, HUD y resultados antes del servidor de juego.
+rotating-control.json contiene fixture: true, matchStart y matchEnd según docs/contracts.md. El inicio se genera con generateMap/createMatch reales y el resultado ejecutando esa misma ronda sin inputs. Ambos son **datos sintéticos de ejemplo**, nunca source=live.
 
-Es una muestra estática de formato con cuatro jugadores. **No es un generador procedural, una partida online ni el mapa final de A.** El inicio refleja el mapa ejecutable; el resultado y sus tiempos son de demostración; nunca insertar este resultado como source=live ni conectar la escena al recorrido de producción como si fuera multijugador.
+La muestra usa a-industrial v5, generador v3, protocolo 5; mundo 1448 × 1088 y plano original 1448 × 1086 sin estirar. Colisión segments-v1, nodos center/north/east/south/west con radio 64. Ver docs/maps.md y docs/a1-integration.md.
 
-Los IDs de nodos se alinean con el boceto del equipo: center, north (A), east (B), south (C), west (D). Dimensiones de trabajo: 160 × 140, tile 8, mundo 1280 × 1120, radio de nodo 64. El boceto original y notas están en docs/visual-references y docs/maps.md.
-
-Importación del ejemplo desde el workspace:
-
-~~~js
-import fixture from '@cybergrid/shared/fixtures/rotating-control' with { type: 'json' };
-
-const { map, state } = fixture.matchStart;
-// Usar únicamente en la escena de desarrollo marcada como fixture.
-~~~
-
-La práctica local de B genera una ronda con el motor compartido en lugar de modificar este fixture. C consulta MatchResult como ejemplo de forma. matchStart se regeneró desde generateMap/createMatch reales (trazado fijo, plantilla v4 y generador v2); matchEnd conserva un resultado sintético de muestra; el ejemplo no se guarda como partida live. Mantener los cambios de este archivo coordinados con el contrato y las constantes compartidas.
+Sirve para desarrollar presentación aislada, marcada como fixture. No acredita una partida online, guardado ni generación procedural completa. La práctica local ejecuta el motor en lugar de modificar este ejemplo.
