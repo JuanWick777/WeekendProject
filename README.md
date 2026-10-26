@@ -6,11 +6,11 @@ Juego web multijugador de control de nodos rotatorios con disparos de energía. 
 
 A1 conserva el mapa industrial y los 32 PNG originales de A con geometría compartida. A2 añade HUD, efectos y presentación del juego online. A3 incorpora menú, registro/login, salas, lobby, ayuda y resultados con datos reales, más controles PC/móvil, interpolación, predicción y recuperación de la ronda.
 
-El paquete de entrega separa estos cambios del puente de servidor de B. El juego online completo requiere también los módulos PostgreSQL y las correcciones de C. El servidor integrado comprueba la conexión y el esquema al arrancar; no sustituye una base ausente con usuarios o resultados de demostración.
+El puente de servidor de B está implementado en la rama de integración: conecta los repositorios de C con autenticación y guardado, comprueba la base antes de escuchar y confirma al cliente cuándo se guardó una ronda. Para arrancar desde el repositorio aún se debe incorporar la rama de C con su helper de pruebas registrado y sus checks aprobados. Ver [puente PostgreSQL](docs/postgres-bridge.md).
 
-Validado en una copia aislada con Node 24.22.1, PostgreSQL 18 local y Edge: lint, 105 pruebas, build y tres recorridos E2E. La cifra incluye las 16 pruebas del paquete corregido de C. No acredita todavía Supabase por internet, despliegue público o un teléfono físico. Ver [integración A2/A3](docs/a23-integration.md).
+La rama A+B pasa lint, 91 pruebas y build. La copia integrada con los módulos de C pasa 107 pruebas y tres recorridos E2E, incluidas sus 16 pruebas de almacenamiento; usa el helper pendiente de registrar por C. Se comprobó además que una sesión real sobrevive al reinicio del servidor. El usuario revisó el flujo en PC y teléfono por Wi-Fi local. Supabase por internet, despliegue y mediciones públicas siguen pendientes. Ver [integración A2/A3](docs/a23-integration.md).
 
-## Arrancar después de integrar C y el puente de B
+## Arrancar después de integrar C
 
 1. Usar Node 24 LTS e instalar desde la raíz: `npm ci`.
 2. Copiar `.env.example` a `.env`. C configura `DATABASE_URL` y una `TEST_DATABASE_URL` diferente para pruebas. No subir credenciales.
@@ -42,6 +42,7 @@ La [práctica local](docs/client-preview.md) continúa en desarrollo en `/?pract
 - [A1: mapa y personajes](docs/a1-integration.md)
 - [A2: HUD y efectos](docs/a2-visuals.md)
 - [A2/A3: pantallas, red e integración](docs/a23-integration.md)
+- [Puente de autenticación y resultados con PostgreSQL](docs/postgres-bridge.md)
 - [Contrato técnico](docs/contracts.md)
 - [Servidor de juego](docs/game-server.md)
 - [Autenticación](docs/auth-integration.md)

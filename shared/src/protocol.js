@@ -19,6 +19,7 @@ export const SERVER_MESSAGES = Object.freeze({
   STATE: 'state',
   EVENT: 'event',
   MATCH_END: 'match:end',
+  MATCH_PERSISTENCE: 'match:persistence',
   PONG: 'pong',
   ERROR: 'error',
 });

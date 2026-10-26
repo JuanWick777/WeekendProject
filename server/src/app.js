@@ -22,6 +22,7 @@ export function createApp({
   websocketReady = false,
   onSessionInvalidated,
   simulationReady = false,
+  databaseReady = false,
 } = {}) {
   const app = express();
   app.disable('x-powered-by');
@@ -38,7 +39,7 @@ export function createApp({
         websocket: websocketReady ? 'ready' : 'pending',
         rooms: roomManager ? 'ready' : 'pending',
         simulation: simulationReady ? 'ready' : 'pending',
-        database: 'pending',
+        database: databaseReady ? 'ready' : 'pending',
       },
     });
   });

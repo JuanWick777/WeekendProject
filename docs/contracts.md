@@ -207,3 +207,8 @@ Telemetry data:
 - overall se calcula desde sumas globales, no promediando porcentajes de filas. Denominador cero devuelve 0, nunca NaN/Infinity. Base vacía devuelve contadores 0 y players vacío.
 
 Medir HTTP completo y RTT en la URL pública con muestras y condiciones. Tiempo de backend y prueba local no acreditan la red pública. Objetivos de evaluación: ping/pong <100 ms y endpoints <200 ms, con HTTP 200; registrar también arranque frío.
+
+
+## Confirmación de persistencia — integración A3/B
+
+Mensaje opcional de servidor: `match:persistence`, payload `{ matchId, status }`. Estados: pending, saved, failed o unavailable. El cliente relaciona el estado por matchId y solo anuncia guardado después de saved, que se emite al resolver saveMatch. Recuperar una ronda terminada envía match:end y el último estado de persistencia. No cambia los campos de MatchResult ni los tiempos/reglas; protocolo 5 conserva compatibilidad aditiva.

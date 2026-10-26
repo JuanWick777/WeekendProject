@@ -18,13 +18,19 @@ export function createGameManager({
     });
   }
 
+  function publishPersistence(entry) {
+    sockets.broadcast(entry.roomCode, SERVER_MESSAGES.MATCH_PERSISTENCE, {matchId:entry.result.matchId,status:entry.persistence});
+  }
+
   function finish(entry) {
     if (entry.done) return;
     entry.done = true;
     entry.result = entry.match.getResult();
+    entry.persistence = saveMatch ? 'pending' : 'unavailable';
     sockets.broadcast(entry.roomCode, SERVER_MESSAGES.STATE, entry.match.getSnapshot());
     sockets.broadcast(entry.roomCode, SERVER_MESSAGES.MATCH_END, entry.result);
     rooms.markFinished(entry.roomCode);
+    publishPersistence(entry);
     entry.cleanupTimer = setTimeout(() => {
       if (entries.get(entry.roomCode) === entry) entries.delete(entry.roomCode);
     }, retentionMs);
@@ -32,8 +38,8 @@ export function createGameManager({
     if (!saveMatch) { entry.persistence = 'unavailable'; storageError(entry); return; }
     entry.persistence = 'pending';
     const saving = Promise.resolve().then(() => saveMatch(structuredClone(entry.result))).then(
-      () => { entry.persistence = 'saved'; },
-      () => { entry.persistence = 'failed'; storageError(entry); },
+      () => { entry.persistence = 'saved'; publishPersistence(entry); },
+      () => { entry.persistence = 'failed'; publishPersistence(entry); storageError(entry); },
     );
     pendingSaves.add(saving);
     void saving.finally(() => pendingSaves.delete(saving));
@@ -90,7 +96,7 @@ export function createGameManager({
     reconnect({ userId, roomCode }) {
       const entry = entries.get(roomCode);
       if (!entry) return;
-      if (entry.done) { sockets.sendToUser(userId, SERVER_MESSAGES.MATCH_END, entry.result); return; }
+      if (entry.done) { sockets.sendToUser(userId, SERVER_MESSAGES.MATCH_END, entry.result); sockets.sendToUser(userId, SERVER_MESSAGES.MATCH_PERSISTENCE, {matchId:entry.result.matchId,status:entry.persistence}); return; }
       entry.match.setConnected(userId, true, true);
       sockets.sendToUser(userId, SERVER_MESSAGES.MATCH_START, entry.match.getStartPayload());
     },
