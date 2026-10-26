@@ -63,3 +63,5 @@ export function drawSkin(context, player, index) {
   // The transparent margins remain; the metal body matches the 20-unit hitbox.
   context.drawImage(skins[index % skins.length][direction], player.x - 20, player.y - 20, 40, 40);
 }
+
+export const skinPortrait = (index) => sources[((index % sources.length) + sources.length) % sources.length][0];
