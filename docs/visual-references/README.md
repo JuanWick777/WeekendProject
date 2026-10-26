@@ -26,7 +26,7 @@ Imágenes entregadas por el equipo para orientar distribución, colores, persona
 - Cuatro recogidas iniciales aparecen una vez; después hay un aleatorio a la vez, con cadencia 15 s según contrato.
 - Solo un nodo está activo; todos tienen radio 64.
 - FFA individual: las menciones a equipos son errores de las imágenes.
-- Mundo vigente 1280 × 1120, cuadrícula 160 × 140 de 8; las dimensiones antiguas se conservan únicamente como referencia.
+- Mundo vigente 1448 × 1088, cuadrícula 181 × 136 de 8; las dimensiones antiguas se conservan únicamente como referencia.
 - Las curvas/diagonales se adaptan a tiles. Ahora se usa el trazado fijo de referencia; las variaciones se posponen hasta terminar pantallas.
 
 Los cinco menús nuevos de la carpeta local ui solo se analizaron; no se incorporan al cliente ni al commit de esta etapa. Ver [revisión de pantallas](../ui-notes.md).

@@ -4,10 +4,10 @@ export const PALETTE = Object.freeze({
 });
 
 export const PILOTS = Object.freeze([
-  { name: 'Dron hexagonal', color: '#ff465d', shape: 'hexagon' },
-  { name: 'Robot blindado', color: '#ffe04b', shape: 'octagon' },
-  { name: 'Unidad esférica', color: '#dc75ff', shape: 'circle' },
-  { name: 'Dron romboidal', color: '#a4f348', shape: 'diamond' },
+  { name: 'Dron hexagonal', color: '#ff4263', shape: 'hexagon' },
+  { name: 'Robot blindado', color: '#e9ad22', shape: 'octagon' },
+  { name: 'Unidad esférica', color: '#b75cff', shape: 'circle' },
+  { name: 'Dron romboidal', color: '#55cb5c', shape: 'diamond' },
 ]);
 
 export const NODE_NAMES = Object.freeze({ center: 'NÚCLEO', north: 'SECTOR A', east: 'SECTOR B', south: 'SECTOR C', west: 'SECTOR D' });

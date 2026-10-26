@@ -10,7 +10,7 @@ Hay workspaces npm, un cliente Vite con Canvas provisional, un servidor Express 
 
 **B0.1, B1, B2 y B3 integrados en main mediante los PR #1–#4:** mapa por semilla, movimiento, nodos, combate, escudo, respawn, reconexión y resultados de servidor. Ver [simulación B3 y conexión de A/C](docs/game-server.md). Los cambios nuevos llegan a main mediante su PR.
 
-**B asume también la programación del cliente; A diseña y revisa. Todavía falta conectar PostgreSQL y el cliente online.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. Ya hay una [vista industrial interactiva de diseño](docs/client-preview.md) solo en desarrollo: mapa fijo 1280 × 1120 con coberturas v4, pasillos protegidos y acabado metálico, cuatro drones detallados, HUD, teclado/táctil y práctica de combate/escudo/respawn con el motor compartido. Está identificada como local; también faltan los endpoints de evaluación.
+**A aporta su prototipo Canvas/UI original y revisa/publica A1; B coordina cliente y servidor. Todavía falta conectar PostgreSQL y el cliente online.** La simulación ya funciona por HTTP/WebSocket en pruebas con dos cuentas y repositorios aislados. El runtime necesita authService y saveMatch de C: sin auth responde AUTH_NOT_READY y sin guardado comunica RESULT_NOT_SAVED al terminar. Ya hay una [vista industrial interactiva de diseño](docs/client-preview.md) solo en desarrollo: mapa fijo 1448 × 1088 con los segmentos, suelo, luces y PNG originales de A, colisión continua alineada al metal, cuatro drones detallados, HUD, teclado/táctil y práctica de combate/escudo/respawn con el motor compartido. Está identificada como local; también faltan los endpoints de evaluación.
 
 Repositorio privado del equipo: https://github.com/JuanWick777/WeekendProject. Todavía no se ha desplegado el juego. Un CI de bootstrap en verde no sustituye los tres E2E y la cobertura funcional de la entrega.
 
@@ -70,7 +70,7 @@ El comando db:init se agregará en C1, junto con el esquema PostgreSQL. No exist
 - Los archivos .gitkeep conservan las carpetas todavía vacías al clonar. Se pueden quitar al implementar cada carpeta.
 - Diseños y datos de prueba son fixtures identificados; el multijugador final siempre usa el servidor real.
 
-Siguiente integración: conectar users/sessions y matches.saveMatch de C al runtime y comprobar dos cuentas con PostgreSQL. B conecta el Canvas a match:start/state/event/match:end siguiendo [B3](docs/game-server.md); el [fixture v4](shared/fixtures/README.md) sigue disponible para presentación aislada.
+Siguiente integración: conectar users/sessions y matches.saveMatch de C al runtime y comprobar dos cuentas con PostgreSQL. B conecta el Canvas a match:start/state/event/match:end siguiendo [B3](docs/game-server.md); el [fixture v5](shared/fixtures/README.md) sigue disponible para presentación aislada.
 
 ## Entrega
 

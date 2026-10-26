@@ -1,3 +1,4 @@
+import { resetWallGeometry } from '../wall-geometry.js';
 import { GAME_CONFIG } from '../constants.js';
 import { circleHitsMap, firstWallHit } from '../collision.js';
 
@@ -9,6 +10,20 @@ export function validateMap(map, { protectedTiles = [], protectedRoutes = map.pr
     || map.tiles.some((row) => !Array.isArray(row) || row.length !== columns || row.some((tile) => tile !== 0 && tile !== 1))) {
     return { valid: false, errors: ['Invalid tile grid'] };
   }
+  if (map.collisionModel && !['tiles', 'segments-v1'].includes(map.collisionModel)) {
+    return { valid: false, errors: ['Invalid collision model'] };
+  }
+  const vectorPoint = (point) => Array.isArray(point) && point.length === 2 && point.every(Number.isFinite);
+  if (map.collisionModel === 'segments-v1' && (
+    !Array.isArray(map.outline) || map.outline.length < 3 || !map.outline.every(vectorPoint)
+    || !Number.isFinite(map.outlineThickness) || map.outlineThickness <= 0
+    || !Array.isArray(map.wallPaths) || map.wallPaths.some((wall) => !wall
+      || !Array.isArray(wall.points) || wall.points.length < 2 || !wall.points.every(vectorPoint)
+      || !Number.isFinite(wall.thickness) || wall.thickness <= 0
+      || (wall.endPadding !== undefined && (!Number.isFinite(wall.endPadding) || wall.endPadding < 0))))) {
+    return { valid: false, errors: ['Invalid wall geometry'] };
+  }
+  resetWallGeometry(map);
   const finitePoint = (point) => point && Number.isFinite(point.x) && Number.isFinite(point.y);
   if (!Array.isArray(map.nodes) || map.nodes.length !== 5
     || map.nodes.some((node, index) => !finitePoint(node) || node.id !== GAME_CONFIG.match.nodeOrder[index] || node.radius !== GAME_CONFIG.match.nodeRadius)) {
@@ -63,6 +78,7 @@ export function validateMap(map, { protectedTiles = [], protectedRoutes = map.pr
       const nc = col + dc; const nr = row + dr; const key = nc + ',' + nr;
       if (nc < 0 || nr < 0 || nc >= columns || nr >= rows || visited.has(key)) continue;
       if (circleHitsMap(map, (nc + 0.5) * tileSize, (nr + 0.5) * tileSize, GAME_CONFIG.player.radius)) continue;
+      if (firstWallHit(map, (col + .5) * tileSize, (row + .5) * tileSize, dc * tileSize, dr * tileSize, GAME_CONFIG.player.radius) !== null) continue;
       visited.add(key); queue.push([nc, nr]);
     }
   }

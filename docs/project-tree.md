@@ -45,13 +45,13 @@ GameWeekend/
     package.json
     src/constants.js                   Mundo/escudos vigentes
     src/collision.js, movement.js       Física compartida por servidor y preview
-    src/maps/                          Plantilla v4, generador y validador
+    src/maps/                          Plantilla v5, generador y validador
     src/game/                          Match, combate, objetivos, escudos, resultados puros
     src/random.js                      PRNG reproducible
-    src/protocol.js                    Rutas/mensajes; protocolVersion 4
+    src/protocol.js                    Rutas/mensajes; protocolVersion 5
     src/schemas.js, index.js            Zod de entradas/exportaciones
     test/schemas.test.js                Contratos iniciales
-    fixtures/                          Ejemplo JSON v4 de partida y resultado
+    fixtures/                          Ejemplo JSON v5 de partida y resultado
   tests/e2e/README.md                   C: specs pendientes
   scripts/README.md                     C: scripts pendientes
   docs/

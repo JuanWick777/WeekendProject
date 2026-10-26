@@ -8,7 +8,7 @@ Lee [contracts.md](contracts.md), [game-design.md](game-design.md), [tasks.md](t
 
 El modo es `rotating_control`: FFA 2–4, ronda de 150 s, cinco nodos de 30 s, único ocupante suma tiempo y dos o más disputan. No hay transporte de fragmentos ni sincronización. Una sola arena tiene variantes de cobertura por semilla, generadas y validadas por B. No implementes un generador propio.
 
-Conserva las estadísticas requeridas de victorias, bajas/muertes y supervivencia. Añade controlTimeMs, mode, templateId, templateVersion y generatorVersion según MatchResult. La puntuación es floor(controlTimeMs/1000); los puntos se conservan al morir. La semilla y las versiones permiten reproducir la geometría con la versión correspondiente del código. La arena vigente es cardinal-sketch v4, generador v2, protocolo 4, 1280 × 1120; el trazado de referencia queda fijo por ahora. MatchResult conserva su forma.
+Conserva las estadísticas requeridas de victorias, bajas/muertes y supervivencia. Añade controlTimeMs, mode, templateId, templateVersion y generatorVersion según MatchResult. La puntuación es floor(controlTimeMs/1000); los puntos se conservan al morir. La semilla y las versiones permiten reproducir la geometría con la versión correspondiente del código. La arena vigente es a-industrial v5, generador v3, protocolo 5, 1448 × 1088; el trazado de referencia queda fijo por ahora. MatchResult conserva su forma.
 
 ## Persistencia completa
 

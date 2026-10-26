@@ -1,11 +1,11 @@
-# Tareas y orden de integración — protocolo 4
+# Tareas y orden de integración — protocolo 5
 
-Entrega lunes 26/10/2026 16:00, Ciudad de México; objetivo de entrega 15:30. A queda en diseño/revisión, B asume toda la programación del cliente además del servidor y C conserva datos, calidad y despliegue.
+Entrega lunes 26/10/2026 16:00, Ciudad de México; objetivo de entrega 15:30. A aporta su prototipo original (PR #9), revisa y publica A1; B coordina cliente/servidor/integración y C mantiene datos, calidad y despliegue.
 
 | Bloque | Responsable | Estado o siguiente resultado |
 | --- | --- | --- |
 | Bootstrap, contrato inicial, auth, salas, WS y simulación B3 | B | Integrados en main, PR #1–#4; PostgreSQL pendiente |
-| Adaptación de arena y escudos | B | Implementados: arena fija 1280 × 1120, plantilla v4, protocolo 4, rutas protegidas y escudos 15 s |
+| Adaptación de arena y escudos | B | Implementados: arena fija 1448 × 1088, plantilla v5, protocolo 5, geometría original de A, colisión continua y escudos 15 s |
 | Vista industrial de diseño | B; A revisa | Canvas local, cuatro diseños detallados, combate/escudos/respawn canónicos, HUD y controles |
 | Arte y pantallas | A | Menú, crear/unirse, lobby, ayuda y resultados recibidos y solo analizados; falta autenticación/estados |
 | Repositorios C1a/C1b | C; B integra | PR #7 abierto: corregir contrato de sesión/expiración, aislamiento de DB, duplicados y tiempos; después saveMatch e integración |
@@ -18,7 +18,7 @@ Entrega lunes 26/10/2026 16:00, Ciudad de México; objetivo de entrega 15:30. A 
 
 ## Orden inmediato
 
-Revisar/publicar la arena fija v4 y sus pasos. Las nuevas referencias de menús solo se analizan en [ui-notes.md](ui-notes.md); no se implementan en este bloque. A revisa capturas mientras B conecta el cliente al servidor. C entrega users/sessions primero y después guardado; B coordina index.js para esa unión. No hace falta esperar a que A termine cada pantalla para comenzar sus funciones.
+Aplicar/revisar/publicar A1 (maps.md y a1-integration.md), conservando el trabajo de A. Después A2 adapta HUD/efectos y A3 conecta pantallas funcionales. Las nuevas referencias de menús solo se analizan en [ui-notes.md](ui-notes.md); no se implementan en este bloque. A revisa capturas mientras B conecta el cliente al servidor. C entrega users/sessions primero y después guardado; B coordina index.js para esa unión. No hace falta esperar a que A termine cada pantalla para comenzar sus funciones.
 
 La vista de diseño está identificada como local y solo se incluye en desarrollo. Calcula puntos/resultados locales con el motor compartido; no acredita multijugador ni guardado. El renderizador se reutilizará con el mapa/snapshots de servidor. Ver [client-preview.md](client-preview.md).
 

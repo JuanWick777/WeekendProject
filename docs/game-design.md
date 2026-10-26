@@ -1,4 +1,4 @@
-# CyberGrid — Diseño acordado v4
+# CyberGrid — Diseño acordado v5
 
 Este documento sustituye la modalidad de extracción del diseño v1. B3 ya implementa estas reglas en la simulación de servidor; falta conectar el cliente jugable y PostgreSQL. El nombre CyberGrid: Breach & Sync se conserva; el modo se identifica como `rotating_control`. Ver [estado e integración B3](game-server.md).
 
@@ -46,7 +46,7 @@ Hay cuatro recogidas iniciales que aparecen una vez (R1/R3/R10/R12). A los **15 
 
 ## Arena y controles
 
-**Una arena base**, de 160 columnas × 140 filas y casillas de 8 unidades: mundo de 1280 × 1120. A proporciona el diseño; B programa cliente y trazado fijo v4, con holgura para las coberturas. Las variaciones de obstáculos se posponen hasta terminar las pantallas; el prototipo procedural solo se activa explícitamente en código. La guía completa y el entregable de A están en [maps.md](maps.md).
+**Una arena base**, de 181 columnas × 136 filas y casillas de 8 unidades: mundo de 1448 × 1088. A proporciona el diseño; se integran sus coordenadas, funciones Canvas y PNG originales sin rediseñar paredes. La física continua sigue sus caras metálicas, según maps.md. Las variaciones de obstáculos se posponen hasta terminar las pantallas; el prototipo procedural solo se activa explícitamente en código. La guía completa y el entregable de A están en [maps.md](maps.md).
 
 Todos reciben el mismo mapa validado por el servidor. Se conserva durante toda la ronda. Jugadores colisionan con paredes/límites y no se bloquean entre sí. Las diagonales se normalizan.
 

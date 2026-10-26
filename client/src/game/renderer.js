@@ -1,3 +1,4 @@
+import { wallGeometry } from '@cybergrid/shared/wall-geometry';
 import { PALETTE as P, PILOTS, NODE_NAMES } from './palette.js';
 import { drawSkin } from './drone-sprites.js';
 import { createArenaArt } from './arena-art.js';
@@ -54,21 +55,19 @@ export function createRenderer(canvas, map) {
       for (const node of map.nodes) {
         const active = state.objective.activeNodeId === node.id;
         const next = state.objective.nextNodeId === node.id;
-        const color = active ? state.objective.status === 'contested' ? P.amber : P.cyan : next ? P.amber : '#72899b';
+        if (!active && !next) continue; // A's original dormant marker is already in the background.
+        const color = active ? state.objective.status === 'contested' ? P.amber : P.cyan : P.amber;
         context.save(); context.translate(node.x, node.y);
         const gradient = context.createRadialGradient(0, 0, 8, 0, 0, node.radius);
-        gradient.addColorStop(0, active ? color + '22' : '#607b8c0a'); gradient.addColorStop(1, active ? color + '0d' : '#607b8c05');
+        gradient.addColorStop(0, color + '22'); gradient.addColorStop(1, color + '0d');
         context.fillStyle = gradient; context.beginPath(); context.arc(0, 0, node.radius, 0, Math.PI * 2); context.fill();
-        context.strokeStyle = color + (active || next ? 'dd' : '55'); context.lineWidth = active ? 1.8 : 1;
+        context.strokeStyle = color + 'dd'; context.lineWidth = active ? 1.8 : 1;
         context.setLineDash(active ? [] : [5, 5]); context.stroke(); context.setLineDash([]);
-        if (active) { context.shadowColor = color; context.shadowBlur = 8; }
-        context.beginPath(); context.arc(0, 0, 23, 0, Math.PI * 2); context.stroke();
-        context.shadowBlur = 0; context.textAlign = 'center'; context.font = 'bold 10px system-ui'; context.fillStyle = color;
-        context.fillText(NODE_NAMES[node.id], 0, -node.radius + 17);
-        context.fillText(active ? 'ACTIVO' : next ? 'PRÓXIMO' : 'NODO', 0, 4);
+        context.textAlign = 'center'; context.font = 'bold 10px system-ui'; context.fillStyle = color;
+        context.fillText((active ? 'ACTIVO · ' : 'PRÓXIMO · ') + NODE_NAMES[node.id], 0, node.radius + 17);
         if (active) {
           const fraction = Math.max(0, Math.min(1, (state.objective.changesAtMs - state.serverTimeMs) / 30000));
-          context.strokeStyle = color; context.lineWidth = 3; context.beginPath(); context.arc(0, 0, node.radius + 5, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); context.stroke();
+          context.lineWidth = 3; context.beginPath(); context.arc(0, 0, node.radius + 5, -Math.PI / 2, -Math.PI / 2 + fraction * Math.PI * 2); context.stroke();
         }
         context.restore();
       }
@@ -105,7 +104,15 @@ export function createRenderer(canvas, map) {
       }
       if (collisions) {
         context.strokeStyle = '#ff7788'; context.lineWidth = 0.6;
-        map.tiles.forEach((row, y) => row.forEach((tile, x) => { if (tile) context.strokeRect(x * map.tileSize, y * map.tileSize, map.tileSize, map.tileSize); }));
+        if (map.collisionModel === 'segments-v1') {
+          for (const wall of wallGeometry(map).rectangles) {
+            context.beginPath();
+            wall.points.forEach(([x,y], index) => index ? context.lineTo(x,y) : context.moveTo(x,y));
+            context.closePath(); context.stroke();
+          }
+        } else {
+          map.tiles.forEach((row, y) => row.forEach((tile, x) => { if (tile) context.strokeRect(x * map.tileSize, y * map.tileSize, map.tileSize, map.tileSize); }));
+        }
         for (const player of state.players) { context.beginPath(); context.arc(player.x, player.y, 10, 0, Math.PI * 2); context.stroke(); }
       }
     },

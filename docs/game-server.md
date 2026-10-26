@@ -22,7 +22,7 @@ Las reglas públicas continúan en [contracts.md](contracts.md). El generador no
 5. Renderizar `objective` y sus plazos: no sumar control desde el render. A los 150 segundos llega `match:end`; mostrar sus estadísticas y la revancha del anfitrión.
 6. Manejar `RESULT_NOT_SAVED` como fallo de guardado de una ronda terminada. Recibir `match:end` por sí solo no confirma persistencia.
 
-La plantilla actual `cardinal-sketch`, versión 4 y generador 2, adapta el mapa de A a 1280 × 1120. El trazado fijo recupera coberturas y arcos, con pasillos principales comprobados de 48 unidades. La variación queda pendiente; A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
+La plantilla a-industrial v5, generador 3 y protocolo 5, integra las coordenadas originales de A en mundo 1448 × 1088. Las caras metálicas tienen colisión continua; los recorridos se verifican con radio real 10, sin prometer el antiguo ancho 48. Ver maps.md y a1-integration.md. El recorrido de navegador online sigue pendiente.
 
 ## C/B: conectar PostgreSQL
 

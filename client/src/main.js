@@ -16,6 +16,6 @@ if (import.meta.env.DEV) {
   const { startArenaPreview } = await import('./preview/arena-preview.js');
   document.querySelector('#online-pending').hidden = true;
   document.querySelector('#arena-layout').hidden = false;
-  const close = startArenaPreview();
+  const close = await startArenaPreview();
   if (import.meta.hot) import.meta.hot.dispose(close);
 }

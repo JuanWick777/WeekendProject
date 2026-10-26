@@ -1,3 +1,4 @@
+import { preloadSkins } from '../game/drone-sprites.js';
 import { createPracticeSession } from './practice-session.js';
 import { createRenderer, drawDrone } from '../game/renderer.js';
 import { createControls } from '../input/controls.js';
@@ -8,7 +9,8 @@ const clock = (ms) => {
   return Math.floor(seconds / 60).toString().padStart(2, '0') + ':' + (seconds % 60).toString().padStart(2, '0');
 };
 
-export function startArenaPreview() {
+export async function startArenaPreview() {
+  await preloadSkins();
   const $ = (id) => document.getElementById(id);
   const canvas = $('game'); const roster = $('roster');
   const controls = createControls(canvas, $('move-pad'), $('aim-pad'));
@@ -53,6 +55,7 @@ export function startArenaPreview() {
     session.select(selected); renderer = createRenderer(canvas, session.map);
     effects = []; controls.clear(); lastTime = null; paused = false;
     const { map } = session;
+    $('show-routes').closest('label').hidden = !map.protectedRoutes?.length;
     $('arena-spec').textContent = `${map.columns * map.tileSize} × ${map.rows * map.tileSize} · trazado fijo · v${map.templateVersion}`;
     updateSelection(); updateHud(); canvas.focus();
   }

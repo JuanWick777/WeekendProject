@@ -1,12 +1,12 @@
-# Contrato técnico v4 — Rotating control
+# Contrato técnico v5 — Rotating control
 
-Acuerdo de implementación para A, B y C. Sustituye v3: amplía la arena, fija el trazado de referencia y añade guías visuales/rutas al mapa resuelto. Mantiene la clasificación de recogidas y cadencia de escudos. MatchResult y repositorios conservan sus firmas. **Estado de implementación:** constantes v4, auth HTTP, salas, WebSockets y simulación B3 están preparados con autenticación/guardado inyectados; falta conectar PostgreSQL de C y el cliente online de B. Ver [B2](lobbies-network.md) y [B3](game-server.md). Hay un [fixture compartido](../shared/fixtures/README.md) para desarrollar presentación, no una partida real.
+Acuerdo para A, B y C. v5 integra el mapa y PNG originales de A, dimensiones y colisión continua; mantiene reglas y firmas de MatchResult/repositorios. Cliente y servidor deben usar protocolo 5. La unión de PostgreSQL y cliente online sigue pendiente; la práctica de desarrollo no guarda resultados.
 
 ## Convenciones y autoridad
 
 - JavaScript ESM; código/protocolo en inglés, UI en español. camelCase para variables y kebab-case.js para archivos.
 - Centros en unidades de mundo, x derecha e y abajo; tiempos externos en milisegundos. Delta interno `dtSeconds`.
-- Mundo 160 × 140, tileSize 8 (1280 × 1120); jugador radio 10 y velocidad 160 unidades/s.
+- Mundo 181 × 136, tileSize 8 (1448 × 1088; autoría 1448 × 1086 sin estirar); jugador radio 10 y velocidad 160 unidades/s.
 - Tick 30 Hz, input 20 Hz, snapshot 15 Hz; render objetivo 60 FPS. Inputs caducan a los 250 ms; ping cada 2 s; máximo mensaje de cliente a servidor 4096 bytes.
 - Servidor decide posición, colisiones, proyectiles, inventario, ocupación y puntos. Cliente interpola y corrige predicción local con snapshots.
 - Un proceso mantiene salas y simulación en memoria. PostgreSQL guarda usuarios, sesiones y resultados; no se consulta por cada tick.
@@ -73,19 +73,20 @@ Ping: `{ type: 'ping', payload: { id, sentAtMs } }`. Pong devuelve los mismos ca
 
 ~~~text
 {
-  seed, layout: 'reference', templateId, templateVersion: 4, generatorVersion: 2,
-  columns: 160, rows: 140, tileSize: 8,
+  seed, layout: 'reference', templateId: 'a-industrial', templateVersion: 5, generatorVersion: 3,
+  variantId: 'base', collisionModel: 'segments-v1',
+  columns: 181, rows: 136, tileSize: 8, designWidth: 1448, designHeight: 1086,
   tiles: [[0, 1, ...], ...],
-  nodes: [{ id, x, y, radius }],
-  spawnPoints: [{ id, x, y }],
+  nodes: [{ id, authorId, x, y, radius: 64 }],
+  spawnPoints: [{ id, authorId, x, y }],
   pickupSpawns: [{ id, type: 'shield', x, y, radius: 10, spawnKind: 'initial' | 'random' }],
-  wallPaths: [{ id, points: [[x, y], ...], thickness }],
-  outline: [[x, y], ...],
-  protectedRoutes: [{ id, points: [[x, y], ...], clearance: 24 }]
+  wallPaths: [{ id, category, points: [[x, y], ...], thickness: 22, endPadding: 4 }],
+  outline: [[x, y], ...], outlineThickness: 18,
+  protectedRoutes: []
 }
 ~~~
 
-`seed` es uint32; versiones son enteros positivos. `tiles[row][column]`: 0 suelo, 1 pared. `nodes` contiene exactamente los cinco IDs de [game-design.md](game-design.md) en su orden de activación, con radio inicial 64. La plantilla y el generador siguen [maps.md](maps.md). Los grupos de variantes son datos internos de B: al cliente se envía el mapa resuelto. `layout` admite reference/procedural; las rondas normales usan reference y conservan las paredes entre semillas. `wallPaths` y `outline` orientan el acabado; caras y luces se recortan a tiles sólidos, que son la autoridad física. `protectedRoutes.clearance` es el radio libre requerido en unidades de mundo. Ver [maps.md](maps.md).
+El servidor envía el mapa resuelto. seed es uint32; versiones enteras positivas. En segments-v1, wallPaths y el borde de outline son la autoridad física; tiles es ocupación auxiliar, no colisión. Las sombras no bloquean. El cliente usa la misma geometría compartida y no reconstruye física desde una imagen. Los originales conservan sus coordenadas y etiquetas authorId. El orden de activación es el orden canónico de nodes, no el número de la etiqueta decorativa. Las rondas normales usan reference/base. La selección opt-in procedural elige una de las tres variantes de A y todavía no acredita generación procedural completa. Ver [maps.md](maps.md).
 
 El servidor reenvía `match:start` con mapa y snapshot actual al reconectar a una ronda. No regenera terreno por una rotación ni al entrar otro socket.
 

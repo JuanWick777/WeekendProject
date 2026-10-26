@@ -1,6 +1,6 @@
 # A — Diseño y revisión visual
 
-Tu responsabilidad ahora es el diseño y las referencias en `docs/visual-references/`. B programa cliente, Canvas, controles, red y servidor; C mantiene datos, pruebas globales y despliegue. Ya existe una [vista interactiva de diseño](client-preview.md) para revisar el resultado.
+A diseñó y programó el prototipo de Canvas/interfaz de PR #9. Ahora revisa y aplica A1 en feat/visual-integration; sus originales quedan conservados. Mantiene diseño y referencias en `docs/visual-references/`. B programa cliente, Canvas, controles, red y servidor; C mantiene datos, pruebas globales y despliegue. Ya existe una [vista interactiva de diseño](client-preview.md) para revisar el resultado.
 
 ## Entregas concretas
 
@@ -19,10 +19,10 @@ FFA 2–4; 150 s; centro -> norte/A -> este/B -> sur/C -> oeste/D, 30 s cada uno
 
 Escudo equipado: una carga que absorbe un impacto y no vence por tiempo. Cuatro recogidas iniciales aparecen una vez; posteriormente hay un aleatorio a la vez con intervalo 15 s según [contrato](contracts.md). No representar habilidades ni atributos distintos por personaje.
 
-Mundo adaptado: 1280 × 1120, 160 × 140 casillas de 8, trazado fijo v4. El cliente dibuja las paredes reales del mapa recibido. Las imágenes con dimensiones anteriores son referencias históricas.
+Plano original 1448 × 1086 sin estirar. Mundo: 1448 × 1088, 181 × 136 casillas de 8, trazado fijo v5. El cliente dibuja las paredes reales del mapa recibido. Las imágenes con dimensiones anteriores son referencias históricas.
 
 ## Cómo revisar
 
-Con B, abrir npm run dev y revisar el mapa completo y el seguimiento del dron. Usar las capas de cuadrícula/colisión/Pasos revisados para señalar diferencias entre pared dibujada y espacio transitable. Comprobar el HUD a tamaño móvil, contraste de balas y personajes, nodo activo e inactivos y orientación del arma.
+Con B, abrir npm run dev y revisar el mapa completo y el seguimiento del dron. Usar cuadrícula y Colisiones; las rutas antiguas de Pasos revisados no corresponden al plano original. Estas capas sirven para señalar diferencias entre pared dibujada y espacio transitable. Comprobar el HUD a tamaño móvil, contraste de balas y personajes, nodo activo e inactivos y orientación del arma.
 
-Las cuatro láminas detalladas ya están recreadas en sprites Canvas con rotación continua y atributos idénticos. La práctica de combate permite revisar recogida/bloqueo/daño/respawn. La vista actual es local y está identificada; el recorrido online, interpolación y controles definitivos los implementa B. A aporta observaciones y prueba el diseño con B/C cuando se conecte la partida real.
+Los cuatro drones usan los 32 PNG originales de A, ocho orientaciones y atributos idénticos. Apuntado/disparo conservan dirección continua. La práctica de combate permite revisar recogida/bloqueo/daño/respawn. La vista actual es local y está identificada; el recorrido online, interpolación y controles definitivos los implementa B. A aporta observaciones y prueba el diseño con B/C cuando se conecte la partida real.

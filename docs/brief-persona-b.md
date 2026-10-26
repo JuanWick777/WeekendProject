@@ -1,12 +1,12 @@
 # B — Cliente, servidor y simulación
 
-B asume ahora client y shared, además de auth/rooms/net/game. A diseña y revisa las referencias; C implementa storage/telemetry, pruebas globales, CI y despliegue. Coordinar index.js, app.js y dependencias con C.
+B coordina la integración de A y mantiene client/shared, además de auth/rooms/net/game. A diseña y revisa las referencias; C implementa storage/telemetry, pruebas globales, CI y despliegue. Coordinar index.js, app.js y dependencias con C.
 
 ## Implementado
 
 Bootstrap, autenticación HTTP inyectable, salas, WebSocket autenticado y simulación B3 están integrados por los PR #1–#4. Las pruebas usan conexiones HTTP/WebSocket reales y repositorios aislados; falta unir PostgreSQL.
 
-El bloque actual adapta la arena a 1280 × 1120, 160 × 140 tiles de 8; plantilla fija cardinal-sketch v4, generador v2 y protocolo 4. Implementa cuatro recogidas iniciales y una aleatoria a la vez con cadencia 15 s. Conserva atributos, combate, nodos, resultado y firmas de persistencia. Ver [mapas](maps.md) y [contrato](contracts.md).
+El bloque actual adapta la arena a 1448 × 1088, 181 × 136 tiles de 8; plantilla fija a-industrial v5, generador v3 y protocolo 5. Implementa cuatro recogidas iniciales y una aleatoria a la vez con cadencia 15 s. Conserva atributos, combate, nodos, resultado y firmas de persistencia. Ver [mapas](maps.md) y [contrato](contracts.md).
 
 La [vista industrial de diseño](client-preview.md) incluye Canvas, drones, HUD, teclado/ratón, pads táctiles y cámara. Es local y solo se incluye en desarrollo; sirve para revisar presentación y física. La práctica ejecuta el motor compartido con captura, combate y resultados locales. No es el recorrido online ni guarda resultados.
 

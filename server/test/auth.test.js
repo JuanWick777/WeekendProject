@@ -1,3 +1,4 @@
+import { PROTOCOL_VERSION } from '@cybergrid/shared/protocol';
 import { createServer } from 'node:http';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.js';
@@ -219,6 +220,6 @@ describe('autenticación por HTTP real con repositorios de prueba', () => {
     expect(repositories.userRows.size).toBe(0);
     const health = await call('/api/health');
     expect(health.data.data.authentication).toBe('pending');
-    expect(health.data.data.protocolVersion).toBe(4);
+    expect(health.data.data.protocolVersion).toBe(PROTOCOL_VERSION);
   });
 });
