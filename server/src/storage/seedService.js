@@ -1,139 +1,120 @@
 import { pool } from './pool.js';
 import { saveMatch } from './matches.js';
-import crypto from 'node:crypto';
 
-/**
- * Procesa un lote de siembra sintética de partidas de forma idempotente.
- * @param {Object} params
- * @param {number} params.seed - Semilla numérica para generación determinista.
- * @param {Array|number} [params.matches] - Arreglo de partidas o cantidad a generar.
- * @param {string} params.batchId - Identificador único del lote.
- * @param {string} [params.defaultUserId] - ID de usuario base para partidas sintéticas.
- * @returns {Promise<{ batchId: string, insertedMatches: number, alreadyExists: boolean }>}
- */
-export async function processSeedBatch({ seed, matches, batchId, defaultUserId = null }) {
-  // 1. Preparar o generar partidas sintéticas coherentes
-  const matchPayloads = Array.isArray(matches)
-    ? matches
-    : generateSyntheticMatches(seed, typeof matches === 'number' ? matches : 100, defaultUserId);
+function createPRNG(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
+export async function processSeedBatch({ seed, matches = 5, batchId }) {
+  if (seed === undefined || seed === null) {
+    throw new Error('INVALID_SEED: Se requiere el parámetro seed.');
+  }
+
+  const effectiveBatchId = batchId || `batch_seed_${seed}`;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // 2. Verificar idempotencia en seed_batches
-    const checkBatchQuery = `SELECT batch_id FROM seed_batches WHERE batch_id = $1;`;
-    const existingBatch = await client.query(checkBatchQuery, [batchId]);
+    const batchRes = await client.query(
+      `INSERT INTO seed_batches (batch_id, seed, match_count)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (batch_id) DO NOTHING
+       RETURNING batch_id;`,
+      [effectiveBatchId, seed, matches]
+    );
 
-    if (existingBatch.rowCount > 0) {
+    if (batchRes.rowCount === 0) {
       await client.query('COMMIT');
-      return {
-        batchId,
-        insertedMatches: 0,
-        alreadyExists: true
-      };
+      return { status: 'success', insertedMatches: 0, batchId: effectiveBatchId };
     }
 
-    // 3. Registrar el lote en seed_batches incluyendo inserted_matches
-    const insertBatchQuery = `
-      INSERT INTO seed_batches (batch_id, inserted_matches)
-      VALUES ($1, $2)
-      ON CONFLICT (batch_id) DO NOTHING;
-    `;
-    await client.query(insertBatchQuery, [batchId, matchPayloads.length]);
+    const prng = createPRNG(seed);
+    let totalInserted = 0;
+
+    const syntheticUsers = [];
+    for (let i = 0; i < 8; i++) {
+      const uId = `00000000-0000-4000-8000-${String(seed).padStart(6, '0')}${String(i).padStart(6, '0')}`;
+      const username = `bot_${seed}_${i}`;
+
+      await client.query(
+        `INSERT INTO users (id, username, display_name, password_hash)
+         VALUES ($1, $2, $3, 'SYNTHETIC_NO_LOGIN')
+         ON CONFLICT DO NOTHING;`,
+        [uId, username, `Bot ${i + 1}`]
+      );
+      syntheticUsers.push(uId);
+    }
+
+    for (let m = 0; m < matches; m++) {
+      const matchId = `seed_match_${effectiveBatchId}_${m}`;
+      const durationMs = 30000;
+      const startedAtMs = 1700000000000 + m * 60000;
+      const endedAtMs = startedAtMs + durationMs;
+
+      const playerCount = 2 + Math.floor(prng() * 3);
+      const shuffled = [...syntheticUsers].sort(() => prng() - 0.5);
+      const selectedPlayers = shuffled.slice(0, playerCount);
+
+      const maxControl = Math.floor(durationMs * 0.8);
+      const winnerIndex = Math.floor(prng() * playerCount);
+      const playersData = [];
+
+      for (let pIdx = 0; pIdx < playerCount; pIdx++) {
+        const pId = selectedPlayers[pIdx];
+        const isWinner = pIdx === winnerIndex;
+        const ctrl = isWinner ? Math.floor(maxControl * 0.6) : Math.floor(maxControl * (0.1 + prng() * 0.2));
+        const alive = Math.min(durationMs, ctrl + Math.floor(prng() * 10000));
+        const part = durationMs;
+
+        playersData.push({
+          playerId: pId,
+          score: Math.floor(ctrl / 1000),
+          kills: isWinner ? 3 + Math.floor(prng() * 4) : Math.floor(prng() * 2),
+          deaths: isWinner ? Math.floor(prng() * 2) : 2 + Math.floor(prng() * 3),
+          controlTimeMs: ctrl,
+          aliveMs: alive,
+          participatedMs: part,
+          winner: isWinner,
+          draw: false,
+          abandonment: false
+        });
+      }
+
+      const matchPayload = {
+        matchId,
+        roomCode: `SEED_${seed}`,
+        mode: 'rotating_control',
+        seed,
+        templateId: 'template-4',
+        templateVersion: 1,
+        generatorVersion: 2,
+        status: 'completed',
+        finishReason: 'time',
+        drawPlayerIds: [],
+        startedAtMs,
+        endedAtMs,
+        durationMs,
+        players: playersData
+      };
+
+      await saveMatch(matchPayload, { source: 'seed', client });
+      totalInserted++;
+    }
 
     await client.query('COMMIT');
+    return { status: 'success', insertedMatches: totalInserted, batchId: effectiveBatchId };
+
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
   } finally {
     client.release();
   }
-
-  // 4. Persistir cada partida sintética con source = 'seed'
-  let insertedCount = 0;
-  for (const matchPayload of matchPayloads) {
-    const matchWithSource = {
-      ...matchPayload,
-      seed: matchPayload.seed ?? seed,
-      source: 'seed'
-    };
-
-    const res = await saveMatch(matchWithSource);
-    if (res.saved) {
-      insertedCount++;
-    }
-  }
-
-  // 5. Ajustar conteo real si se ignoraron duplicados durante el bucle
-  if (insertedCount !== matchPayloads.length) {
-    await pool.query(
-      `UPDATE seed_batches SET inserted_matches = $1 WHERE batch_id = $2;`,
-      [insertedCount, batchId]
-    );
-  }
-
-  return {
-    batchId,
-    insertedMatches: insertedCount,
-    alreadyExists: false
-  };
-}
-
-/**
- * Generador de partidas sintéticas con métricas coherentes:
- * 0 <= controlTimeMs <= aliveMs <= participatedMs <= durationMs
- */
-function generateSyntheticMatches(baseSeed, count, userId) {
-  const syntheticMatches = [];
-  let currentSeed = Number(baseSeed) || 12345;
-
-  function lcg() {
-    currentSeed = (currentSeed * 1664525 + 1013904223) % 4294967296;
-    return currentSeed / 4294967296;
-  }
-
-  const targetUserId = userId || crypto.randomUUID();
-
-  for (let i = 0; i < count; i++) {
-    const matchId = crypto.randomUUID();
-    const durationMs = Math.floor(30000 + lcg() * 90000); // 30s a 120s
-    const startedAtMs = 1700000000000 + i * 1000;
-    const endedAtMs = startedAtMs + durationMs;
-
-    const participatedMs = durationMs;
-    const aliveMs = Math.floor(participatedMs * (0.5 + lcg() * 0.5));
-    const controlTimeMs = Math.floor(aliveMs * lcg());
-
-    const won = lcg() > 0.5;
-
-    syntheticMatches.push({
-      id: matchId,
-      seed: baseSeed,
-      status: 'completed',
-      startedAtMs,
-      endedAtMs,
-      durationMs,
-      winnerId: won ? targetUserId : null,
-      source: 'seed',
-      players: [
-        {
-          userId: targetUserId,
-          displayName: 'Synthetic_Bot',
-          score: Math.floor(lcg() * 2000),
-          controlTimeMs,
-          kills: Math.floor(lcg() * 10),
-          deaths: Math.floor(lcg() * 5),
-          aliveMs,
-          participatedMs,
-          won,
-          draw: !won && lcg() > 0.8,
-          forfeited: false
-        }
-      ]
-    });
-  }
-
-  return syntheticMatches;
 }

@@ -1,106 +1,123 @@
 import { pool } from './pool.js';
 
 /**
- * Guarda una partida y sus resultados de jugadores en una única transacción PostgreSQL.
- * @param {Object} match
- * @returns {Promise<{ saved: boolean, duplicate: boolean, id: string }>}
+ * Persiste una partida y sus participantes de forma idempotente.
+ * 
+ * @param {Object} matchData - Datos de la partida
+ * @param {Object} options - Opciones adicionales { source: 'live' | 'seed', client: pgClient }
+ * @returns {Promise<Object>} Objeto { inserted: boolean, matchId: string }
  */
-export async function saveMatch(match) {
+export async function saveMatch(matchData, options = {}) {
+  const { source = 'live', client: customClient } = options;
+  const db = customClient || pool;
+
   const {
-    id,
+    matchId,
+    roomCode = null,
+    mode = 'rotating_control',
     seed = 0,
+    templateId = 'template-4',
+    templateVersion = 1,
+    generatorVersion = 2,
     status = 'completed',
+    drawPlayerIds = [],
     startedAtMs,
     endedAtMs,
     durationMs,
-    winnerId = null,
-    source = 'live',
     players = []
-  } = match;
+  } = matchData;
 
-  // 1. Validar reglas de coherencia para cada jugador
-  const duration = Number(durationMs);
-  for (const player of players) {
-    const controlTimeMs = Number(player.controlTimeMs ?? 0);
-    const aliveMs = Number(player.aliveMs ?? 0);
-    const participatedMs = Number(player.participatedMs ?? 0);
+  if (!matchId) {
+    throw new Error('INVALID_MATCH_ID: Se requiere matchId');
+  }
 
-    const isValidCoherence =
-      0 <= controlTimeMs &&
-      controlTimeMs <= aliveMs &&
-      aliveMs <= participatedMs &&
-      participatedMs <= duration;
+  // Normalizar status para cumplir con el CHECK constraint matches_status_check
+  let normalizedStatus = status || 'completed';
+  if (normalizedStatus === 'finished') normalizedStatus = 'completed';
 
-    if (!isValidCoherence) {
-      throw new Error(
-        `[Storage Error] Métricas incoherentes para el usuario ${player.userId}: ` +
-        `se requiere 0 <= controlTimeMs (${controlTimeMs}) <= aliveMs (${aliveMs}) <= participatedMs (${participatedMs}) <= durationMs (${duration})`
-      );
+  // Normalizar finish_reason para cumplir con el CHECK constraint matches_finish_reason_check
+  const validReasons = ['time', 'score', 'elimination', 'aborted', 'surrender', 'disconnect'];
+  let normalizedFinishReason = matchData.finishReason || matchData.finish_reason || 'time';
+  if (normalizedFinishReason === 'time_limit') normalizedFinishReason = 'time';
+  if (normalizedFinishReason === 'score_limit') normalizedFinishReason = 'score';
+  if (!validReasons.includes(normalizedFinishReason)) {
+    normalizedFinishReason = 'time';
+  }
+
+  // Validación de coherencia temporal (0 <= control <= alive <= participated <= duration)
+  if (Array.isArray(players) && durationMs != null) {
+    for (const p of players) {
+      const ctrl = p.controlTimeMs || 0;
+      const alive = p.aliveMs || 0;
+      const part = p.participatedMs || 0;
+
+      if (ctrl < 0 || alive < ctrl || part < alive || (durationMs > 0 && part > durationMs)) {
+        throw new Error(`TEMPORAL_COHERENCE_ERROR: Inconsistencia en tiempos de jugador (${p.playerId || p.userId})`);
+      }
     }
   }
 
-  const client = await pool.connect();
+  // 1. Insertar en la tabla matches (referenciando la clave primaria 'id')
+  const insertMatchQuery = `
+    INSERT INTO matches (
+      id, room_code, mode, seed, template_id, template_version, 
+      generator_version, status, finish_reason, draw_player_ids, 
+      started_at_ms, ended_at_ms, duration_ms, source
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+    ON CONFLICT (id) DO NOTHING;
+  `;
 
-  try {
-    await client.query('BEGIN');
+  const matchRes = await db.query(insertMatchQuery, [
+    matchId,
+    roomCode,
+    mode,
+    seed,
+    templateId,
+    templateVersion,
+    generatorVersion,
+    normalizedStatus,
+    normalizedFinishReason,
+    drawPlayerIds,
+    startedAtMs,
+    endedAtMs,
+    durationMs,
+    source
+  ]);
 
-    // 2. Inserción idempotente de la cabecera de la partida
-    const insertMatchQuery = `
-      INSERT INTO matches (id, seed, status, started_at_ms, ended_at_ms, duration_ms, winner_id, source)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT (id) DO NOTHING
-      RETURNING id;
-    `;
+  if (matchRes.rowCount === 0 && !customClient) {
+    return { inserted: false, matchId };
+  }
 
-    const resMatch = await client.query(insertMatchQuery, [
-      id,
-      seed,
-      status,
-      startedAtMs,
-      endedAtMs,
-      durationMs,
-      winnerId,
-      source
+  // 2. Insertar participantes en player_matches (FK 'match_id')
+  const insertPlayerQuery = `
+    INSERT INTO player_matches (
+      match_id, player_id, score, kills, deaths, 
+      control_time_ms, alive_ms, participated_ms, 
+      winner, draw, abandonment
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    ON CONFLICT (match_id, player_id) DO NOTHING;
+  `;
+
+  for (const p of players) {
+    const playerId = p.playerId || p.userId;
+    if (!playerId) continue;
+
+    await db.query(insertPlayerQuery, [
+      matchId,
+      playerId,
+      p.score || 0,
+      p.kills || 0,
+      p.deaths || 0,
+      p.controlTimeMs || 0,
+      p.aliveMs || 0,
+      p.participatedMs || 0,
+      p.winner || false,
+      p.draw || false,
+      p.abandonment || false
     ]);
-
-    if (resMatch.rowCount === 0) {
-      await client.query('COMMIT');
-      return { saved: false, duplicate: true, id };
-    }
-
-    // 3. Inserción de resultados incluyendo display_name
-    const insertPlayerQuery = `
-      INSERT INTO player_results (
-        match_id, player_id, display_name, score, control_time_ms, kills, deaths,
-        alive_ms, participated_ms, won, draw, forfeited
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-      ON CONFLICT (match_id, player_id) DO NOTHING;
-    `;
-
-    for (const player of players) {
-      await client.query(insertPlayerQuery, [
-        id,
-        player.userId,
-        player.displayName || player.username || 'Jugador',
-        player.score ?? 0,
-        player.controlTimeMs ?? 0,
-        player.kills ?? 0,
-        player.deaths ?? 0,
-        player.aliveMs ?? 0,
-        player.participatedMs ?? 0,
-        Boolean(player.won),
-        Boolean(player.draw),
-        Boolean(player.forfeited)
-      ]);
-    }
-
-    await client.query('COMMIT');
-    return { saved: true, duplicate: false, id };
-  } catch (error) {
-    await client.query('ROLLBACK');
-    throw error;
-  } finally {
-    client.release();
   }
+
+  return { inserted: true, matchId };
 }

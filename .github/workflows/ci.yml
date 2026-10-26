@@ -1,24 +1,21 @@
-name: Bootstrap checks
+name: CI Pipeline
 
 on:
-  pull_request:
   push:
-    branches: [main]
-
-permissions:
-  contents: read
+    branches: [ main, feat/* ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  quality:
+  verify:
     runs-on: ubuntu-latest
 
     services:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: cybergrid_test
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: cybergrid_test
         ports:
           - 5432:5432
         options: >-
@@ -29,22 +26,36 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci
-      - name: Crear .env para entorno CI
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Create Env Mock
         run: touch .env
-      - name: Inicializar esquema de BD
-        env:
-          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
-          TEST_DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
-        run: npm run db:init
-      - name: Ejecutar verificaciones (Lint, Test, Build)
+
+      # 1. Linter
+      - name: Run Linter
+        run: npm run lint
+
+      # 2. Inicialización de DB de pruebas y Tests (NODE_ENV=test aislado)
+      - name: Run Storage Tests
         env:
           NODE_ENV: test
           DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
           TEST_DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/cybergrid_test
           SESSION_SECRET: test_session_secret_key_32_chars_min!!
-        run: npm run verify
+        run: |
+          npm run db:init
+          npm run test:storage
+
+      # 3. Compilación de producción (NODE_ENV=production para asegurar DEV=false en Vite)
+      - name: Build Client (Production)
+        env:
+          NODE_ENV: production
+        run: npm run build
