@@ -9,13 +9,14 @@ B coordina el trabajo de A y C y mantiene client/shared, auth/rooms/net/game y e
 - Red: entradas a 20 Hz, snapshots a 15 Hz, interpolación, predicción y reconciliación local, recuperación de ronda y secuencias.
 - Puente con PostgreSQL: repositorios reales de C para usuarios, sesiones y guardado; esquema comprobado antes de escuchar.
 - Confirmación de guardado pending/saved/failed/unavailable y recuperación del estado al reconectar.
-- CI con PostgreSQL, 107 pruebas, build y tres E2E con Chromium. PC y teléfono revisados por el usuario.
+- API pública de evaluación con validación, límites y funciones PostgreSQL de C.
+- CI con PostgreSQL, 118 pruebas, build y tres E2E con Chromium. PC y teléfono revisados por el usuario.
 
 La arena permanece en 1448 × 1088, plantilla a-industrial v5, generador v3 y protocolo 5. El terreno base está fijo; las tres variantes opt-in no cierran por sí solas el requisito procedural.
 
 ## Siguiente trabajo
 
-1. Montar los endpoints HTTP de evaluación sobre processSeedBatch y getTelemetry de C, con validación, límites y pruebas de respuestas reales.
+1. Cerrar la integración de los endpoints de evaluación, ya implementados sobre processSeedBatch y getTelemetry de C; medir su rendimiento público tras desplegar.
 2. Cerrar procedural manteniendo recorridos transitables y aspecto de A.
 3. Coordinar Supabase, arranque de producción y despliegue HTTPS con C.
 4. Comprobar persistencia tras reinicio y medir RTT/HTTP en la URL pública.

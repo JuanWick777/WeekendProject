@@ -9,6 +9,7 @@ export function createServerRuntime({
   onStartMatch = null, onInput = null, onPlayerLeft = null,
   now = Date.now, roomOptions, socketOptions, clientDist,
   enableGame = true, saveMatch = null, gameOptions, databaseReady = false,
+  evaluationService = null, evaluationRateLimit,
 } = {}) {
   let games;
   const rooms = createRoomManager({
@@ -20,6 +21,7 @@ export function createServerRuntime({
     authService, appOrigin, nodeEnv, clientDist, roomManager: rooms,
     websocketReady: Boolean(authService),
     simulationReady: enableGame, databaseReady,
+    evaluationService, evaluationRateLimit,
     onSessionInvalidated: (token) => sockets.closeSession(token),
   });
   const server = createServer(app);
