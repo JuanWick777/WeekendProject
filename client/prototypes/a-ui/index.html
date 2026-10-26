@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06111f">
+  <meta name="description" content="Prototipo navegable de las cinco interfaces aprobadas de CyberGrid.">
+  <title>CyberGrid · Prototipo de interfaces</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="tool-header">
+    <div class="brand" aria-label="CyberGrid, interfaces de demostración">
+      <span class="brand-mark" aria-hidden="true">⬡</span>
+      <span><strong>CYBERGRID</strong><small>Prototipo de interfaces</small></span>
+    </div>
+    <nav class="screen-nav" aria-label="Navegar entre pantallas para revisar los diseños">
+      <button type="button" data-goto="menu">Menú</button>
+      <button type="button" data-goto="salas">Salas</button>
+      <button type="button" data-goto="lobby">Lobby</button>
+      <button type="button" data-goto="como">Cómo jugar</button>
+      <button type="button" data-goto="resultados">Resultados</button>
+    </nav>
+    <a class="game-link" href="../a-canvas/index.html" title="Abre el prototipo jugable separado">Abrir partida ↗</a>
+  </header>
+
+  <main class="workspace">
+    <section class="stage" id="stage" aria-label="Pantalla actual de CyberGrid" style="--screen-ratio:1.6815">
+      <img id="screenImage" class="stage-image" alt="" draggable="false" width="1626" height="967" src="./assets/ui/menu.png">
+      <div id="interactiveLayer" class="interactive-layer" aria-live="off"></div>
+    </section>
+  </main>
+
+  <footer class="status-line">
+    <span id="screenCaption">MENÚ PRINCIPAL</span>
+    <span class="note">DEMO VISUAL · No hay conexión real a salas ni partidas</span>
+    <button class="hint-control" id="toggleAreas" type="button" aria-pressed="false">Ver zonas clicables (H)</button>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <dialog id="infoDialog" class="cg-dialog" aria-labelledby="dialogTitle" aria-describedby="dialogBody">
+    <form method="dialog" class="dialog-panel">
+      <span class="dialog-accent" aria-hidden="true"></span>
+      <h2 id="dialogTitle">CyberGrid</h2>
+      <p id="dialogBody"></p>
+      <div class="dialog-actions"><button type="submit" class="dialog-button">ENTENDIDO</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
