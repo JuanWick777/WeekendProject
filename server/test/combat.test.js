@@ -31,7 +31,7 @@ describe('daño y proyectiles autoritativos', () => {
     expect(s.players.get('c').hp).toBe(100); expect(s.projectiles.size).toBe(0);
   });
   it('las paredes bloquean a un rival situado detrás y consumen el proyectil', () => {
-    const s = state(); s.map.tiles[8][4] = 1;
+    const s = state(); s.map.tiles[256 / s.map.tileSize][128 / s.map.tileSize] = 1;
     fireProjectile(s, s.players.get('a'), 0); advanceProjectiles(s, 0.5, 500000);
     expect(s.players.get('b').hp).toBe(100); expect(s.projectiles.size).toBe(0);
   });

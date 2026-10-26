@@ -219,6 +219,6 @@ describe('autenticación por HTTP real con repositorios de prueba', () => {
     expect(repositories.userRows.size).toBe(0);
     const health = await call('/api/health');
     expect(health.data.data.authentication).toBe('pending');
-    expect(health.data.data.protocolVersion).toBe(2);
+    expect(health.data.data.protocolVersion).toBe(4);
   });
 });

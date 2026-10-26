@@ -1,10 +1,10 @@
 # B3 — Simulación y conexión del equipo
 
-B3 implementa la simulación de servidor sobre la base que integra los PR #1, #2 y #3. Esta guía describe código disponible, no funcionalidades pendientes de crear. El cliente sigue siendo responsabilidad de A y la conexión PostgreSQL sigue siendo responsabilidad de C/B.
+B3 implementa la simulación de servidor sobre la base que integra los PR #1, #2 y #3. Esta guía describe código disponible, no funcionalidades pendientes de crear. B asume también la programación del cliente; A diseña y revisa. La integración del cliente online sigue pendiente y la conexión PostgreSQL sigue siendo responsabilidad de C/B.
 
 ## Qué está funcionando
 
-- Generación determinista por semilla, validación de accesos/conectividad y fallback acotado.
+- Generación determinista: trazado de referencia fijo por defecto, procedural opt-in, validación de pasillos/accesos/conectividad y fallback acotado.
 - Movimiento autoritativo, colisiones, inputs a 20 Hz y simulación a 30 Hz; snapshots a 15 Hz.
 - Cinco nodos rotatorios, ocupación, disputa, fracciones de control y fin a 150 segundos.
 - Proyectiles de energía, primer impacto por segmento, caída de daño, escudo y respawn.
@@ -13,7 +13,7 @@ B3 implementa la simulación de servidor sobre la base que integra los PR #1, #2
 
 Las reglas públicas continúan en [contracts.md](contracts.md). El generador no usa el fixture compartido para una ronda real. No se añadieron dependencias ni un almacén alternativo de producción.
 
-## A: conectar el cliente
+## B: conectar el cliente; A revisa diseño
 
 1. Completar auth y lobby siguiendo [lobbies-network.md](lobbies-network.md). El arranque normal necesita los repositorios PostgreSQL de C para autenticar.
 2. Al recibir `match:start`, construir el terreno desde `payload.map`, leer `payload.config` y aplicar `payload.state`. El mismo mensaje recupera la ronda al reconectar; reemplazar la escena anterior sin duplicar bucles/listeners.
@@ -22,7 +22,7 @@ Las reglas públicas continúan en [contracts.md](contracts.md). El generador no
 5. Renderizar `objective` y sus plazos: no sumar control desde el render. A los 150 segundos llega `match:end`; mostrar sus estadísticas y la revancha del anfitrión.
 6. Manejar `RESULT_NOT_SAVED` como fallo de guardado de una ronda terminada. Recibir `match:end` por sí solo no confirma persistencia.
 
-La plantilla actual `cardinal-sketch`, versión 1, es **provisional** y traduce la disposición cardinal del boceto, con coberturas simplificadas. A debe revisar geometría y balance con B. El Canvas de bootstrap todavía no implementa estas pantallas ni controles.
+La plantilla actual `cardinal-sketch`, versión 4 y generador 2, adapta el mapa de A a 1280 × 1120. El trazado fijo recupera coberturas y arcos, con pasillos principales comprobados de 48 unidades. La variación queda pendiente; A debe revisar geometría y balance con B. La [vista industrial de diseño](client-preview.md) ya permite inspeccionar terreno, drones, controles y HUD; las pantallas online siguen pendientes.
 
 ## C/B: conectar PostgreSQL
 
@@ -54,10 +54,11 @@ Este fragmento muestra la unión; no presupone módulos de storage ya creados. C
 
 - `server/src/game/match.js`: estado, tick, inputs, recogidas, respawn y snapshots.
 - `server/src/game/game-manager.js`: ciclo de salas, difusión, reconexión, fin y guardado.
-- `server/src/game/maps/`: plantilla, generador y validador.
+- `shared/src/maps/`: plantilla, generador y validador canónicos; server/src/game/maps reexporta para conservar imports.
+- `shared/src/game/`: simulación pura usada por servidor y práctica local DEV; server/src/game conserva reexportaciones y game-manager/red siguen siendo exclusivos del servidor.
 - `server/src/game/movement.js` y `collision.js`: movimiento y geometría.
 - `server/src/game/combat.js`, `objectives.js` y `results.js`: combate, nodos y clasificación.
 
-Con Node 24, `npm run verify` pasa lint, **65 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
+Con Node 24, `npm run verify` pasa lint, **78 pruebas** y build. Se comprueban 64 semillas, fallback, velocidad con inputs a 20 Hz, paredes, daño, escudo, muerte/respawn, disputa, rotación, límites de tiempo, resultados y cuatro recorridos HTTP/WebSocket con dos cuentas. En pruebas se usan repositorios aislados y rondas acortadas; producción conserva 150/30/5 segundos.
 
-Siguen pendientes: repositorios y guardado PostgreSQL reales, cliente jugable de A, revisión del mapa, pruebas de interpolación, tres E2E de navegador, telemetría/siembra y mediciones en URL pública. B4 cierra la integración y los fallos de conexión/guardado sobre ese recorrido completo.
+Siguen pendientes: repositorios y guardado PostgreSQL reales, cliente online de B, revisión del mapa, pruebas de interpolación, tres E2E de navegador, telemetría/siembra y mediciones en URL pública. B4 cierra la integración y los fallos de conexión/guardado sobre ese recorrido completo.

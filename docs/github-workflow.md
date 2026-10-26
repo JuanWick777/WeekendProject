@@ -12,13 +12,13 @@ Se crea una rama por tarea, no una rama permanente por persona:
 
 | Persona | Primera rama | Trabajo |
 | --- | --- | --- |
-| A | feat/client-shell | Diseño aplicado, Canvas, HUD y controles |
-| B | feat/auth | Registro, login y sesiones |
+| A | feat/design-references | Diseño, referencias y revisión visual |
+| B | feat/client-online | Cliente online sobre el servidor ya integrado |
 | C | feat/storage | PostgreSQL y repositorios de usuarios/sesiones |
 
 Tras integrar una tarea, crear otra rama desde main actualizado. Ejemplos siguientes: feat/lobbies, feat/telemetry y feat/client-network. No necesitamos una rama develop durante este fin de semana.
 
-Los PR #1, #2 y #3 ya se integraron en ese orden, conservando las dependencias entre ramas mediante commits de merge. La nueva rama B3, feat/game-simulation, parte de main actualizado. A/C deben traer main a sus ramas antes de conectar cliente o persistencia.
+Los PR #1–#4 ya integran documentación, auth, salas/WebSocket y B3. El bloque de arena/vista de diseño parte de main en feat/arena-design. B asume la programación de client; A mantiene las referencias. Incorporar main actualizado antes de conectar cliente o persistencia.
 
 **Push y merge son pasos distintos.** Push publica los commits de una rama en GitHub. El PR permite revisarlos; el merge incorpora el cambio a main. Tener una rama sincronizada y sin commits pendientes de push no significa que sus cambios ya estén en main. Un clon de main recibe solamente lo que se haya integrado allí.
 
@@ -38,7 +38,7 @@ Usar Node 24. Si GitHub solicita autenticación, iniciar sesión mediante el ges
 A crea su primera rama:
 
 ~~~powershell
-git switch -c feat/client-shell
+git switch -c feat/design-references
 ~~~
 
 C crea su primera rama:
@@ -56,9 +56,9 @@ Ejemplo de A; B y C usan sus archivos, mensaje y rama:
 ~~~powershell
 git status
 npm run verify
-git add client docs/visual-references
-git commit -m "feat: add responsive client shell"
-git push -u origin feat/client-shell
+git add docs/visual-references
+git commit -m "docs: add visual design references"
+git push -u origin feat/design-references
 ~~~
 
 Agregar solo los archivos de la tarea; revisar git status antes de confirmar. En los siguientes envíos de la misma rama basta git push. No subir node_modules, dist ni archivos .env.
@@ -104,7 +104,7 @@ No continuar desarrollando sobre una rama que ya se integró por squash.
 
 ## Propiedad y coordinación
 
-- A: client/ y docs/visual-references/.
+- A: docs/visual-references/ y revisión visual. B asume la programación de client/.
 - B: shared/ y server/src/auth, rooms, net y game.
 - C: server/src/storage, telemetry, scripts, tests/e2e y configuración global de pruebas/despliegue.
 - app.js, package.json y package-lock.json requieren aviso porque pueden cambiar en varias tareas.

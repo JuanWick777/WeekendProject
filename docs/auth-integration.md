@@ -62,6 +62,6 @@ Hay 20 intentos combinados de registro/login por minuto e IP por defecto y como 
 
 ## Verificación y cierre de B1
 
-Con Node 24: npm run verify. B1 aprobó 20 pruebas; junto con B2/B3, el total es 65 pruebas, lint y build aprobados. Los tests de auth cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
+Con Node 24: npm run verify. B1 aprobó 20 pruebas; junto con B2/B3, el total es 72 pruebas, lint y build aprobados. Los tests de auth cubren registro, normalización/duplicados, credenciales, rotación, expiración, logout, Origin, validación, cookies Secure, frecuencia, errores de repositorio y estado no configurado.
 
 Para cerrar B1 faltan dos cuentas reales con PostgreSQL, reinicio del servidor conservando usuarios/sesiones y rechazo de sesión después de logout/expiración. C añade esa integración a su base de pruebas; el recorrido de navegador con auth, lobby y Canvas sigue pendiente de C3/A/B2.

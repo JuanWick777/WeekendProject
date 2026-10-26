@@ -8,7 +8,13 @@
     "./constants": "./src/constants.js",
     "./protocol": "./src/protocol.js",
     "./schemas": "./src/schemas.js",
-    "./fixtures/rotating-control": "./fixtures/rotating-control.json"
+    "./collision": "./src/collision.js",
+    "./movement": "./src/movement.js",
+    "./fixtures/rotating-control": "./fixtures/rotating-control.json",
+    "./maps": "./src/maps/index.js",
+    "./maps/*": "./src/maps/*.js",
+    "./simulation": "./src/game/index.js",
+    "./simulation/*": "./src/game/*.js"
   },
   "dependencies": {
     "zod": "^4.0.0"
