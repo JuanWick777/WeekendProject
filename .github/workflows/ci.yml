@@ -1,25 +1,52 @@
-name: Bootstrap checks
+name: CI Pipeline
 
 on:
-  pull_request:
   push:
+    branches: [main, 'feat/*', 'codex/*']
+  pull_request:
     branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  quality:
+  verify:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: cybergrid_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-      - run: npm ci
-      - run: npm run verify
 
-      # C3: agregar servicio PostgreSQL aislado, instalar Chromium y ejecutar
-      # npm run test:e2e cuando existan auth.spec.js, lobby.spec.js y gameplay.spec.js.
-      # Este workflow inicial NO representa la suite completa de la rúbrica.
+      - run: npm ci
+      - run: npm run lint
+
+      - name: Inicializar esquema oficial y ejecutar toda la suite
+        env:
+          NODE_ENV: test
+          TEST_DATABASE_URL: postgres://postgres:postgrespassword@127.0.0.1:5432/cybergrid_test
+        run: |
+          npm run db:init
+          npm test
+
+      - name: Build de producción
+        env:
+          NODE_ENV: production
+        run: npm run build
