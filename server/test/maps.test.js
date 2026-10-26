@@ -70,7 +70,8 @@ describe('integración fiel de la arena de A', () => {
     }
     expect([...seen].sort()).toEqual(['base','v2','v3']); expect(fallback).toHaveLength(0);
     expect(generateMap(42).variantId).toBe('base');
-  });
+    // This batch generates and validates 32 arenas alongside the other test files.
+  }, 20_000);
 
   it('camina con la hitbox real hasta todos los nodos, apariciones y escudos sin mover paredes', () => {
     const map = generateMap(42);

@@ -1,0 +1,41 @@
+
+      <header class="brand-line">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">///</span> CYBERGRID <span class="brand-subtitle">BREACH &amp; SYNC</span></div>
+        <span id="design-label" class="design-label">CLIENTE ONLINE EN PREPARACIÓN</span>
+      </header>
+      <p id="online-pending" class="pending-note">La simulación de servidor está preparada. Falta conectar el acceso con PostgreSQL y las pantallas del cliente.</p>
+      <section id="arena-layout" class="arena-layout" aria-label="Simulación local de la arena" hidden>
+        <div class="match-hud" aria-label="Indicadores de la ronda local">
+          <div class="hud-cell"><span>PARTIDA</span><strong id="round-time">02:30</strong></div>
+          <div class="hud-cell objective-cell"><span>NODO ACTIVO</span><strong id="active-node">NÚCLEO</strong></div>
+          <div class="hud-cell"><span>ROTACIÓN</span><strong id="rotation-time" class="amber">00:30</strong></div>
+        </div>
+        <aside class="roster-area" aria-label="Drones de la práctica local">
+          <div id="roster" class="roster"></div>
+          <div class="local-status"><span>CONTROLANDO</span><strong id="pilot-name"></strong><span id="shield-state" class="shield-note">◇ Sin escudo</span><span id="local-health">Vida 100/100</span></div>
+        </aside>
+        <div class="game-frame"><canvas id="game" tabindex="0" aria-label="Arena de diseño: WASD o flechas para moverse; ratón para apuntar; clic mantenido para disparar">Tu navegador necesita soporte de Canvas 2D.</canvas><div id="game-status" class="game-status" role="status"></div>
+          <div id="local-result" class="local-result" hidden><div><span class="result-kicker">RESULTADO LOCAL · SIN GUARDAR</span><h2 id="result-title"></h2><p id="result-scores"></p><button id="result-restart" type="button">Otra ronda</button></div></div></div>
+        <div class="touch-controls" aria-label="Controles táctiles">
+          <button id="move-pad" class="control-pad move-pad" type="button" aria-label="Arrastrar para moverse"><span class="pad-cross" aria-hidden="true"></span><span class="stick" aria-hidden="true"></span><span class="pad-label">MOVER</span></button>
+          <button id="aim-pad" class="control-pad aim-pad" type="button" aria-label="Arrastrar para apuntar y disparar"><span class="crosshair" aria-hidden="true">⌖</span><span class="stick" aria-hidden="true"></span><span class="pad-label">APUNTAR / DISPARAR</span></button>
+        </div>
+        <div class="arena-footer"><span class="desktop-hint">WASD / flechas · ratón + clic · selecciona un dron en el panel</span><span class="touch-hint">Movimiento y disparo simultáneos</span><span id="fps">— FPS</span></div>
+      </section>
+      <details id="preview-tools" class="preview-tools" hidden>
+        <summary>Herramientas de diseño <span id="arena-spec"></span></summary>
+        <div class="tool-row">
+          <label>Encuadre <select id="camera-mode"><option value="map">Mapa completo</option><option value="follow">Seguir dron · 2×</option></select></label>
+          <label>Controles <select id="control-mode"><option value="auto">Automático</option><option value="pc">PC</option><option value="touch">Táctiles</option></select></label>
+          <label>Escenario <select id="practice-mode"><option value="round">Ronda normal</option><option value="combat">Práctica de combate</option></select></label>
+          <label>Semilla de escudos <input id="map-seed" type="number" min="0" max="4294967295" step="1" value="42" required /></label>
+          <label class="check-label"><input id="show-grid" type="checkbox" /> Cuadrícula</label>
+          <label class="check-label"><input id="show-routes" type="checkbox" /> Pasos revisados</label>
+          <label class="check-label"><input id="show-collisions" type="checkbox" /> Colisiones</label>
+          <button id="pause-preview" type="button">Pausar</button>
+          <button id="reset-preview" type="button">Reiniciar ronda</button>
+          <output id="preview-player-state" data-testid="preview-player-state"></output>
+        </div>
+        <p>Práctica local con las mismas reglas del servidor: daño, escudos de un impacto, captura y respawn. Controlas un dron a la vez; los otros permanecen quietos. En combate P1 comienza sobre R1 frente a P2: selecciona P2 y dispara hacia P1 para probar el bloqueo. No hay cuentas ni resultados guardados. Cambiar de ventana pausa la práctica; pulsa Continuar al volver.</p>
+      </details>
+      <footer class="connection-line"><span id="connection-status" role="status">Comprobando servidor…</span><span>INDUSTRIAL TECH · DISEÑO DE A</span></footer>
