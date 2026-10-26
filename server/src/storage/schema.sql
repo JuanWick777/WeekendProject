@@ -72,3 +72,15 @@ CREATE TABLE IF NOT EXISTS seed_batches (
 ALTER TABLE matches ALTER COLUMN started_at_ms TYPE NUMERIC(16, 3) USING started_at_ms::NUMERIC(16, 3);
 ALTER TABLE matches ALTER COLUMN ended_at_ms TYPE NUMERIC(16, 3) USING ended_at_ms::NUMERIC(16, 3);
 ALTER TABLE matches ALTER COLUMN duration_ms TYPE NUMERIC(16, 3) USING duration_ms::NUMERIC(16, 3);
+
+ALTER TABLE player_results
+ALTER COLUMN control_time_ms TYPE NUMERIC(16,3)
+USING control_time_ms::NUMERIC(16,3);
+
+ALTER TABLE player_results
+ALTER COLUMN alive_ms TYPE NUMERIC(16,3)
+USING alive_ms::NUMERIC(16,3);
+
+ALTER TABLE player_results
+ALTER COLUMN participated_ms TYPE NUMERIC(16,3)
+USING participated_ms::NUMERIC(16,3);
