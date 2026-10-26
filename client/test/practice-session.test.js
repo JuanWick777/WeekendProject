@@ -37,7 +37,7 @@ describe('práctica local con motor canónico', () => {
 
   it('rota los cinco nodos, cierra una ronda y no altera el mapa online', () => {
     const round = createPracticeSession(); const combat = createPracticeSession({ mode: 'combat' });
-    expect(round.map).toEqual(generateMap(42)); expect(combat.map.spawnPoints).not.toEqual(round.map.spawnPoints);
+    expect(round.map).toEqual(generateMap(42,{layout:'reference'})); expect(combat.map.spawnPoints).not.toEqual(round.map.spawnPoints);
     expect(combat.map.tiles).toEqual(round.map.tiles);
     for (const id of ['north', 'east', 'south', 'west']) {
       round.advance(30000, idle); expect(round.snapshot.objective.activeNodeId).toBe(id);
@@ -47,5 +47,17 @@ describe('práctica local con motor canónico', () => {
     const result = round.result; round.advance(10000, idle); expect(round.result).toEqual(result);
     expect(() => createPracticeSession({ seed: -1 })).toThrow();
     expect(() => createPracticeSession({ mode: 'unknown' })).toThrow();
+  });
+
+  it('permite comparar la referencia original con el mapa procedural de la misma semilla', () => {
+    const reference = createPracticeSession({seed:42});
+    const procedural = createPracticeSession({seed:42,layout:'procedural'});
+    expect(reference.map.variantId).toBe('base');
+    expect(procedural.map).toEqual(generateMap(42));
+    expect(procedural.map.wallPaths).not.toEqual(reference.map.wallPaths);
+    const before = structuredClone(procedural.map);
+    procedural.advance(30000,idle);
+    expect(procedural.snapshot.objective.activeNodeId).toBe('north');
+    expect(procedural.map).toEqual(before);
   });
 });

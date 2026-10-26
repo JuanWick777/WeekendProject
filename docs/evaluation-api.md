@@ -77,9 +77,9 @@ Repetir la primera petición comprueba que el lote no se duplica. En producción
 
 ## Pruebas y medición local
 
-La suite contiene 118 pruebas en 18 archivos y los tres E2E de juego. Cuatro pruebas HTTP con PostgreSQL real cubren base vacía, lotes de 100/1000, filtros, datos humanos intactos, invalidación previa a escrituras, duplicados simultáneos y reinicio de API. Los casos de frontera inyectan fallos y demoras para comprobar errores privados, cuotas y capacidad.
+La suite contiene 121 pruebas en 18 archivos y los tres E2E de juego. Cuatro pruebas HTTP con PostgreSQL real cubren base vacía, lotes de 100/1000, filtros, datos humanos intactos, invalidación previa a escrituras, duplicados simultáneos y reinicio de API. Los casos de frontera inyectan fallos y demoras para comprobar errores privados, cuotas y capacidad.
 
-Mediciones del 26/10/2026: Node 24.22.1 y PostgreSQL 18 en localhost, peticiones secuenciales, sin sesión y en un esquema aislado. Se midió fetch más lectura completa de JSON; el servidor ya estaba listo.
+Mediciones históricas con generador v3, anteriores al bloque procedural v4; no acreditan el rendimiento del generador nuevo. Mediciones del 26/10/2026: Node 24.22.1 y PostgreSQL 18 en localhost, peticiones secuenciales, sin sesión y en un esquema aislado. Se midió fetch más lectura completa de JSON; el servidor ya estaba listo.
 
 | Solicitud | Muestras | HTTP observado |
 | --- | --- | --- |

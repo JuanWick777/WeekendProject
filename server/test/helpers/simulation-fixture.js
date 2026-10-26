@@ -3,7 +3,7 @@ import { generateMap } from '../../src/game/maps/generate-map.js';
 import { createMatch } from '../../src/game/match.js';
 
 export function flatMap() {
-  const map = generateMap(42);
+  const map = generateMap(42, { layout: 'reference' });
   map.tiles = map.tiles.map((row, y) => row.map((_tile, x) => Number(y === 0 || x === 0 || y === map.rows - 1 || x === map.columns - 1)));
   // Stable calibration coordinates keep simulation tests independent of art.
   map.nodes = [

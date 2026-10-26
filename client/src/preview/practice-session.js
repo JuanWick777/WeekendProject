@@ -3,8 +3,8 @@ import { generateMap } from '@cybergrid/shared/maps';
 import { createMatch } from '@cybergrid/shared/simulation';
 
 // Development adapter only. The online server executes this same createMatch.
-export function createPracticeSession({ seed = 42, mode = 'round' } = {}) {
-  const map = generateMap(seed);
+export function createPracticeSession({ seed = 42, mode = 'round', layout = 'reference' } = {}) {
+  const map = generateMap(seed, { layout });
   if (!['round', 'combat'].includes(mode)) throw new RangeError('Invalid practice mode');
   if (mode === 'combat') {
     // A local drill near R1/R12. Online spawns remain in the four corners.

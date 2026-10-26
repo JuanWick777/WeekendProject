@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { generateMap } from '../src/game/maps/generate-map.js';
-import { ARENA_TEMPLATE } from '../src/game/maps/arena-template.js';
+import { ARENA_TEMPLATE, createArenaTemplate } from '../src/game/maps/arena-template.js';
 import { validateMap } from '../src/game/maps/validate-map.js';
 import { firstWallHit, circleHitsMap } from '@cybergrid/shared/collision';
 import { movePlayer } from '@cybergrid/shared/movement';
@@ -41,7 +41,7 @@ function routesFromSpawn(map) {
 
 describe('integración fiel de la arena de A', () => {
   it('conserva exactamente todos los segmentos base y coordenadas de A', () => {
-    const map = generateMap(42);
+    const map = generateMap(42, { layout: 'reference' });
     expect(map.wallPaths.map((w) => [...w.points[0], ...w.points[1]])).toEqual(
       design.variants[0].walls.map((w) => [w.x1,w.y1,w.x2,w.y2]));
     for (const node of map.nodes) expect(design.nodes.find((n) => n.id === node.authorId)).toMatchObject({x:node.x,y:node.y});
@@ -52,40 +52,87 @@ describe('integración fiel de la arena de A', () => {
   });
 
   it('mantiene terreno fijo entre semillas, copias independientes y plantilla intacta', () => {
-    const before = JSON.stringify(ARENA_TEMPLATE); const a = generateMap(0); const b = generateMap(0);
+    const before = JSON.stringify(ARENA_TEMPLATE);
+    const a = generateMap(0, { layout: 'reference' }); const b = generateMap(0, { layout: 'reference' });
     expect(a).toEqual(b); a.wallPaths[0].points[0][0] += 50; a.tiles[10][10] = 0;
     expect(a.wallPaths).not.toEqual(b.wallPaths);
     for (const seed of [1,42,4294967295]) {
-      const other = generateMap(seed); expect(other.wallPaths).toEqual(b.wallPaths); expect(other.tiles).toEqual(b.tiles);
+      const other = generateMap(seed, { layout: 'reference' }); expect(other.wallPaths).toEqual(b.wallPaths); expect(other.tiles).toEqual(b.tiles);
     }
     expect(JSON.stringify(ARENA_TEMPLATE)).toBe(before);
   });
 
-  it('conserva válidas las tres variantes de A, deterministas y solo opt-in', () => {
+  it('genera cobertura variada, válida y fiel a A en 64 semillas sin fallback', () => {
+    const geometry = (walls) => walls.map(w => JSON.stringify([w.category, w.points])).sort().join('|');
+    const authored = new Set(['base','v2','v3'].flatMap(id => {
+      const map = createArenaTemplate(id);
+      expect(validateMap(map).valid).toBe(true);
+      return map.wallPaths.map(w => JSON.stringify([w.category,w.points]));
+    }));
     const seen = new Set(); const fallback = [];
-    for (let seed=0;seed<16;seed++) {
-      const map = generateMap(seed,{layout:'procedural',onFallback:(e)=>fallback.push(e)});
-      expect(validateMap(map)).toEqual({valid:true,errors:[]}); seen.add(map.variantId);
-      expect(generateMap(seed,{layout:'procedural'})).toEqual(map);
+    const fixed = ARENA_TEMPLATE.wallPaths.filter(w => w.category === 'fixed');
+    for (let seed=0;seed<64;seed++) {
+      const map = generateMap(seed,{onFallback:(e)=>fallback.push(e)});
+      expect(validateMap(map)).toEqual({valid:true,errors:[]});
+      expect(map).toMatchObject({layout:'procedural',variantId:'procedural',generatorVersion:4});
+      expect(map.wallPaths.filter(w => w.category === 'fixed')).toEqual(fixed);
+      expect(map.wallPaths.every(w => authored.has(JSON.stringify([w.category,w.points])))).toBe(true);
+      expect(new Set(map.wallPaths.map(w => w.id)).size).toBe(map.wallPaths.length);
+      expect(map.wallPaths.length).toBeGreaterThanOrEqual(140);
+      expect(map.wallPaths.length).toBeLessThanOrEqual(160);
+      expect(map.nodes).toEqual(ARENA_TEMPLATE.nodes);
+      expect(map.spawnPoints).toEqual(ARENA_TEMPLATE.spawnPoints);
+      expect(map.pickupSpawns).toEqual(ARENA_TEMPLATE.pickupSpawns);
+      expect(map.outline).toEqual(ARENA_TEMPLATE.outline);
+      seen.add(geometry(map.wallPaths));
     }
-    expect([...seen].sort()).toEqual(['base','v2','v3']); expect(fallback).toHaveLength(0);
-    expect(generateMap(42).variantId).toBe('base');
-    // This batch generates and validates 32 arenas alongside the other test files.
-  }, 20_000);
+    expect(seen.size).toBeGreaterThan(32); expect(fallback).toHaveLength(0);
+  }, 40_000);
 
-  it('camina con la hitbox real hasta todos los nodos, apariciones y escudos sin mover paredes', () => {
-    const map = generateMap(42);
-    for (const points of routesFromSpawn(map)) {
-      const player = {x:points[0][0],y:points[0][1]};
-      for (const [x,y] of points.slice(1)) {
-        expect(firstWallHit(map,player.x,player.y,x-player.x,y-player.y,10)).toBeNull();
-        let steps=0;
-        while (Math.hypot(x-player.x,y-player.y)>.001 && steps++<50) {
-          const distance=Math.hypot(x-player.x,y-player.y);
-          movePlayer(player,{moveX:(x-player.x)/distance,moveY:(y-player.y)/distance},Math.min(1/30,distance/160),map);
+  it('reproduce geometría y metadatos para uint32, sin compartir objetos ni alterar fuentes', () => {
+    const before = JSON.stringify(ARENA_TEMPLATE);
+    for (const seed of [0,1,42,4294967295]) {
+      const a = generateMap(seed); const b = generateMap(seed);
+      expect(a).toEqual(b);
+      a.wallPaths[0].points[0][0] += 50; a.tiles[10][10] = 0;
+      expect(a.wallPaths).not.toEqual(b.wallPaths);
+      expect(generateMap(seed)).toEqual(b);
+    }
+    expect(JSON.stringify(ARENA_TEMPLATE)).toBe(before);
+  });
+
+  it('retira cobertura también de colisiones, balas y cuadrícula auxiliar', () => {
+    let map;
+    for (let seed=0;seed<24;seed++) {
+      const candidate = generateMap(seed);
+      if (candidate.generation.removedGroup==='node-bars') { map=candidate; break; }
+    }
+    expect(map).toBeDefined();
+    const reference = generateMap(map.seed,{layout:'reference'});
+    const x=720,y=260;
+    expect(circleHitsMap(reference,x,y,3)).toBe(true);
+    expect(circleHitsMap(map,x,y,3)).toBe(false);
+    expect(firstWallHit(reference,x,y-30,0,60,3)).not.toBeNull();
+    expect(firstWallHit(map,x,y-30,0,60,3)).toBeNull();
+    expect(reference.tiles[32][90]).toBe(1);
+    expect(map.tiles[32][90]).toBe(0);
+  });
+
+  it('camina con la hitbox real hasta todos los objetivos en distintas combinaciones', () => {
+    for (const seed of [0,1,42,4294967295]) {
+      const map = generateMap(seed);
+      for (const points of routesFromSpawn(map)) {
+        const player = {x:points[0][0],y:points[0][1]};
+        for (const [x,y] of points.slice(1)) {
+          expect(firstWallHit(map,player.x,player.y,x-player.x,y-player.y,10)).toBeNull();
+          let steps=0;
+          while (Math.hypot(x-player.x,y-player.y)>.001 && steps++<50) {
+            const distance=Math.hypot(x-player.x,y-player.y);
+            movePlayer(player,{moveX:(x-player.x)/distance,moveY:(y-player.y)/distance},Math.min(1/30,distance/160),map);
+          }
+          expect(player.x).toBeCloseTo(x,3); expect(player.y).toBeCloseTo(y,3);
+          expect(circleHitsMap(map,player.x,player.y,10)).toBe(false);
         }
-        expect(player.x).toBeCloseTo(x,3); expect(player.y).toBeCloseTo(y,3);
-        expect(circleHitsMap(map,player.x,player.y,10)).toBe(false);
       }
     }
   });
@@ -110,6 +157,8 @@ describe('integración fiel de la arena de A', () => {
   it('usa fallback validado y rechaza entradas/segmentos inválidos', () => {
     const fallback=[]; const map=generateMap(42,{maxAttempts:0,onFallback:e=>fallback.push(e)});
     expect(validateMap(map).valid).toBe(true); expect(fallback).toHaveLength(1);
+    expect(map.generation).toMatchObject({fallback:true,attempts:0});
+    expect(map.wallPaths).toEqual(ARENA_TEMPLATE.wallPaths);
     for(const seed of[-1,NaN,.1,2**32])expect(()=>generateMap(seed)).toThrow();
     expect(()=>generateMap(42,{layout:'unknown'})).toThrow();
     expect(()=>generateMap(42,{maxAttempts:-1})).toThrow();
